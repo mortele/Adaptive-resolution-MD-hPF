@@ -1,4 +1,4 @@
-module particle
+module particles
     use iso_fortran_env, only: real64, int32
     implicit none
     private 
@@ -10,4 +10,4 @@ module particle
 
 
 contains
-end module particle
+end module particles
