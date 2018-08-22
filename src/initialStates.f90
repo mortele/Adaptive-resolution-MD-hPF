@@ -12,9 +12,10 @@ module initial_states
 
 contains
 
-    subroutine random_initial_state(positions, velocities)
+    subroutine random_initial_state(positions, velocities, types)
         real (real64), dimension(:,:), intent(in out) :: positions
         real (real64), dimension(:,:), intent(in out) :: velocities
+        integer (int32), dimension(:), intent(in out) :: types
         integer (int32)  :: i, j
         real    (real64) :: T = temperature
 
@@ -38,5 +39,11 @@ contains
             ! Boltzmann distribution at temperature T.
             velocities(:, i) = velocities(:, i) * T / masses(i)
         end do
+
+        do i = 1, number_of_particles
+            ! Assign every particle the type 1.
+            types(i) = 1
+        end do
+
     end subroutine random_initial_state
 end module initial_states

@@ -1,1 +1,4 @@
-*.o \n*.mod\n*.app
+*.o 
+*.mod
+*.app
+*.xyz

@@ -4,6 +4,7 @@ program main
     use system,             only: system_size
     use parameters,         only: number_of_particles, number_of_dimensions
     use initial_states,     only: random_initial_state
+    use file_writer,        only: write_state
     implicit none
     
     ! Allocate particle arrays and generate the initial state of the system.
@@ -12,9 +13,10 @@ program main
     allocate(forces    (number_of_dimensions, number_of_particles))
     allocate(masses    (number_of_particles))
     allocate(types     (number_of_particles))
-    call random_initial_state(positions, velocities)
+    call random_initial_state(positions, velocities, types)
 
-
+    ! Write the initial state to a file for analysis.
+    call write_state(positions)
 
 
     ! Deallocate all arrays. This is probably not neccessary, but ...
