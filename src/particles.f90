@@ -1,12 +1,14 @@
 module particles
-    use iso_fortran_env, only: real64, int32
+    use, intrinsic :: iso_fortran_env, only: real64, int32
     implicit none
     private 
 
-    real (real64), public, dimension(:), allocatable :: positions,  &
-                                                        velocities, &
-                                                        forces
-    real (real64), public, dimension(:), allocatable :: masses
+    integer (int32), public, dimension(:), allocatable :: types
+    real   (real64), public, dimension(:), allocatable :: positions,  &
+                                                          velocities, &
+                                                          forces,     &
+                                                          masses
+
 
 
 contains
