@@ -12,6 +12,7 @@ SRC = 	app/main.f90 			\
 		src/randomGenerator.f90	\
 		src/initialStates.f90 	\
 		src/fileWriter.f90		\
+		src/integrator.f90
 
 OBJ = 	main.o 					\
 		system.o 				\
@@ -22,6 +23,7 @@ OBJ = 	main.o 					\
 		randomGenerator.o 		\
 		initialStates.o 		\
 		fileWriter.o 			\
+		integrator.o 			\
 
 MOD = 	system.mod 				\
 		particles.mod 			\
@@ -31,6 +33,7 @@ MOD = 	system.mod 				\
 		randomGenerator.mod 	\
 		initialStates.mod 		\
 		fileWriter.mod 			\
+		integrator.mod 			\
 
 all: $(OBJ)
 	$(FORTRAN_COMPIILER) $(OBJ) -o app/$(PROGRAM).app
