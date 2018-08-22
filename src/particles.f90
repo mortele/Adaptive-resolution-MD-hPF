@@ -3,11 +3,11 @@ module particles
     implicit none
     private 
 
-    integer (int32), public, dimension(:), allocatable :: types
-    real   (real64), public, dimension(:), allocatable :: positions,  &
-                                                          velocities, &
-                                                          forces,     &
-                                                          masses
+    integer (int32), public, dimension(:), allocatable   :: types
+    real   (real64), public, dimension(:), allocatable   :: masses 
+    real   (real64), public, dimension(:,:), allocatable :: positions,  &
+                                                            velocities, &
+                                                            forces
 
 
 
