@@ -24,8 +24,10 @@ module parameters
 
     integer (int32), public, parameter :: number_of_time_steps = int(1e3)
 
-
-
+    ! Potential parameters.
+    real (real64), public, parameter :: lennard_jones_epsilon = 1.0
+    real (real64), public, parameter :: lennard_jones_sigma   = 1.0
+    real (real64), public, parameter :: lennard_jones_cutoff  = 100.0
 
 contains
 

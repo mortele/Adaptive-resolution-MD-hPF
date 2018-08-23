@@ -12,7 +12,8 @@ SRC = 	app/main.f90 			\
 		src/randomGenerator.f90	\
 		src/initialStates.f90 	\
 		src/fileWriter.f90		\
-		src/integrator.f90
+		src/integrator.f90		\
+		src/sampler.f90			\
 
 OBJ = 	main.o 					\
 		system.o 				\
@@ -24,6 +25,7 @@ OBJ = 	main.o 					\
 		initialStates.o 		\
 		fileWriter.o 			\
 		integrator.o 			\
+		sampler.o 				\
 
 MOD = 	system.mod 				\
 		particles.mod 			\
@@ -34,6 +36,7 @@ MOD = 	system.mod 				\
 		initialStates.mod 		\
 		fileWriter.mod 			\
 		integrator.mod 			\
+		sampler.mod 			\
 
 all: $(OBJ)
 	$(FORTRAN_COMPIILER) $(OBJ) -o app/$(PROGRAM).app
@@ -49,6 +52,10 @@ parameters.o parameters.mod: src/parameters.f90
 # Secondly, we compile system.f90 so that other modules which depend on it can 
 # use system.mod.
 system.o system.mod: src/system.f90 parameters.mod 
+	$(FORTRAN_COMPIILER) -c $<
+
+# Thirdly, make sure particles.f90 is compiled so other modules can use it.
+particles.o particles.mod: src/particles.f90 
 	$(FORTRAN_COMPIILER) -c $<
 
 # The rest of the modules are compiled using the % wild card. The %.o %.mod: 

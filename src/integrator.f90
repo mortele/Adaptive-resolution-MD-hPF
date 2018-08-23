@@ -39,8 +39,7 @@ contains
         integer (int32) :: i
         
         do i = 1, number_of_particles
-            velocities(:, i) = velocities(:, i)     &
-                                    + 0.5 * time_step / masses(i) * forces(:, i)
+            velocities(:, i) = velocities(:, i) + 0.5 * time_step / masses(i) * forces(:, i)
         end do
     end subroutine half_move
 
