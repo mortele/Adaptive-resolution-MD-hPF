@@ -1,12 +1,19 @@
 GFORTRAN 			= gfortran
 COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -Wextra -Wconversion -std=f2008 -pedantic-errors
-OPTIMIZATION_FLAGS  = #-O2 
+OPTIMIZATION_FLAGS  = -Og 	# All default optimizations which dont interfer with 
+							# debugging flags and functionality.
 
 # TODO: Check if -frepack-arrays actually is faster.
-AGRESSIVE_OPTIMIZE  = #-faggressive-function-elimination -frepack-arrays  
+# TODO: Check that -Ofast doesnt break something by enabling unsafe math flags.
+AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -march=native
+
+# TODO: Profile guided optimization; compile with -fprofile-generate and run the 
+# code, then compile with -fprofile-use to let gfortran learn from the run time
+# execution of the code to optimize it further.
 
 DEBUG_FLAGS 		= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
-FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(AGRESSIVE_OPTIMIZE) $(DEBUG_FLAGS)
+FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS)
+#FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
 PROGRAM 			= AdapResoMD-hPF
 
 SRC = 	app/main.f90 			\
