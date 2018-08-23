@@ -42,8 +42,6 @@ program main
         call store_energy(kinetic_energy, potential_energy, total_energy)
     end do
 
-    print *, total_energy
-
     ! Deallocate all arrays. This is probably not neccessary, but ...
     deallocate(positions)
     deallocate(velocities)
