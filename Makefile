@@ -1,6 +1,12 @@
 GFORTRAN 			= gfortran
-COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -std=f2008ts
-FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS)
+COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -Wextra -Wconversion -std=f2008 -pedantic-errors
+OPTIMIZATION_FLAGS  = #-O2 
+
+# TODO: Check if -frepack-arrays actually is faster.
+AGRESSIVE_OPTIMIZE  = #-faggressive-function-elimination -frepack-arrays  
+
+DEBUG_FLAGS 		= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
+FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(AGRESSIVE_OPTIMIZE) $(DEBUG_FLAGS)
 PROGRAM 			= AdapResoMD-hPF
 
 SRC = 	app/main.f90 			\

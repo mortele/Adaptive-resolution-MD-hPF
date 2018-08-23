@@ -18,12 +18,10 @@ contains
         integer (int32), dimension(:), intent(in out) :: types
         integer (int32)  :: i, j
         real    (real64) :: T = temperature
-        real (real64) :: test_scalar
-        real (real64), dimension(3) :: test_vector
-        real (real64), dimension(3,5) :: test_matrix
 
-        ! Assign each particle a mass of 1.0.
+        ! Assign each particle a mass of 1.0 and type 1.
         masses = 1.0
+        types  = 1
 
         do i = 1, number_of_particles
             ! Assign a uniform random position to each particle, then scale each

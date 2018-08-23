@@ -1,7 +1,6 @@
 program main
     use, intrinsic :: iso_fortran_env,    only: real64, int32
     use particles,          only: positions, velocities, forces, masses, types
-    use system,             only: system_size
     use initial_states,     only: random_initial_state      ! subroutine
     use file_writer,        only: write_state               ! subroutine
     use integrator,         only: integrate_one_step        ! subroutine
@@ -28,13 +27,13 @@ program main
     call write_state(positions, time_step, types)
 
     ! Allocate statistics arrays and compute the initial energy.
-    allocate(potential_energy(number_of_time_steps))
-    allocate(kinetic_energy  (number_of_time_steps))
-    allocate(total_energy    (number_of_time_steps))
+    allocate(potential_energy(number_of_time_steps + 1))
+    allocate(kinetic_energy  (number_of_time_steps + 1))
+    allocate(total_energy    (number_of_time_steps + 1))
     call store_energy(kinetic_energy, potential_energy, total_energy)
 
     ! Integrate the equations of motion using the velocity Verlet algorithm.
-    do time_step = 0, number_of_time_steps
+    do time_step = 0, number_of_time_steps - 1
         call integrate_one_step(positions, velocities, forces)
 
         ! Dump the energies computed in the integration step (in the potential
