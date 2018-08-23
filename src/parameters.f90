@@ -7,22 +7,24 @@ module parameters
     real (real64), public, parameter :: system_size_y = 10.0
     real (real64), public, parameter :: system_size_z = 10.0
 
-    integer (int32), public, parameter :: number_of_particles  = int(1e2)
+    integer (int32), public, parameter :: number_of_particles  = int(1e1)
     integer (int32), public, parameter :: number_of_dimensions = 3
     
     ! Number of field vertices per dimension, total number of vertices is 
     ! field_nodes^3.
     integer (int32), public, parameter :: field_nodes = 25
-    real (real64), public, parameter :: temperature = 1.0
-    character (*), public, parameter :: out_file_name = "positions.xyz"
+    real (real64),   public, parameter :: temperature = 1.0
+    
+    character (*), public, parameter :: out_file_name  = "positions.xyz"
+    character (*), public, parameter :: info_file_name = "systeminfo.out"
 
     ! Time step used in the velocity Verlet integration.
-    real (real64), public, parameter :: time_step = 0.01
+    real (real64), public, parameter :: time_step = 0.001
 
     ! Step length used in the numerical derivatives of the density field.
     real (real64), public, parameter :: step_length = 0.01
 
-    integer (int32), public, parameter :: number_of_time_steps = int(1e2)
+    integer (int32), public, parameter :: number_of_time_steps = int(1e1)
 
     ! Potential parameters.
     real (real64), public, parameter :: lennard_jones_epsilon = 1.0

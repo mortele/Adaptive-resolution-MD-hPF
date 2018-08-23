@@ -2,8 +2,10 @@ program main
     use, intrinsic :: iso_fortran_env,    only: real64, int32
     use particles,          only: positions, velocities, forces, masses, types
     use initial_states,     only: random_initial_state      ! subroutine
-    use file_writer,        only: write_state               ! subroutine
+    use file_writer,        only: write_state,          &   ! subroutine
+                                  write_info                ! subroutine
     use integrator,         only: integrate_one_step        ! subroutine
+    use potential,          only: Ek, V, E
     use sampler,            only: kinetic_energy,       &
                                   potential_energy,     &
                                   total_energy,         &
@@ -39,7 +41,12 @@ program main
         ! Dump the energies computed in the integration step (in the potential
         ! module) into the appropriate arrays.
         call store_energy(kinetic_energy, potential_energy, total_energy)
+        print *, E  / number_of_particles,  &
+                 Ek / number_of_particles,  &
+                 V  / number_of_particles
     end do
+
+    call write_info
 
     ! Since the automatic Visual Studio Code terminal doesnt show exit codes, we
     ! add a simple output showing the program exited with code 0.

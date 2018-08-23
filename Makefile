@@ -71,9 +71,17 @@ system.o system.mod: src/system.f90 parameters.mod
 particles.o particles.mod: src/particles.f90 
 	$(FORTRAN_COMPIILER) -c $<
 
+# Fourth, initialStates.f90 depends on randomGenerator.f90 so we compile that.
+randomGenerator.o randomGenerator.mod: src/randomGenerator.f90
+	$(FORTRAN_COMPIILER) -c $<
+
+# integrator.f90 depends on potential.f90, so lets do that one next.
+potential.o potential.mod: src/potential.f90 parameters.mod
+	$(FORTRAN_COMPIILER) -c $<
+
 # The rest of the modules are compiled using the % wild card. The %.o %.mod: 
 # possibly only works with the gfortran.
-%.o %.mod: src/%.f90 parameters.mod system.mod 
+%.o %.mod: src/%.f90 parameters.mod system.mod particles.mod potential.mod particles.mod
 	$(FORTRAN_COMPIILER) -c $<
 
 clean: 

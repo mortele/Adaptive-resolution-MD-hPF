@@ -5,6 +5,12 @@ clc;
 format;
 
 
+%% Load the systeminfo.out file
+fileID  = fopen('../systeminfo.out', 'r');
+data    = textscan(fileID, '%s %f');
+
+
+
 %% Load .xyz file
 fileID  = fopen('../positions.xyz', 'r');
 data    = textscan(fileID, '%d %f %f %f', 'HeaderLines', 2);
