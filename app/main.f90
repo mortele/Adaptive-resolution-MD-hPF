@@ -42,16 +42,6 @@ program main
         call store_energy(kinetic_energy, potential_energy, total_energy)
     end do
 
-    ! Deallocate all arrays. This is probably not neccessary, but ...
-    deallocate(positions)
-    deallocate(velocities)
-    deallocate(forces)
-    deallocate(masses)
-    deallocate(types)
-    deallocate(total_energy)
-    deallocate(kinetic_energy)
-    deallocate(potential_energy)
-
     ! Since the automatic Visual Studio Code terminal doesnt show exit codes, we
     ! add a simple output showing the program exited with code 0.
     print *, "AdapResoMD-hPF exiting with code 0."
