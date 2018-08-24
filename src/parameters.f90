@@ -3,11 +3,26 @@ module parameters
     implicit none
     private 
 
-    real (real64), public, parameter :: system_size_x = 10.0
-    real (real64), public, parameter :: system_size_y = 10.0
-    real (real64), public, parameter :: system_size_z = 10.0
+    ! Pre-set fabricated initial states. 
+    ! Current options: 
+    !    - "random"         ! Random uniform positions, velocities according to 
+    !                       ! Maxwell-Boltzmann distribution at given 
+    !                       ! temperature. Default case used.
+    !    - "fcc"            ! Solid Ar configuration, face centered cubic 
+    !                       ! lattice of given lattice constant, b. Velocities
+    !                       ! According to Maxwell-Boltzmann distribution at 
+    !                       ! given temperature.
+    character (*), public, parameter :: initial_configuration = "random"
 
-    integer (int32), public, parameter :: number_of_particles  = int(1e1)
+    ! FCC parameters. 
+    real (real64), public, parameter :: fcc_lattice_constant = 5.26
+    integer (int32), public, parameter :: fcc_number_of_unit_cells = 5
+
+    real (real64), public :: system_size_x = 10.0
+    real (real64), public :: system_size_y = 10.0
+    real (real64), public :: system_size_z = 10.0
+
+    integer (int32), public            :: number_of_particles  = int(1e1)
     integer (int32), public, parameter :: number_of_dimensions = 3
     
     ! Number of field vertices per dimension, total number of vertices is 
@@ -28,8 +43,9 @@ module parameters
 
     ! Potential parameters.
     real (real64), public, parameter :: lennard_jones_epsilon = 1.0
-    real (real64), public, parameter :: lennard_jones_sigma   = 1.0
+    real (real64), public, parameter :: lennard_jones_sigma   = 3.405
     real (real64), public, parameter :: lennard_jones_cutoff  = 100.0
+
 
 contains
 

@@ -1,7 +1,7 @@
 program main
     use, intrinsic :: iso_fortran_env,    only: real64, int32
     use particles,          only: positions, velocities, forces, masses, types
-    use initial_states,     only: random_initial_state      ! subroutine
+    use initial_states,     only: setup_initial_state       ! subroutine
     use file_writer,        only: write_state,          &   ! subroutine
                                   write_info                ! subroutine
     use integrator,         only: integrate_one_step        ! subroutine
@@ -11,19 +11,14 @@ program main
                                   total_energy,         &
                                   store_energy              ! subroutine
     use parameters,         only: number_of_particles,  &
-                                  number_of_dimensions, &
                                   number_of_time_steps
     implicit none
     
     integer (int32) :: time_step = 0
 
-    ! Allocate particle arrays and generate the initial state of the system.
-    allocate(positions (number_of_dimensions, number_of_particles))
-    allocate(velocities(number_of_dimensions, number_of_particles))
-    allocate(forces    (number_of_dimensions, number_of_particles))
-    allocate(masses    (number_of_particles))
-    allocate(types     (number_of_particles))
-    call random_initial_state(positions, velocities, types)
+    ! Setup the initial state of the particles. The initial_states module also
+    ! handles allocating of the arrays to the appropriate sizes.
+    call setup_initial_state(positions, velocities, forces, masses, types)
 
     ! Write the initial state to a file for analysis.
     call write_state(positions, time_step, types)
@@ -44,7 +39,7 @@ program main
 
         ! Write the state to file.
         call write_state(positions, time_step, types)
-        
+
         print *, E  / number_of_particles,  &
                  Ek / number_of_particles,  &
                  V  / number_of_particles

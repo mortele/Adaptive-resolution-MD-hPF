@@ -20,7 +20,7 @@
             },
             "type": "shell",
             "args": [
-                "-j4"
+                "-j1"
             ],
             "command": "make",
             "problemMatcher": {

@@ -29,6 +29,9 @@ contains
         
         call half_move     (velocities, forces)
         call move          (positions,  velocities)
+
+        call apply_periodic_boundary_conditions(positions)
+        
         call compute_forces(positions,  forces)
         call half_move     (velocities, forces)
     end subroutine integrate_one_step

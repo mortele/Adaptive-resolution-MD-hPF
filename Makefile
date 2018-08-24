@@ -1,5 +1,5 @@
 GFORTRAN 			= gfortran
-COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -Wextra -Wconversion -std=f2008 -pedantic-errors
+COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -Wextra -Wconversion -std=f2008 -pedantic-errors -ffree-line-length-200
 OPTIMIZATION_FLAGS  = -Og 	# All default optimizations which dont interfer with 
 							# debugging flags and functionality.
 

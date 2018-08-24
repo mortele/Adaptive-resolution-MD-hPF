@@ -8,10 +8,7 @@ module system
     implicit none
     private 
 
-    real (real64), public, parameter, dimension(3) :: system_size =            &
-                                                            [system_size_x,    &
-                                                             system_size_y,    &
-                                                             system_size_z]
+    real (real64), public, dimension(3) :: system_size = [-1.0, -1.0, -1.0]
     public :: remove_linear_momentum, apply_periodic_boundary_conditions
 
 contains
@@ -38,10 +35,11 @@ contains
         ! priting to terminal.
         P = total_momentum * number_of_particles
 
-        print *, "╔═══════════════════════════════════╗"
-        print *, "║ Removing linear momentum.         ║"
-        print *, "╚═══════════════════════════════════╝"
-        print *, "   Removed total (center of mass momentum): [", P(1), P(2), P(3), "]"
+        print *, "╔════════════════════════════════════════════════════╗"
+        print *, "║ Removing linear momentum.                          ║"
+        print *, "╚════════════════════════════════════════════════════╝"
+        print *, "   Removed total (center of mass momentum):"
+        print *, "   [", P(1), P(2), P(3), "]"
     end subroutine remove_linear_momentum
 
     subroutine apply_periodic_boundary_conditions(positions)
