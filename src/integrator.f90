@@ -1,9 +1,10 @@
 module integrator
     use, intrinsic :: iso_fortran_env, only: real64, int32
-    use potential,      only: compute_forces
+    use potential,      only: compute_forces                      ! Subroutine
     use particles,      only: masses
-    use parameters,     only: time_step,            &
-                              number_of_particles,  &
+    use system,         only: apply_periodic_boundary_conditions  ! Subroutine
+    use parameters,     only: time_step,                          &
+                              number_of_particles,                &
                               number_of_dimensions
     implicit none
     private

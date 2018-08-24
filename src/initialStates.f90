@@ -1,10 +1,11 @@
 module initial_states
     use, intrinsic :: iso_fortran_env, only: real64, int32
-    use system,           only: system_size
     use particles,        only: masses
     use random_generator, only: random_normal
-    use parameters,       only: number_of_particles,  &
-                                number_of_dimensions, &
+    use system,           only: system_size,            &
+                                remove_linear_momentum      ! Subroutine
+    use parameters,       only: number_of_particles,    &
+                                number_of_dimensions,   &
                                 temperature
     implicit none
     private 
@@ -18,6 +19,7 @@ contains
         integer (int32), dimension(:), intent(in out) :: types
         integer (int32)  :: i, j
         real    (real64) :: T = temperature
+        real    (real64), dimension(:) :: S(number_of_dimensions)
 
         ! Assign each particle a mass of 1.0 and type 1.
         masses = 1.0
@@ -48,6 +50,16 @@ contains
             ! Assign every particle the type 1.
             types(i) = 1
         end do
+
+        ! Aliasing system_size for brevity while printing to terminal.
+        S = system_size
+
+        print *, "╔═══════════════════════════════════╗"
+        print *, "║ Initializing a random state.      ║"
+        print *, "╚═══════════════════════════════════╝"
+        print *, "   Positions uniformely distributed inside the simulation box"
+        print *, "   of size: [", S(1), S(2), S(3), "]"
+        call remove_linear_momentum(velocities, masses)
 
     end subroutine random_initial_state
 end module initial_states
