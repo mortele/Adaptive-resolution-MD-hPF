@@ -30,7 +30,6 @@ contains
         logical,         save :: file_is_open = .false.
         logical               :: file_exists
         
-
         ! If the file is not open, we have to open it before we continue.
         if (.not. file_is_open)  then
 
@@ -44,6 +43,7 @@ contains
                         file    = out_file_name,    &
                         status  = "replace",        &
                         action  = "write")
+                file_is_open = .true.
             else 
 
                 ! Create a new file.
@@ -51,43 +51,44 @@ contains
                          file   = out_file_name,    &
                         status  = "new",            &
                         action  = "write")
+                file_is_open = .true.
             end if
-
-            ! Write positions of all particles to out_file_name in the .xyz 
-            ! file format. The .xyz format starts with a line containing the 
-            ! total number of particles, followed by an optional line. We use 
-            ! this second line to write the time step.
-            write(file_ID, *) number_of_particles
-
-            if (present(time_step)) then
-                write(file_ID, *) "#time step ", time_step
-            else 
-                write(file_ID, *) "#"
-            end if
-            
-            do i = 1, number_of_particles  
-
-                ! The start of each row is the particle identifier, contained in
-                ! the type(:) array.
-                if (present(types)) then    
-                    write(file_ID, fmt = "( i3 )", advance = "no") types(i)
-                else
-                    write(file_ID, fmt = "( i3 )", advance = "no") 1
-                end if
-
-
-                ! Write the x, y, and z positions, supressing the newline with
-                ! advance = "no".
-                do j = 1, number_of_dimensions
-                    write(  file_ID,                &
-                            fmt     = "( f15.5 )",  &
-                            advance = "no")             positions(j, i)
-                end do
-
-                ! Write a newline after the position of each particle.
-                write(file_ID, *) " " 
-            end do
         end if
+    
+        ! Write positions of all particles to out_file_name in the .xyz 
+        ! file format. The .xyz format starts with a line containing the 
+        ! total number of particles, followed by an optional line. We use 
+        ! this second line to write the time step.
+        write(file_ID, *) number_of_particles
+
+        if (present(time_step)) then
+            write(file_ID, *) "#time step ", time_step
+        else 
+            write(file_ID, *) "#"
+        end if
+        
+        do i = 1, number_of_particles  
+
+            ! The start of each row is the particle identifier, contained in
+            ! the type(:) array.
+            if (present(types)) then    
+                write(file_ID, fmt = "( i3 )", advance = "no") types(i)
+            else
+                write(file_ID, fmt = "( i3 )", advance = "no") 1
+            end if
+
+
+            ! Write the x, y, and z positions, supressing the newline with
+            ! advance = "no".
+            do j = 1, number_of_dimensions
+                write(  file_ID,                 &
+                        fmt     = "( f30.18 )",  &
+                        advance = "no")             positions(j, i)
+            end do
+
+            ! Write a newline after the position of each particle.
+            write(file_ID, *) " " 
+        end do
     end subroutine write_state
 
     subroutine write_info
@@ -116,8 +117,6 @@ contains
         end if
 
         write(file_ID, *) "number_of_time_steps ", number_of_time_steps
-        write(file_ID, *) "number_of_particles ", number_of_particles
-        write(file_ID, *) "number_of_dimensions ", number_of_dimensions
         write(file_ID, *) "number_of_particles ", number_of_particles
         write(file_ID, *) "number_of_dimensions ", number_of_dimensions
         write(file_ID, *) "temperature ", temperature

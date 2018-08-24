@@ -35,12 +35,16 @@ program main
     call store_energy(kinetic_energy, potential_energy, total_energy)
 
     ! Integrate the equations of motion using the velocity Verlet algorithm.
-    do time_step = 0, number_of_time_steps - 1
+    do time_step = 1, number_of_time_steps - 1
         call integrate_one_step(positions, velocities, forces)
 
         ! Dump the energies computed in the integration step (in the potential
         ! module) into the appropriate arrays.
         call store_energy(kinetic_energy, potential_energy, total_energy)
+
+        ! Write the state to file.
+        call write_state(positions, time_step, types)
+        
         print *, E  / number_of_particles,  &
                  Ek / number_of_particles,  &
                  V  / number_of_particles
