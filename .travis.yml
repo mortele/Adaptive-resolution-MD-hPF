@@ -30,7 +30,7 @@ matrix:
 
     - language: ruby
       rvm: 
-        - 2.4.0
+        - ruby-head
       install:
         - sudo gem install rake
         - sudogem install minitest
