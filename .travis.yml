@@ -32,6 +32,8 @@ matrix:
       rvm: 
         - ruby-head
       install:
+        - rmv --default use 2.1.1
+        - rvm use 2.1.1
         - sudo gem install rake
         - sudogem install minitest
       before_script:
