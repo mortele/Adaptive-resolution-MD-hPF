@@ -29,13 +29,11 @@ matrix:
 #        - ./app/AdapResoMD-hPF.app
 
     - language: ruby
-      rvm: 
-        - ruby-head
+      version:
+        - 2.0.0-p648
       install:
-        - rmv --default use 2.1.1
-        - rvm use 2.1.1
         - sudo gem install rake
-        - sudogem install minitest
+        - sudo gem install minitest
       before_script:
         - cd ext/FRUIT/fruit_processor_gem
         - rake install
