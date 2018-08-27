@@ -24,15 +24,14 @@ matrix:
         - ./app/AdapResoMD-hPF.app
 
     - language: ruby
-      addons:
-        apt:
-          packages:
-            - ruby2.0-tcltk
-            - libtcl-8.5
-            - libtk-8.5
-        rvm: 
-          - system
-        install: 
-          - gem install rake
-      script: 
-        - ruby2.0 -r tcl hello.rb
+      rvm: system
+      install:
+        - gem install rake
+        - gem install minitest
+      before_script:
+        - cd ext/FRUIT/fruit_processor_gem
+        - rake install
+        - cd ..
+      script:
+        - rake test
+    
