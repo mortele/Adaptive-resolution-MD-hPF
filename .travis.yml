@@ -6,6 +6,7 @@ sudo: required
 # Solution ot Permission denied (publickey) error when TravisCI tries to fetch submodules:
 # 
 # https://stackoverflow.com/questions/15674064/how-to-fix-a-permission-denied-publickey-error-for-a-git-submodule-update-in-t/24600210
+#
 git: 
   submodules: false
 
@@ -14,20 +15,25 @@ before_install:
   - git submodule update --init --recursive
 
 
+# Multi-language build matrix mini tutorial example taken from
+#
+#   https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
+#
 matrix:
   include:
-    - language: c
-      before_install: 
-        - sudo apt-get install gfortran
-      script:
-        - make 
-        - ./app/AdapResoMD-hPF.app
+#    - language: c
+#      before_install: 
+#        - sudo apt-get install gfortran
+#      script:
+#        - make 
+#        - ./app/AdapResoMD-hPF.app
 
     - language: ruby
-      rvm: system
+      rvm: 
+        - 2.4.0
       install:
-        - gem install rake
-        - gem install minitest
+        - sudo gem install rake
+        - sudogem install minitest
       before_script:
         - cd ext/FRUIT/fruit_processor_gem
         - rake install
