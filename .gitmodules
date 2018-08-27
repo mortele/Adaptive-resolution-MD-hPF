@@ -1,3 +1,6 @@
 [submodule "ext/FRUITPy"]
 	path = ext/FRUITPy
 	url = https://github.com/mortele/FRUITPy
+[submodule "ext/FRUIT"]
+	path = ext/FRUIT
+	url = https://github.com/mortele/FRUIT
