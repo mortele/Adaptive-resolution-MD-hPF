@@ -11,7 +11,7 @@ AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -
 # code, then compile with -fprofile-use to let gfortran learn from the run time
 # execution of the code to optimize it further.
 
-DEBUG_FLAGS 		= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all -g 
+DEBUG_FLAGS 		= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
 FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS)
 #FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
 PROGRAM 			= AdapResoMD-hPF

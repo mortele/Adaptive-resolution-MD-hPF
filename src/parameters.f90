@@ -12,7 +12,7 @@ module parameters
     !                       ! lattice of given lattice constant, b. Velocities
     !                       ! According to Maxwell-Boltzmann distribution at 
     !                       ! given temperature.
-    character (*), public, parameter :: initial_configuration = "fcc"
+    character (*), public, parameter :: initial_configuration = "random"
 
     ! FCC parameters. 
     real (real64), public, parameter :: fcc_lattice_constant = 5.26
@@ -22,7 +22,7 @@ module parameters
     real (real64), public :: system_size_y = 10.0
     real (real64), public :: system_size_z = 10.0
 
-    integer (int32), public            :: number_of_particles  = int(1e2)
+    integer (int32), public            :: number_of_particles  = int(1e1)
     integer (int32), public, parameter :: number_of_dimensions = 3
     
     ! Number of field vertices per dimension, total number of vertices is 
