@@ -10,7 +10,7 @@
 			"path": "app"
 		},
 		{
-			"path": "lib"
+			"path": "ext"
 		}
 	],
 	"settings": {}
