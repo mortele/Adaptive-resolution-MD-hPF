@@ -24,10 +24,15 @@ matrix:
         - ./app/AdapResoMD-hPF.app
 
     - language: ruby
-      rvm: 
-        - 2.3
-      install:
-        - gem install rake
-        - gem install tk
+      addons:
+        apt:
+          packages:
+            - ruby2.0-tcltk
+            - libtcl-8.5
+            - libtk-8.5
+        rvm: 
+          - system
+        install: 
+          - gem install rake
       script: 
-        - make clean
+        - ruby2.0 -r tcl hello.rb
