@@ -129,6 +129,7 @@ contains
 
                     do l = 1, atoms_per_unit_cell
                         positions(:, atom_counter) = lattice_vector + atom_relative_position(:, l)
+                        atom_counter = atom_counter + 1
                     end do
                 end do
             end do
@@ -147,13 +148,19 @@ contains
         integer (int32),  dimension(:),   allocatable, intent(in out) :: types
 
         select case (initial_configuration)
-        case ("fcc")             
+        case ("fcc")        
             call print_fcc_warning()
+
+            ! Override the specified number of particles and system size in the 
+            ! parameters input, and use the FCC_number_of_unit_cells parameter
+            ! to compute number of particles and system size.
             number_of_particles = 4 * fcc_number_of_unit_cells**3
             system_size_x = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size_y = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size_z = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size   = [system_size_x, system_size_y, system_size_z]
+
+            print *, number_of_particles
             call allocate_arrays(positions, velocities, forces, masses, types)
             call fcc_initial_state(positions, velocities, masses, types)
 
@@ -180,7 +187,7 @@ contains
         real    (real64), dimension(:,:), allocatable, intent(in out) :: forces
         real    (real64), dimension(:),   allocatable, intent(in out) :: masses
         integer (int32),  dimension(:),   allocatable, intent(in out) :: types
-
+        
         allocate(positions (number_of_dimensions, number_of_particles))
         allocate(velocities(number_of_dimensions, number_of_particles))
         allocate(forces    (number_of_dimensions, number_of_particles))

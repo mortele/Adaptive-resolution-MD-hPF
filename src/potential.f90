@@ -38,7 +38,6 @@ contains
                 force           = lennard_jones_force(dr_squared)
                 forces(:,i)     = forces(:,i) + force * distance_vector
                 forces(:,j)     = forces(:,j) - force * distance_vector
-                
                 V = V + lennard_jones_potential(dr_squared)
             end do
         end do
