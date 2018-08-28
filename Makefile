@@ -5,7 +5,7 @@ OPTIMIZATION_FLAGS  = -Og 	# All default optimizations which dont interfer with
 
 # TODO: Check if -frepack-arrays actually is faster.
 # TODO: Check that -Ofast doesnt break something by enabling unsafe math flags.
-AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -march=native
+AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -march=native -flto
 
 # TODO: Profile guided optimization; compile with -fprofile-generate and run the 
 # code, then compile with -fprofile-use to let gfortran learn from the run time

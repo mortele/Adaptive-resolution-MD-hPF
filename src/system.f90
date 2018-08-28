@@ -9,7 +9,9 @@ module system
     private 
 
     real (real64), public, dimension(3) :: system_size = [-1.0, -1.0, -1.0]
-    public :: remove_linear_momentum, apply_periodic_boundary_conditions
+    public ::   remove_linear_momentum,                 &
+                apply_periodic_boundary_conditions,     &
+                compute_distance_minimum_image
 
 contains
 
@@ -58,5 +60,13 @@ contains
             end do
         end do
     end subroutine apply_periodic_boundary_conditions
+
+    pure function compute_distance_minimum_image(vector) result(minimum_image_vector)
+        implicit none
+        real (real64), dimension(:), intent(in) :: vector(number_of_dimensions)
+        real (real64), dimension(:)             :: minimum_image_vector(number_of_dimensions)
+        
+        minimum_image_vector = vector - system_size * nint(vector / system_size)
+    end function compute_distance_minimum_image
 
 end module system

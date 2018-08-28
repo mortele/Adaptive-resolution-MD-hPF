@@ -21,23 +21,23 @@ before_install:
 #
 matrix:
   include:
-#    - language: c
-#      before_install: 
-#        - sudo apt-get install gfortran
-#      script:
-#        - make 
-#        - ./app/AdapResoMD-hPF.app
-
-    - language: ruby
-      version:
-        - 2.0.0-p648
-      install:
-        - sudo gem install rake
-        - sudo gem install minitest
-      before_script:
-        - cd ext/FRUIT/fruit_processor_gem
-        - rake install
-        - cd ..
+    - language: c
+      before_install: 
+        - sudo apt-get install gfortran
       script:
-        - rake test
+        - make 
+        - ./app/AdapResoMD-hPF.app
+#
+#    - language: ruby
+#      version:
+#        - 2.0.0-p648
+#      install:
+#        - sudo gem install rake
+#        - sudo gem install minitest
+#      before_script:
+#        - cd ext/FRUIT/fruit_processor_gem
+#        - rake install
+#        - cd ..
+#      script:
+#        - rake test
     

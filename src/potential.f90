@@ -1,5 +1,6 @@
 module potential
     use, intrinsic :: iso_fortran_env, only: real64, int32
+    use system,     only: compute_distance_minimum_image    ! Function 
     use particles,  only: masses, velocities
     use parameters, only: number_of_particles,      &
                           lennard_jones_epsilon,    &
@@ -34,6 +35,11 @@ contains
         do i = 1, number_of_particles
             do j = i + 1, number_of_particles
                 distance_vector = positions(:,j) - positions(:,i)
+
+                ! Apply the minimum image convention to compute the periodic 
+                ! boundary condition distance between two particles.
+                distance_vector = compute_distance_minimum_image(distance_vector)
+                
                 dr_squared      = dot_product(distance_vector, distance_vector)
                 force           = lennard_jones_force(dr_squared)
                 forces(:,i)     = forces(:,i) + force * distance_vector
