@@ -14,7 +14,8 @@ AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -
 # execution of the code to optimize it further.
 
 DEBUG_FLAGS 				= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
-FORTRAN_COMPIILER 			= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS)
+TEST_FLAGS 					= -fprofile-arcs -ftest-coverage
+FORTRAN_COMPIILER 			= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS) $(TEST_FLAGS)
 FORTRAN_COMPIILER_OPTIMIZE 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
 PROGRAM 					= AdapResoMD-hPF
 TEST_PROGRAM 				= UnitTests
@@ -111,7 +112,7 @@ test: $(OBJ) $(FRUIT_OBJ) $(TEST_OBJ) unitTests.o
 	$(FORTRAN_COMPIILER) $(OBJ) $(FRUIT_OBJ) $(TEST_OBJ) unitTests.o -o test/$(TEST_PROGRAM).app
 
 clean: 
-	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o
+	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o *.gcda *.gcno	
 
 
 # Make macro cheat sheet
