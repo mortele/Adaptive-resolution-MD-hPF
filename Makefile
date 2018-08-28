@@ -13,14 +13,14 @@ AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -
 # code, then compile with -fprofile-use to let gfortran learn from the run time
 # execution of the code to optimize it further.
 
-DEBUG_FLAGS 		= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
-FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS)
-#FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
-PROGRAM 			= AdapResoMD-hPF
-TEST_PROGRAM 		= UnitTests
-FRUIT_SRC 			= ext/FRUIT/src/fruit.f90
-FRUIT_MOD 			= fruit.mod fruit_util.mod
-FRUIT_OBJ			= fruit.o
+DEBUG_FLAGS 				= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
+FORTRAN_COMPIILER 			= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS)
+FORTRAN_COMPIILER_OPTIMIZE 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
+PROGRAM 					= AdapResoMD-hPF
+TEST_PROGRAM 				= UnitTests
+FRUIT_SRC 					= ext/FRUIT/src/fruit.f90
+FRUIT_MOD 					= fruit.mod fruit_util.mod
+FRUIT_OBJ					= fruit.o
 
 SRC = 	app/main.f90 			\
 		test/unitTests.f90		\
@@ -57,6 +57,12 @@ MOD = 	system.mod 				\
 		integrator.mod 			\
 		sampler.mod 			\
 
+TEST_SRC = test/system_test.f90
+
+TEST_OBJ = system_test.o
+
+TEST_MOD = system_test.mod
+
 all: $(PROGRAM)
 
 $(PROGRAM): main.o $(OBJ)
@@ -92,14 +98,17 @@ potential.o potential.mod: src/potential.f90 parameters.mod
 %.o %.mod: src/%.f90 parameters.mod system.mod particles.mod potential.mod particles.mod
 	$(FORTRAN_COMPIILER) -c $<
 
+%.o %.mod: test/%.f90 $(MOD) 
+	$(FORTRAN_COMPIILER) -c $<
+
 unitTests.o: test/unitTests.f90 $(MOD)
 	$(FORTRAN_COMPIILER) -c $<
 
 fruit.o fruit.mod fruit_util.mod: $(FRUIT_SRC)
 	$(FORTRAN_COMPIILER) -c $<
 
-test: $(OBJ) $(FRUIT_OBJ) unitTests.o
-	$(FORTRAN_COMPIILER) $(OBJ) unitTests.o -o test/$(TEST_PROGRAM).app
+test: $(OBJ) $(FRUIT_OBJ) $(TEST_OBJ) unitTests.o
+	$(FORTRAN_COMPIILER) $(OBJ) $(FRUIT_OBJ) $(TEST_OBJ) unitTests.o -o test/$(TEST_PROGRAM).app
 
 clean: 
 	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o

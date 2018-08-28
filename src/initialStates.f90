@@ -31,8 +31,9 @@ contains
         integer (int32),  dimension(:),   intent(in out) :: types
 
         integer (int32)  :: i, j
-        real    (real64) :: T = temperature
+        real    (real64) :: T
         real    (real64), dimension(:) :: S(number_of_dimensions)
+        T = temperature
 
         ! Assign each particle a mass of 1.0 and type 1.
         masses = 1.0

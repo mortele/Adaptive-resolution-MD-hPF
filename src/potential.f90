@@ -10,9 +10,8 @@ module potential
     implicit none
     private 
 
-    real (real64), private, parameter :: sigma6  = lennard_jones_sigma**6
-    real (real64), private, parameter :: sigma12 = lennard_jones_sigma**12
-    real (real64), public :: Ek, V, E  ! Kinetic, potential, and total energies.
+    real (real64), private :: sigma6, sigma12
+    real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
 
     private :: lennard_jones_force, lennard_jones_potential
     public  :: compute_forces
@@ -27,6 +26,9 @@ contains
                                                           force
         real (real64)   :: dr_squared
         integer (int32) :: i, j
+        
+        sigma6  = lennard_jones_sigma**6
+        sigma12 = lennard_jones_sigma**12
 
         forces  = 0  ! All elements of dimension(3,:) array is set to zero. 
         V       = 0
