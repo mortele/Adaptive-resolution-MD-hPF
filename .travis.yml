@@ -1,6 +1,6 @@
 
 sudo: required
-
+language: c
 
 # Use sed to replace the SSH URL with the public URL, then initialize submodules before_install: 
 # Solution ot Permission denied (publickey) error when TravisCI tries to fetch submodules:
@@ -13,31 +13,35 @@ git:
 before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
+  - sudo apt-get install gfortran
 
 
+jobs: 
+  include:
+    - stage: build
+      script:
+        - make
+    - stage: test
+      script:
+        - make test
+        - ./test/UnitTests.app
 # Multi-language build matrix mini tutorial example taken from
 #
 #   https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
 #
-matrix:
-  include:
-    - language: c
-      before_install: 
-        - sudo apt-get install gfortran
-      script:
-        - make 
-        - ./app/AdapResoMD-hPF.app
-#
-#    - language: ruby
-#      version:
-#        - 2.0.0-p648
-#      install:
-#        - sudo gem install rake
-#        - sudo gem install minitest
-#      before_script:
-#        - cd ext/FRUIT/fruit_processor_gem
-#        - rake install
-#        - cd ..
+#matrix:
+#  include:
+#    - language: c
+#      before_install: 
+#        - sudo apt-get install gfortran
 #      script:
-#        - rake test
+#        - make 
+#        - ./app/AdapResoMD-hPF.app
+#
+#    - language: c
+#      before_install:
+#        - sudo apt-get install gfortran
+#      script:
+#        - make test
+#        - ./test/UnitTests.app
     
