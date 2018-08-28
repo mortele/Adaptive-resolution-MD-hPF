@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := all
+
 GFORTRAN 			= gfortran
 COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -Wextra -Wconversion -std=f2008 -pedantic-errors -ffree-line-length-200
 OPTIMIZATION_FLAGS  = -Og 	# All default optimizations which dont interfer with 
@@ -15,8 +17,13 @@ DEBUG_FLAGS 		= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
 FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS)
 #FORTRAN_COMPIILER 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
 PROGRAM 			= AdapResoMD-hPF
+TEST_PROGRAM 		= UnitTests
+FRUIT_SRC 			= ext/FRUIT/src/fruit.f90
+FRUIT_MOD 			= fruit.mod fruit_util.mod
+FRUIT_OBJ			= fruit.o
 
 SRC = 	app/main.f90 			\
+		test/unitTests.f90		\
 		src/system.f90 			\
 		src/particles.f90		\
 		src/potential.f90		\
@@ -28,8 +35,7 @@ SRC = 	app/main.f90 			\
 		src/integrator.f90		\
 		src/sampler.f90			\
 
-OBJ = 	main.o 					\
-		system.o 				\
+OBJ = 	system.o 				\
 		particles.o 			\
 		potential.o 			\
 		parameters.o 			\
@@ -51,13 +57,15 @@ MOD = 	system.mod 				\
 		integrator.mod 			\
 		sampler.mod 			\
 
-all: $(OBJ)
-	$(FORTRAN_COMPIILER) $(OBJ) -o app/$(PROGRAM).app
+all: $(PROGRAM)
+
+$(PROGRAM): main.o $(OBJ)
+	$(FORTRAN_COMPIILER) $(OBJ) main.o -o app/$(PROGRAM).app
 
 main.o: app/main.f90 $(MOD)
 	$(FORTRAN_COMPIILER) -c $<
 
-# Make sure parameters.f90 is kompiled first, so parameters.mod is available to
+# Make sure parameters.f90 is compiled first, so parameters.mod is available to
 # the other modules at compile time.
 parameters.o parameters.mod: src/parameters.f90
 	$(FORTRAN_COMPIILER) -c $<
@@ -84,6 +92,15 @@ potential.o potential.mod: src/potential.f90 parameters.mod
 %.o %.mod: src/%.f90 parameters.mod system.mod particles.mod potential.mod particles.mod
 	$(FORTRAN_COMPIILER) -c $<
 
+unitTests.o: test/unitTests.f90 $(MOD)
+	$(FORTRAN_COMPIILER) -c $<
+
+fruit.o fruit.mod fruit_util.mod: $(FRUIT_SRC)
+	$(FORTRAN_COMPIILER) -c $<
+
+test: $(OBJ) $(FRUIT_OBJ) unitTests.o
+	$(FORTRAN_COMPIILER) $(OBJ) unitTests.o -o test/$(TEST_PROGRAM).app
+
 clean: 
 	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o
 
@@ -91,6 +108,6 @@ clean:
 # Make macro cheat sheet
 # 
 # xxx: code.1 code.2
-#		$@ xxx
-#		$< code.1
-#		$^ code.1 code.2
+#		$@ = xxx
+#		$< = code.1
+#		$^ = code.1 code.2

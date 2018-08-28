@@ -11,7 +11,11 @@
 		},
 		{
 			"path": "ext"
+		},
+		{
+			"path": "test"
 		}
+
 	],
 	"settings": {}
 }
