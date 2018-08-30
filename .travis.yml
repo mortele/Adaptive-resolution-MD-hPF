@@ -23,7 +23,7 @@ jobs:
     - stage: test
       script:
         - make test
-        - ./test/UnitTests.app
+        - ./bin/UnitTests.app
 # Multi-language build matrix mini tutorial example taken from
 #
 #   https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages

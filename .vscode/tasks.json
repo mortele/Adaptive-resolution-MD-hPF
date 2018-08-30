@@ -20,7 +20,7 @@
             },
             "type": "shell",
             "args": [
-                "-j1"
+                "-j8"
             ],
             "command": "make",
             "problemMatcher": {
@@ -39,6 +39,43 @@
                 }
             }
         },
+        {
+            "label": "make test",
+            "group":{
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true
+            },
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "type": "shell",
+            "args": [
+                "test"
+            ],
+            "command": "make",
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceRoot}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },        
         {
             "label": "make clean",
             "group": "build",
@@ -62,7 +99,7 @@
                 "kind": "test",
                 "isDefault": true
             },
-            "command": "./app/AdapResoMD-hPF.app",
+            "command": "./bin/AdapResoMD-hPF.app",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -71,5 +108,21 @@
                 "showReuseMessage": true
             }
         }
+        {
+            "label": "test",
+            "group":{
+                "kind": "test",
+                "isDefault": true
+            },
+            "command": "./bin/UnitTests.app",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true
+            }
+        }
+
     ]
 }
