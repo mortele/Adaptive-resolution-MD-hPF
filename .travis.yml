@@ -22,25 +22,8 @@ jobs:
         - make
     - stage: test
       script:
+        - make clean
         - make test
         - ./bin/UnitTests.app
-# Multi-language build matrix mini tutorial example taken from
-#
-#   https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
-#
-#matrix:
-#  include:
-#    - language: c
-#      before_install: 
-#        - sudo apt-get install gfortran
-#      script:
-#        - make 
-#        - ./app/AdapResoMD-hPF.app
-#
-#    - language: c
-#      before_install:
-#        - sudo apt-get install gfortran
-#      script:
-#        - make test
-#        - ./test/UnitTests.app
-    
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -t f3e28ebb-cea3-4dd4-95c8-d5fca5566ddd
