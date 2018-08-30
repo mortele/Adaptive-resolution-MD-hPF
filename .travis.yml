@@ -1,6 +1,7 @@
 
-sudo: required
 language: c
+dist: trusty
+sudo: false
 
 # Use sed to replace the SSH URL with the public URL, then initialize submodules before_install: 
 # Solution ot Permission denied (publickey) error when TravisCI tries to fetch submodules:
@@ -13,7 +14,7 @@ git:
 before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
-  - sudo apt-get install gfortran
+#  - sudo apt-get install gfortran
 
 jobs: 
   include:
