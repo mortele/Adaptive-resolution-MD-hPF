@@ -22,14 +22,22 @@ module system_test
 contains
 
 subroutine test_distance_minimum_image()
+    logical, allocatable, dimension(:,:,:) :: distances_too_long    
     real (real64), allocatable, dimension(:,:,:) :: distances
-    integer (int32) :: i, j 
+    logical :: any_distance_too_long
+    integer (int32) :: i, j, test_number
 
     call setup_test_system()
     allocate(distances (number_of_dimensions, number_of_particles,  number_of_particles))
     allocate(positions (number_of_dimensions, number_of_particles))
     positions(:,1) = [1.0,  5.0,  6.0]
     positions(:,2) = [9.0,  5.0,  6.0]
+    positions(:,3) = [9.0,  5.0,  0.5]
+    positions(:,4) = [9.0,  9.0,  9.0]
+    positions(:,5) = [1.0,  1.0,  1.0]
+    positions(:,6) = [6.0,  2.0,  0.5]
+    call random_number(positions(:,7:))
+    positions(:,7:) = positions(:,7:) * system_size_x
 
 
     do i = 1, number_of_particles
@@ -42,9 +50,38 @@ subroutine test_distance_minimum_image()
         end do
     end do
 
-    call assert_equals(distances(:,1,2), [2.0_real64, 0.0_real64, 0.0_real64], 3, "Computed distance across boundary of the simulation box incorrect")
+    ! positions(:,1) - positions(:,2) = [1,5,6] - [9,5,6] = [-8,0,0] -> [2,0,0]
+    call assert_equals([ 2.0_real64,  0.0_real64,  0.0_real64], distances(:,1,2), 3, "1  test_distance_minimum_image : Computed distance across boundary of the simulation box incorrect")
+    ! positions(:,2) - positions(:,3) = [9,5,6] - [9,5,0.5] = [0,0,5.5] -> [0,0,-4.5]
+    call assert_equals([ 0.0_real64,  0.0_real64, -4.5_real64], distances(:,2,3), 3, "2  test_distance_minimum_image : Computed distance across boundary of the simulation box incorrect")
+    ! positions(:,4) - positions(:,5) = [9,9,9] - [1,1,1] = [8,8,8] -> [-2,-2,-2]
+    call assert_equals([-2.0_real64, -2.0_real64, -2.0_real64], distances(:,4,5), 3, "3  test_distance_minimum_image : Computed distance across boundary of the simulation box incorrect")
+    ! positions(:,4) - positions(:,6) = [9,9,9] - [6,2,0.5] = [3,7,8.5] -> [3,-2,-3.5]
+    call assert_equals([ 3.0_real64, -3.0_real64, -1.5_real64], distances(:,4,6), 3, "4  test_distance_minimum_image : Computed distance across boundary of the simulation box incorrect")
 
+    test_number = 5
+    do i = 1, number_of_particles
+        do j = 1, number_of_particles
+            if (i /= j) then
+                call assert_equals(distances(:,i,j), -distances(:,j,i), 3, char(test_number)//"  test_distance_minimum_image : Distance between i and j is not equal to negative distance between j and i")
+                test_number = test_number + 1
+            end if
+        end do
+    end do
+
+    allocate(distances_too_long(number_of_dimensions, number_of_particles, number_of_particles))
+
+    distances_too_long = distances > 5.0
+    any_distance_too_long = any(distances_too_long)
+    call assert_false(any_distance_too_long, char(test_number)//" test_distance_minimum_image : Some distances were computed to be larger than half the system size")
+    test_number = test_number + 1
+
+    distances_too_long = distances < -5.0
+    any_distance_too_long = any(distances_too_long)
+    call assert_false(any_distance_too_long, char(test_number)//" test_distance_minimum_image : Some distances were computed to be smaller than minus half the system size")
+    
     deallocate(positions)
+    deallocate(distances_too_long)
 end subroutine test_distance_minimum_image
 
 subroutine test_periodic_boundary_conditions()
@@ -52,13 +89,6 @@ subroutine test_periodic_boundary_conditions()
     logical :: any_outside
     
     call setup_test_system()
-    
-    system_size_x = 10.0
-    system_size_y = 10.0
-    system_size_z = 10.0
-    system_size = [system_size_x, system_size_y, system_size_z]
-    number_of_dimensions = 3
-    number_of_particles  = 11
     
     allocate(positions (number_of_dimensions, number_of_particles))
     allocate(outside_box(number_of_dimensions, number_of_particles))
@@ -75,30 +105,29 @@ subroutine test_periodic_boundary_conditions()
     positions(:,11) = [-9.0,  1.5,   2.5]
     call apply_periodic_boundary_conditions(positions)
     
-    call assert_equals(positions(:,1),  [1.0_real64,   2.0_real64,   3.0_real64], 3, "No changes expected")
-    call assert_equals(positions(:,2),  [1.0_real64,   4.0_real64,   5.0_real64], 3, "Change expected in first component")
-    call assert_equals(positions(:,3),  [2.0_real64,   3.0_real64,   6.0_real64], 3, "Change expected in first and second components")
-    call assert_equals(positions(:,4),  [7.0_real64,   4.0_real64,   5.0_real64], 3, "Change expected in second and third components")
-    call assert_equals(positions(:,4),  [7.0_real64,   4.0_real64,   5.0_real64], 3, "Change expected in second and third components")
-    call assert_equals(positions(:,5),  [6.0_real64,   7.0_real64,   8.0_real64], 3, "Change expected in all components")
-    call assert_equals(positions(:,6),  [9.0_real64,   8.0_real64,   9.0_real64], 3, "Change expected in first and third components")
-    call assert_equals(positions(:,7),  [8.0_real64,   1.5_real64,   9.0_real64], 3, "Change expected in first and second components")        
-    call assert_equals(positions(:,8),  [2.5_real64,   3.5_real64,   7.0_real64], 3, "Change expected in all components")                
-    call assert_equals(positions(:,9),  [6.0_real64,   5.0_real64,   4.0_real64], 3, "Change expected in all components")        
-    call assert_equals(positions(:,10), [3.0_real64,   4.5_real64,   2.0_real64], 3, "Change expected in all components")        
-    call assert_equals(positions(:,11), [1.0_real64,   1.5_real64,   2.5_real64], 3, "Change expected in first component")        
+    call assert_equals([1.0_real64,   2.0_real64,   3.0_real64], positions(:,1),  3, "1  test_periodic_boundary_conditions : No changes expected")
+    call assert_equals([1.0_real64,   4.0_real64,   5.0_real64], positions(:,2),  3, "2  test_periodic_boundary_conditions : Change expected in first component")
+    call assert_equals([2.0_real64,   3.0_real64,   6.0_real64], positions(:,3),  3, "3  test_periodic_boundary_conditions : Change expected in first and second components")
+    call assert_equals([7.0_real64,   4.0_real64,   5.0_real64], positions(:,4),  3, "4  test_periodic_boundary_conditions : Change expected in second and third components")
+    call assert_equals([7.0_real64,   4.0_real64,   5.0_real64], positions(:,4),  3, "5  test_periodic_boundary_conditions : Change expected in second and third components")
+    call assert_equals([6.0_real64,   7.0_real64,   8.0_real64], positions(:,5),  3, "6  test_periodic_boundary_conditions : Change expected in all components")
+    call assert_equals([9.0_real64,   8.0_real64,   9.0_real64], positions(:,6),  3, "6  test_periodic_boundary_conditions : Change expected in first and third components")
+    call assert_equals([8.0_real64,   1.5_real64,   9.0_real64], positions(:,7),  3, "7  test_periodic_boundary_conditions : Change expected in first and second components")        
+    call assert_equals([2.5_real64,   3.5_real64,   7.0_real64], positions(:,8),  3, "8  test_periodic_boundary_conditions : Change expected in all components")                
+    call assert_equals([6.0_real64,   5.0_real64,   4.0_real64], positions(:,9),  3, "9  test_periodic_boundary_conditions : Change expected in all components")        
+    call assert_equals([3.0_real64,   4.5_real64,   2.0_real64], positions(:,10), 3, "10 test_periodic_boundary_conditions : Change expected in all components")        
+    call assert_equals([1.0_real64,   1.5_real64,   2.5_real64], positions(:,11), 3, "11 test_periodic_boundary_conditions : Change expected in first component")        
     
     call random_number(positions)
-    positions  = positions * 20.0 - 10.0
-    print *, positions
+    positions  = positions * 30.0 - 10.0 ! Uniform distribution in [-10, 20)
     call apply_periodic_boundary_conditions(positions)
     outside_box = positions > 10.0
     any_outside = any(outside_box)
-    call assert_false(any_outside, "One or more of the random positions ended up outside the simulation box")
+    call assert_false(any_outside, "12 test_periodic_boundary_conditions : One or more of the random positions ended up outside the simulation box")
     
     outside_box = positions < 0.0
     any_outside = any(outside_box)
-    call assert_false(any_outside, "One or more of the random positions ended up outside the simulation box")
+    call assert_false(any_outside, "13 test_periodic_boundary_conditions : One or more of the random positions ended up outside the simulation box")
     
     deallocate(positions)
     deallocate(outside_box)
