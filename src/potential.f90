@@ -13,8 +13,8 @@ module potential
     real (real64), private :: sigma6, sigma12
     real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
 
-    private :: lennard_jones_force, lennard_jones_potential
-    public  :: compute_forces
+    public :: lennard_jones_force, lennard_jones_potential
+    public :: compute_forces
 
 contains
 

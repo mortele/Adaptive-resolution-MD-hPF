@@ -69,10 +69,13 @@ system_test.o: test/system_test.f90 fruit.o system.o particles.o parameters.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 random_generator_test.o: test/random_generator_test.f90 random_generator.o fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
-unit_tests.o: unit_tests.f90 system_test.o 
+potential_test.o: test/potential_test.f90 potential.o system.o parameters.o fruit.o
+	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
+unit_tests.o: unit_tests.f90 $(patsubst build/%.o, %.o, $(wildcard build/*_test.o))
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 fruit.o fruit.mod: ext/FRUIT/src/fruit.f90
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
+
 
 #%.o: src/%.f90
 #	$(FORTRAN_COMPILER) -c $<
@@ -81,7 +84,7 @@ depend depend.mk:
 	./ext/makedepf90/makedepf90 src/*.f90 test/*.f90 -m '%m.mod' -b '' > depend.mk
 
 clean: 
-	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o *.gcda *.gcno	build/*.mod build/*.o build/*.gcda build/*.gcno
+	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o test/*.mod test/*.o4 *.gcda *.gcno	build/*.mod build/*.o build/*.gcda build/*.gcno
 
 
 
