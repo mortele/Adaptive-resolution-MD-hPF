@@ -1,25 +1,37 @@
 module system_test
     use, intrinsic :: iso_fortran_env, only: real64, int32
-    use fruit
-    use parameters, only:   system_size_x,                      &
-                            system_size_y,                      &
-                            system_size_z,                      &
-                            number_of_particles,                &
-                            number_of_dimensions               
-    use particles,  only:   positions,                          &
-                            velocities,                         &
-                            masses
-    use system,     only:   remove_linear_momentum,             & ! Subroutine
-                            apply_periodic_boundary_conditions, & ! Subroutine
-                            compute_distance_minimum_image,     & ! Subroutine
-                            system_size
+    use fruit,              only:   assert_equals,                      & ! Subroutine
+                                    assert_false                          ! Subroutine
+    use parameters,         only:   system_size_x,                      &
+                                    system_size_y,                      &
+                                    system_size_z,                      &
+                                    number_of_particles,                &
+                                    number_of_dimensions               
+    use particles,          only:   positions,                          &
+                                    velocities,                         &
+                                    masses
+    use system,             only:   remove_linear_momentum,             & ! Subroutine
+                                    apply_periodic_boundary_conditions, & ! Subroutine
+                                    compute_distance_minimum_image,     & ! Subroutine
+                                    system_size
+    use random_generator,   only:   random_normal
     implicit none
     private
 
     private ::  setup_test_system
-    public  ::  test_periodic_boundary_conditions,      &
-                test_distance_minimum_image
+    public  ::  setup,                                  &
+                teardown,                               &
+                test_periodic_boundary_conditions,      &
+                test_distance_minimum_image,            &
+                test_remove_linear_momentum
 contains
+
+subroutine setup
+end subroutine setup
+
+subroutine teardown
+end subroutine teardown
+
 
 subroutine test_distance_minimum_image()
     logical, allocatable, dimension(:,:,:) :: distances_too_long    
@@ -132,6 +144,41 @@ subroutine test_periodic_boundary_conditions()
     deallocate(positions)
     deallocate(outside_box)
 end subroutine test_periodic_boundary_conditions
+
+subroutine test_remove_linear_momentum()
+    real (real64), dimension(:), allocatable :: total_momentum
+    real (real64)   :: test_tollerance = 1e-10
+    integer (int32) :: i, j, k, test_number
+
+    call setup_test_system()
+    allocate(velocities     (number_of_dimensions, number_of_particles))
+    allocate(masses         (number_of_particles))
+    allocate(total_momentum (number_of_dimensions))
+
+    test_number = 1
+    do k = 1, 2
+        do i = 1, 10
+            call random_number(masses)
+            masses = masses * 9.9 + 0.1  ! Uniform distribution in [0.1, 10.0)
+            
+            if (k == 1) then
+                call random_normal(velocities)
+            else 
+                call random_number(velocities)
+                velocities = velocities * 20 - 10
+            end if
+            
+            call remove_linear_momentum(velocities, masses, .true.)
+            total_momentum = 0
+            do j = 1, number_of_particles
+                total_momentum = total_momentum + masses(j) * velocities(:,j)
+            end do
+
+            call assert_equals([0.0_real64, 0.0_real64, 0.0_real64], total_momentum, 3, test_tollerance, char(test_number)//"  test_remove_linear_momentum : The total computed linear momentum is not zero")
+            test_number = test_number + 1
+        end do
+    end do
+end subroutine test_remove_linear_momentum
 
 subroutine setup_test_system
     system_size_x = 10.0

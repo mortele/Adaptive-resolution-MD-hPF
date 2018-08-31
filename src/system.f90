@@ -15,10 +15,11 @@ module system
 
 contains
 
-    subroutine remove_linear_momentum(velocities, masses)
+    subroutine remove_linear_momentum(velocities, masses, silent)
         implicit none
         real (real64), dimension(:,:), intent(in out) :: velocities
         real (real64), dimension(:),   intent(in)     :: masses
+        logical, optional,             intent(in)     :: silent
         real (real64), dimension(:) :: total_momentum(number_of_dimensions), &
                                        P             (number_of_dimensions)
         integer (int32) :: i
@@ -36,12 +37,13 @@ contains
         ! Aliasing the total momentum of the center of mass for brevity when 
         ! priting to terminal.
         P = total_momentum * number_of_particles
-
-        print *, "╔════════════════════════════════════════════════════╗"
-        print *, "║ Removing linear momentum.                          ║"
-        print *, "╚════════════════════════════════════════════════════╝"
-        print *, "   Removed total (center of mass momentum):"
-        print *, "   [", P(1), P(2), P(3), "]"
+        if (.not. silent) then
+            print *, "╔════════════════════════════════════════════════════╗"
+            print *, "║ Removing linear momentum.                          ║"
+            print *, "╚════════════════════════════════════════════════════╝"
+            print *, "   Removed total (center of mass momentum):"
+            print *, "   [", P(1), P(2), P(3), "]"
+        end if
     end subroutine remove_linear_momentum
 
     subroutine apply_periodic_boundary_conditions(positions)
