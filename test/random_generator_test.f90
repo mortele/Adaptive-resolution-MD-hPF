@@ -6,6 +6,18 @@ module random_generator_test
 
     private
 
+    ! The compute functions were tested against the sample values found here
+    !
+    !    http://jean-pierre.moreau.pagesperso-orange.fr/Fortran/tmoment_f90.txt,
+    !
+    ! with data [12, 9, 7, 15, 6] to produce 
+    !    
+    ! mean               =   9.80000000000000
+    ! standard_deviation =   3.70135110466435
+    ! variance           =   13.7000000000000
+    ! skewness           =  0.291548695888740
+    ! kurtosis           =  -1.90779903031595
+    ! 
     private ::  compute_mean,               &
                 compute_variance,           &
                 compute_skewness,           &
@@ -23,25 +35,41 @@ contains
     subroutine test_random_normal()
         real (real64), dimension(:), allocatable :: values
         real (real64)   :: mean, variance, skewness, kurtosis
-        real (real64)   :: mean_tollerance     = 0.01
-        real (real64)   :: variance_tollerance = 0.1
-        real (real64)   :: skewness_tollerance = 1.0
-        real (real64)   :: kurtosis_tollerance = 1.0
+        real (real64)   :: standard_deviation, new_standard_deviation
+        real (real64)   :: mean_tollerance     = 2.0E-002
+        real (real64)   :: variance_tollerance = 5.0E-002
+        real (real64)   :: skewness_tollerance = 5.0E-002
+        real (real64)   :: kurtosis_tollerance = 1.0E-001
         integer (int32) :: i
         
         allocate(values(int(1e5)))
 
-        do i = 1, 20
+        do i = 1, 25
             call random_normal(values)
             mean        = compute_mean    (values)
             variance    = compute_variance(values, mean)
             skewness    = compute_skewness(values, mean, variance)
             kurtosis    = compute_kurtosis(values, mean, variance)
-
+            
             call assert_equals(0.0_real64, mean,     mean_tollerance,     char(i)//"  test_random_normal : Calculated mean is not sufficiently close to zero")
             call assert_equals(1.0_real64, variance, variance_tollerance, char(i)//"  test_random_normal : Calculated variance is not sufficiently close to zero")
             call assert_equals(0.0_real64, skewness, skewness_tollerance, char(i)//"  test_random_normal : Calculated skewness is not sufficiently close to zero")
             call assert_equals(0.0_real64, kurtosis, kurtosis_tollerance, char(i)//"  test_random_normal : Calculated kurtosis is not sufficiently close to zero")
+        end do
+
+        do i = 26, 50
+            call random_normal(values)
+            mean        = compute_mean    (values)
+            standard_deviation = sqrt(variance)
+            call random_number(new_standard_deviation)
+            new_standard_deviation = new_standard_deviation * 10.0
+            values = values * new_standard_deviation
+
+            ! Compute the variance, and the standard deviation, make sure the 
+            ! scaled distribution _actually_ has the standard deviation 
+            ! new_standard_deviation.
+            variance = compute_variance(values, mean)
+            call assert_equals(new_standard_deviation, sqrt(variance), variance_tollerance, char(i)//"  test_random_normal : Scaled distribution does not have the correct standard deviation")
         end do
     end subroutine test_random_normal
 

@@ -67,7 +67,7 @@ system.o system.mod: src/system.f90 parameters.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 system_test.o: test/system_test.f90 fruit.o system.o particles.o parameters.o 
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
-random_generator_test.o: test/random_generator_test.f90 random_generator.o
+random_generator_test.o: test/random_generator_test.f90 random_generator.o fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
 unit_tests.o: unit_tests.f90 system_test.o 
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
