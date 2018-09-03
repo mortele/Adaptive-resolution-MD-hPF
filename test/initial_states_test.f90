@@ -1,5 +1,5 @@
 module initial_states_test
-    use, intrinsic :: iso_fortran_env, only: real64, int32
+    use, intrinsic :: iso_fortran_env, only: real64, int32, output_unit
     use fruit,          only:   assert_equals,                  &
                                 assert_true
     use system,         only:   system_size
@@ -20,7 +20,11 @@ module initial_states_test
                                 system_size_x,                  &
                                 system_size_y,                  &
                                 system_size_z,                  &
-                                initial_configuration
+                                initial_configuration,          &
+                                lennard_jones_epsilon,          &
+                                lennard_jones_sigma
+    use potential,      only:   compute_forces,                 & ! Subroutine
+                                V
 
 
     implicit none
@@ -68,6 +72,7 @@ contains
 
     subroutine test_random_initial_state()
         logical :: silent = .true.
+
         number_of_dimensions  = 3
         number_of_particles   = 10
         initial_configuration = "random"
@@ -85,13 +90,38 @@ contains
 
 
     subroutine test_fcc_initial_state()
+        integer (int32) :: i, j
+        real (real64)   :: FCC_potential_energy, potential_energy
+        real (real64)   :: dx = 0.02
         logical :: silent = .true.
+
+        fcc_lattice_constant     = 5.26
+        lennard_jones_epsilon    = 1.0
+        lennard_jones_sigma      = 3.405
         number_of_dimensions     = 3
         fcc_number_of_unit_cells = 2
         initial_configuration    = "fcc"
         call setup_initial_state(positions, velocities, forces, masses, types, silent)
 
         call assert_equals(4*2**3, number_of_particles, "1  test_fcc_initial_state : Number of particles not correctly assigned in test_fcc_initial_state")
+
+        ! Test that the FCC lattice is the minium of the potential energy. We 
+        ! move all particles in every direction and check if the potential 
+        ! energy ever decreases in any other configuration.
+        call compute_forces(positions, forces)
+        FCC_potential_energy = V
+
+        do i = 1, number_of_particles
+            do j = 1, number_of_dimensions
+                
+                positions(j,i) = positions(j,i) + dx
+                call compute_forces(positions, forces)
+                potential_energy = V
+                positions(j,i) = positions(j,i) - dx
+                ! write (output_unit, fmt="( f15.10, f15.10 )") potential_energy, FCC_potential_energy
+                call assert_true(FCC_potential_energy < potential_energy, char(i*number_of_dimensions+i)//" test_fcc_initial_state : The FCC state is not the minimum of the potential energy")
+            end do
+        end do
     end subroutine test_fcc_initial_state
 
 end module initial_states_test

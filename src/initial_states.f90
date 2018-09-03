@@ -154,6 +154,7 @@ contains
 
                     do l = 1, atoms_per_unit_cell
                         positions(:, atom_counter) = lattice_vector + atom_relative_position(:, l)
+                        atom_counter = atom_counter + 1
                     end do
                 end do
             end do

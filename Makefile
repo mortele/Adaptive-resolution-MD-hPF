@@ -71,7 +71,7 @@ random_generator_test.o: test/random_generator_test.f90 random_generator.o fruit
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
 potential_test.o: test/potential_test.f90 potential.o system.o parameters.o fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
-initial_states_test.o: test/initial_states_test.f90 initial_states.o system.o parameters.o fruit.o
+initial_states_test.o: test/initial_states_test.f90 initial_states.o system.o parameters.o fruit.o potential.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
 unit_tests.o: unit_tests.f90 $(patsubst test/%.f90, %.o, $(wildcard test/*_test.f90)) fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
@@ -87,8 +87,6 @@ depend depend.mk:
 
 clean: 
 	@/bin/rm -f *.mod *.o src/*.mod src/*.o app/*.mod app/*.o test/*.mod test/*.o4 *.gcda *.gcno	build/*.mod build/*.o build/*.gcda build/*.gcno
-
-
 
 
 # Make macro cheat sheet
