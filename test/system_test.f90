@@ -178,6 +178,8 @@ subroutine test_remove_linear_momentum()
             test_number = test_number + 1
         end do
     end do
+    deallocate(velocities)
+    deallocate(masses)
 end subroutine test_remove_linear_momentum
 
 subroutine setup_test_system

@@ -13,7 +13,7 @@ AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -
 # code, then compile with -fprofile-use to let gfortran learn from the run time
 # execution of the code to optimize it further.
 
-DEBUG_FLAGS 				= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all
+DEBUG_FLAGS 				= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all -g
 TEST_FLAGS 					= -fprofile-arcs #-ftest-coverage
 FORTRAN_COMPILER 			= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS) $(TEST_FLAGS)
 FORTRAN_COMPILER_OPTIMIZE 	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 

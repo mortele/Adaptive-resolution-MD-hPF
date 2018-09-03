@@ -66,5 +66,13 @@ contains
         call set_unit_name ('test_lennard_jones_potential')    
         call run_test_case(test_lennard_jones_potential, "test_lennard_jones_potential")
         call teardown     
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_compute_forces"
+        call set_unit_name ('test_compute_forces')    
+        call run_test_case(test_compute_forces, "test_compute_forces")
+        call teardown     
+
     end subroutine potential_all_tests
 end program unit_tests
