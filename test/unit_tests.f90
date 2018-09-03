@@ -110,7 +110,6 @@ contains
         call set_unit_name ('test_compute_forces')    
         call run_test_case(test_compute_forces, "test_compute_forces")
         call teardown     
-
     end subroutine potential_all_tests
 
     subroutine initial_states_all_tests()
@@ -136,14 +135,6 @@ contains
         call set_unit_name ('test_fcc_initial_state')    
         call run_test_case(test_fcc_initial_state, "test_fcc_initial_state")
         call teardown     
-
-        call setup
-        print *, " "
-        print *, " ..running test: test_setup_initial_state"
-        call set_unit_name ('test_setup_initial_state')    
-        call run_test_case(test_setup_initial_state, "test_setup_initial_state")
-        call teardown
-
     end subroutine initial_states_all_tests
 
 end program unit_tests

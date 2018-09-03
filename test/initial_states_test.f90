@@ -30,8 +30,8 @@ module initial_states_test
                 teardown,                   &
                 test_allocate_arrays,       &
                 test_random_initial_state,  &
-                test_fcc_initial_state,     &
-                test_setup_initial_state
+                test_fcc_initial_state
+
 contains
 
     subroutine setup()
@@ -67,9 +67,11 @@ contains
 
 
     subroutine test_random_initial_state()
-        number_of_dimensions = 3
-        number_of_particles  = 10
-        call random_initial_state(positions, velocities, masses, types, .true.)
+        logical :: silent = .true.
+        number_of_dimensions  = 3
+        number_of_particles   = 10
+        initial_configuration = "random"
+        call setup_initial_state(positions, velocities, forces, masses, types, silent)
         call assert_true(allocated(positions),                       "1  test_random_initial_state : Arrays not allocated by random_initial_state()")
         call assert_equals(number_of_dimensions, size(positions, 1), "2  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")
         call assert_equals(number_of_particles,  size(positions, 2), "3  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")
@@ -81,10 +83,15 @@ contains
         deallocate(types)
     end subroutine test_random_initial_state
 
-    subroutine test_fcc_initial_state()
-    end subroutine test_fcc_initial_state
 
-    subroutine test_setup_initial_state()
-    end subroutine test_setup_initial_state
+    subroutine test_fcc_initial_state()
+        logical :: silent = .true.
+        number_of_dimensions     = 3
+        fcc_number_of_unit_cells = 2
+        initial_configuration    = "fcc"
+        call setup_initial_state(positions, velocities, forces, masses, types, silent)
+
+        call assert_equals(4*2**3, number_of_particles, "1  test_fcc_initial_state : Number of particles not correctly assigned in test_fcc_initial_state")
+    end subroutine test_fcc_initial_state
 
 end module initial_states_test

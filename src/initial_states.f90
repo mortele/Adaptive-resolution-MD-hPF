@@ -176,10 +176,12 @@ contains
         real    (real64), dimension(:,:), allocatable, intent(in out) :: forces
         real    (real64), dimension(:),   allocatable, intent(in out) :: masses
         integer (int32),  dimension(:),   allocatable, intent(in out) :: types
-        logical,          optional,                    intent(in)     :: silent
+        logical,          optional,                    intent(in out) :: silent
 
         integer (int32)  :: printing_unit
-
+        if (.not. present(silent)) then
+            silent = .false.
+        end if
         if (.not. silent) then
             ! Print to standard out (terminal).
             printing_unit = output_unit
@@ -197,7 +199,7 @@ contains
             system_size_z = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size   = [system_size_x, system_size_y, system_size_z]
             call allocate_arrays(positions, velocities, forces, masses, types)
-            call fcc_initial_state(positions, velocities, masses, types)
+            call fcc_initial_state(positions, velocities, masses, types, silent)
 
         case ("random") 
             call allocate_arrays(positions, velocities, forces, masses, types)

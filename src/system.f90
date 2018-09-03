@@ -38,13 +38,16 @@ contains
         ! Aliasing the total momentum of the center of mass for brevity when 
         ! priting to terminal.
         P = total_momentum * number_of_particles
-        
-        if (.not. silent) then
-            ! Print to standard out (terminal).
-            printing_unit = output_unit
+        if (present(silent)) then
+            if (.not. silent) then
+                ! Print to standard out (terminal).
+                printing_unit = output_unit
+            else 
+                ! Supress terminal output, print to silentoutput.out file instead.
+                printing_unit = silent_output_ID
+            end if
         else 
-            ! Supress terminal output, print to silentoutput.out file instead.
-            printing_unit = silent_output_ID
+            printing_unit = output_unit
         end if
         
         write(printing_unit, *) "╔════════════════════════════════════════════════════╗"
