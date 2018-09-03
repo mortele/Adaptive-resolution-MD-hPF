@@ -89,7 +89,6 @@ contains
         implicit none
         real (real64), dimension(number_of_dimensions) :: unit_vector
         real (real64)   :: tollerance
-        integer (int32) :: i
 
         tollerance            = 1e-10
         lennard_jones_epsilon = 1.25875

@@ -31,8 +31,10 @@ module parameters
     integer (int32), public :: field_nodes = 25
     real (real64),   public :: temperature = 1.0
 
-    character (13), public :: out_file_name  = "positions.xyz"
-    character (14), public :: info_file_name = "systeminfo.out"
+    character (13),  public :: out_file_name      = "positions.xyz"
+    character (14),  public :: info_file_name     = "systeminfo.out"
+    character (16),  public :: silent_output_file = "silentoutput.out"
+    integer (int32), public :: silent_output_ID
 
     ! Time step used in the velocity Verlet integration.
     real (real64), public :: time_step = 0.001

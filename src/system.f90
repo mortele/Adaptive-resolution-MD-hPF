@@ -1,10 +1,11 @@
 module system
-    use, intrinsic :: iso_fortran_env, only:  real64, int32
+    use, intrinsic :: iso_fortran_env, only:  real64, int32, output_unit
     use parameters,      only:  system_size_x,          &
                                 system_size_y,          &
                                 system_size_z,          &
                                 number_of_particles,    &
-                                number_of_dimensions
+                                number_of_dimensions,   &
+                                silent_output_ID
     implicit none
     private 
 
@@ -22,7 +23,7 @@ contains
         logical, optional,             intent(in)     :: silent
         real (real64), dimension(:) :: total_momentum(number_of_dimensions), &
                                        P             (number_of_dimensions)
-        integer (int32) :: i
+        integer (int32) :: i, printing_unit
 
         total_momentum = 0
         do i = 1, number_of_particles
@@ -37,13 +38,20 @@ contains
         ! Aliasing the total momentum of the center of mass for brevity when 
         ! priting to terminal.
         P = total_momentum * number_of_particles
+        
         if (.not. silent) then
-            print *, "╔════════════════════════════════════════════════════╗"
-            print *, "║ Removing linear momentum.                          ║"
-            print *, "╚════════════════════════════════════════════════════╝"
-            print *, "   Removed total (center of mass momentum):"
-            print *, "   [", P(1), P(2), P(3), "]"
+            ! Print to standard out (terminal).
+            printing_unit = output_unit
+        else 
+            ! Supress terminal output, print to silentoutput.out file instead.
+            printing_unit = silent_output_ID
         end if
+        
+        write(printing_unit, *) "╔════════════════════════════════════════════════════╗"
+        write(printing_unit, *) "║ Removing linear momentum.                          ║"
+        write(printing_unit, *) "╚════════════════════════════════════════════════════╝"
+        write(printing_unit, *) "   Removed total (center of mass momentum):"
+        write(printing_unit, *) "   [", P(1), P(2), P(3), "]"
     end subroutine remove_linear_momentum
 
     subroutine apply_periodic_boundary_conditions(positions)

@@ -47,7 +47,7 @@ field.o field.mod: src/field.f90 system.o parameters.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 file_writer.o file_writer.mod: src/file_writer.f90 parameters.o system.o 
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
-initial_states.o initial_states.mod: src/initial_states.f90 parameters.o system.o random_generator.o 
+initial_states.o initial_states.mod: src/initial_states.f90 parameters.o system.o random_generator.o particles.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 random_generator.o random_generator.mod: src/random_generator.f90 
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
@@ -71,7 +71,9 @@ random_generator_test.o: test/random_generator_test.f90 random_generator.o fruit
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
 potential_test.o: test/potential_test.f90 potential.o system.o parameters.o fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
-unit_tests.o: unit_tests.f90 $(patsubst build/%.o, %.o, $(wildcard build/*_test.o))
+initial_states_test.o: test/initial_states_test.f90 initial_states.o system.o parameters.o fruit.o
+	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
+unit_tests.o: unit_tests.f90 $(patsubst test/%.f90, %.o, $(wildcard test/*_test.f90)) fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 fruit.o fruit.mod: ext/FRUIT/src/fruit.f90
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)

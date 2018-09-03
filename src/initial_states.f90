@@ -1,5 +1,5 @@
 module initial_states
-    use, intrinsic :: iso_fortran_env, only: real64, int32
+    use, intrinsic :: iso_fortran_env, only: real64, int32, output_unit
     use random_generator, only: random_normal                   ! Function
     use system,           only: system_size,                &
                                 remove_linear_momentum          ! Subroutine
@@ -11,29 +11,36 @@ module initial_states
                                 initial_configuration,      &
                                 system_size_x,              &
                                 system_size_y,              &
-                                system_size_z              
+                                system_size_z,              &
+                                silent_output_ID
+    use particles,        only: forces
     implicit none
     private 
 
-    private ::  random_initial_state,    &
+    public  ::  random_initial_state,    &
                 fcc_initial_state,       &
                 allocate_arrays,         &
                 print_fcc_warning
-    public  :: setup_initial_state
+    public  ::  setup_initial_state
 
 contains
 
-    subroutine random_initial_state(positions, velocities, masses, types)
+    subroutine random_initial_state(positions, velocities, masses, types, silent)
         implicit none
-        real    (real64), dimension(:,:), intent(in out) :: positions
-        real    (real64), dimension(:,:), intent(in out) :: velocities
-        real    (real64), dimension(:),   intent(in out) :: masses
-        integer (int32),  dimension(:),   intent(in out) :: types
+        real    (real64), dimension(:,:), allocatable, intent(in out) :: positions
+        real    (real64), dimension(:,:), allocatable, intent(in out) :: velocities
+        real    (real64), dimension(:),   allocatable, intent(in out) :: masses
+        integer (int32),  dimension(:),   allocatable, intent(in out) :: types
+        logical,          optional,       intent(in)     :: silent
 
-        integer (int32)  :: i, j
+        integer (int32)  :: i, j, printing_unit
         real    (real64) :: T
         real    (real64), dimension(:) :: S(number_of_dimensions)
         T = temperature
+
+        if (.not. allocated(positions)) then
+            call allocate_arrays(positions, velocities, forces, masses, types)
+        end if
 
         ! Assign each particle a mass of 1.0 and type 1.
         masses = 1.0
@@ -68,22 +75,35 @@ contains
         ! Aliasing system_size for brevity while printing to terminal.
         S = system_size
 
-        print *, "╔════════════════════════════════════════════════════╗"
-        print *, "║ Initializing a random state.                       ║"
-        print *, "╚════════════════════════════════════════════════════╝"
-        print *, "   Positions uniformely distributed inside the simulation box"
-        print *, "   of size:"
-        print *, "   [", S(1), S(2), S(3), "]"
-        call remove_linear_momentum(velocities, masses)
+        if (.not. silent) then
+            ! Print to standard out (terminal).
+            printing_unit = output_unit
+        else 
+            ! Supress terminal output, print to silentoutput.out file instead.
+            printing_unit = silent_output_ID
+        end if
 
+        write(printing_unit, *) "╔════════════════════════════════════════════════════╗"
+        write(printing_unit, *) "║ Initializing a random state.                       ║"
+        write(printing_unit, *) "╚════════════════════════════════════════════════════╝"
+        write(printing_unit, *) "   Positions uniformely distributed inside the simulation box"
+        write(printing_unit, *) "   of size:"
+        write(printing_unit, *) "   [", S(1), S(2), S(3), "]"
+        
+        if (present(silent)) then
+            call remove_linear_momentum(velocities, masses, silent)
+        else 
+            call remove_linear_momentum(velocities, masses)
+        end if
     end subroutine random_initial_state
 
-    subroutine fcc_initial_state(positions, velocities, masses, types)
+    subroutine fcc_initial_state(positions, velocities, masses, types, silent)
         implicit none
-        real    (real64), dimension(:,:), intent(in out) :: positions
-        real    (real64), dimension(:,:), intent(in out) :: velocities
-        real    (real64), dimension(:),   intent(in out) :: masses
-        integer (int32),  dimension(:),   intent(in out) :: types        
+        real    (real64), dimension(:,:), allocatable, intent(in out) :: positions
+        real    (real64), dimension(:,:), allocatable, intent(in out) :: velocities
+        real    (real64), dimension(:),   allocatable, intent(in out) :: masses
+        integer (int32),  dimension(:),   allocatable, intent(in out) :: types
+        logical,          optional,       intent(in)     :: silent
         
         integer (int32) :: atoms_per_unit_cell = 4
         real (real64), dimension(:) :: lattice_vector(number_of_dimensions),   &
@@ -95,6 +115,10 @@ contains
         real (real64)   :: b
         integer (int32) :: i, j, k, l, atom_counter
     
+        if (.not. allocated(positions)) then
+            call allocate_arrays(positions, velocities, forces, masses, types)
+        end if
+
         allocate(atom_relative_position(number_of_dimensions, atoms_per_unit_cell))
 
         ! Argon atomic mass.
@@ -137,19 +161,36 @@ contains
 
         call random_normal(velocities)
         velocities = velocities * temperature / argon_mass
+
+        if (present(silent)) then
+            call remove_linear_momentum(velocities, masses, silent)
+        else 
+            call remove_linear_momentum(velocities, masses)
+        end if
     end subroutine fcc_initial_state
 
-    subroutine setup_initial_state(positions, velocities, forces, masses, types)
+    subroutine setup_initial_state(positions, velocities, forces, masses, types, silent)
         implicit none
         real    (real64), dimension(:,:), allocatable, intent(in out) :: positions
         real    (real64), dimension(:,:), allocatable, intent(in out) :: velocities
         real    (real64), dimension(:,:), allocatable, intent(in out) :: forces
         real    (real64), dimension(:),   allocatable, intent(in out) :: masses
         integer (int32),  dimension(:),   allocatable, intent(in out) :: types
+        logical,          optional,                    intent(in)     :: silent
+
+        integer (int32)  :: printing_unit
+
+        if (.not. silent) then
+            ! Print to standard out (terminal).
+            printing_unit = output_unit
+        else 
+            ! Supress terminal output, print to silentoutput.out file instead.
+            printing_unit = silent_output_ID
+        end if
 
         select case (initial_configuration)
         case ("fcc")             
-            call print_fcc_warning()
+            call print_fcc_warning(silent)
             number_of_particles = 4 * fcc_number_of_unit_cells**3
             system_size_x = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size_y = fcc_number_of_unit_cells * fcc_lattice_constant
@@ -160,17 +201,24 @@ contains
 
         case ("random") 
             call allocate_arrays(positions, velocities, forces, masses, types)
-            call random_initial_state(positions, velocities, masses, types)
+            if (present(silent)) then
+                call random_initial_state(positions, velocities, masses, types, silent)
+            else 
+                call random_initial_state(positions, velocities, masses, types)
+            end if
 
         case default 
-            print *, "╔════════════════════════════════════════════════════╗"
-            print *, "║ Unknown initial configuration.                     ║"
-            print *, "╚════════════════════════════════════════════════════╝"
-            print *, "   The initial configuration"
-            print *, "   <", initial_configuration, ">"
-            print *, "   was not recognized. Defaulting to a random system."
-            call random_initial_state(positions, velocities, masses, types)
-
+            write(printing_unit, *) "╔════════════════════════════════════════════════════╗"
+            write(printing_unit, *) "║ Unknown initial configuration.                     ║"
+            write(printing_unit, *) "╚════════════════════════════════════════════════════╝"
+            write(printing_unit, *) "   The initial configuration"
+            write(printing_unit, *) "   <", initial_configuration, ">"
+            write(printing_unit, *) "   was not recognized. Defaulting to a random system."
+            if (present(silent)) then
+                call random_initial_state(positions, velocities, masses, types, silent)
+            else 
+                call random_initial_state(positions, velocities, masses, types)
+            end if
         end select 
     end subroutine setup_initial_state
 
@@ -189,9 +237,19 @@ contains
         allocate(types     (number_of_particles))
     end subroutine allocate_arrays
 
-    subroutine print_fcc_warning()
+    subroutine print_fcc_warning(silent)
         implicit none 
-        real (real64), dimension(:) :: S        (number_of_dimensions)
+        logical, optional, intent(in) :: silent
+        real (real64), dimension(:)   :: S        (number_of_dimensions)
+        integer (int32) :: printing_unit
+
+        if (.not. silent) then
+            ! Print to standard out (terminal).
+            printing_unit = output_unit
+        else 
+            ! Supress terminal output, print to silentoutput.out file instead.
+            printing_unit = silent_output_ID
+        end if
 
         ! If the FCC initial condition is chosen, we need to override the 
         ! number_of_particles in the input parameters (parameters module) 
@@ -202,27 +260,27 @@ contains
         ! the number of unit cells in each dimension. Aliasing the new 
         ! system size to S for brevity when printing.
         S = [1.0, 1.0, 1.0] * fcc_number_of_unit_cells * fcc_lattice_constant 
-        print *, "╔════════════════════════════════════════════════════╗"
-        print *, "║                                _                   ║"
-        print *, "║                               (_)                  ║"
-        print *, "║      __      ____ _ _ __ _ __  _ _ __   __ _       ║"
-        print *, "║      \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |      ║"
-        print *, "║       \ V  V / (_| | |  | | | | | | | | (_| |      ║"
-        print *, "║        \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |      ║"
-        print *, "║                                         __/ |      ║"
-        print *, "║                                        |___/       ║"
-        print *, "╚════════════════════════════════════════════════════╝"
-        print *, "   The specified number of particles in the input is"
-        print *, "   ignored when using the FCC lattice initial state."
-        print *, "   "
-        print *, "   Specified number of atoms (disregarded):", number_of_particles
-        print *, "   Number of atoms used:                   ", 4*fcc_number_of_unit_cells**3
-        print *, "   "
-        print *, "   The specified system size is also ignored."
-        print *, "   "
-        print *, "   Specified system size (disregarded):"
-        print *, "   [", system_size_x, system_size_y, system_size_z, "]"
-        print *, "   System size in use:"
-        print *, "   [", S(1), S(2), S(3), "]"
+        write(printing_unit, *) "╔════════════════════════════════════════════════════╗"
+        write(printing_unit, *) "║                                _                   ║"
+        write(printing_unit, *) "║                               (_)                  ║"
+        write(printing_unit, *) "║      __      ____ _ _ __ _ __  _ _ __   __ _       ║"
+        write(printing_unit, *) "║      \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |      ║"
+        write(printing_unit, *) "║       \ V  V / (_| | |  | | | | | | | | (_| |      ║"
+        write(printing_unit, *) "║        \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |      ║"
+        write(printing_unit, *) "║                                         __/ |      ║"
+        write(printing_unit, *) "║                                        |___/       ║"
+        write(printing_unit, *) "╚════════════════════════════════════════════════════╝"
+        write(printing_unit, *) "   The specified number of particles in the input is"
+        write(printing_unit, *) "   ignored when using the FCC lattice initial state."
+        write(printing_unit, *) "   "
+        write(printing_unit, *) "   Specified number of atoms (disregarded):", number_of_particles
+        write(printing_unit, *) "   Number of atoms used:                   ", 4*fcc_number_of_unit_cells**3
+        write(printing_unit, *) "   "
+        write(printing_unit, *) "   The specified system size is also ignored."
+        write(printing_unit, *) "   "
+        write(printing_unit, *) "   Specified system size (disregarded):"
+        write(printing_unit, *) "   [", system_size_x, system_size_y, system_size_z, "]"
+        write(printing_unit, *) "   System size in use:"
+        write(printing_unit, *) "   [", S(1), S(2), S(3), "]"
     end subroutine
 end module initial_states
