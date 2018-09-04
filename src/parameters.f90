@@ -28,7 +28,7 @@ module parameters
     
     ! Number of field vertices per dimension, total number of vertices is 
     ! field_nodes^3.
-    integer (int32), public :: field_nodes = 25
+    integer (int32), public :: number_of_field_nodes = 25
     real (real64),   public :: temperature = 1.0
 
     character (13),  public :: out_file_name      = "positions.xyz"

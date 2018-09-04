@@ -73,6 +73,8 @@ potential_test.o: test/potential_test.f90 potential.o system.o parameters.o frui
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
 initial_states_test.o: test/initial_states_test.f90 initial_states.o system.o parameters.o fruit.o potential.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
+field_test.o: test/field_test.f90 parameters.o system.o field.o fruit.o
+	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 
 unit_tests.o: unit_tests.f90 $(patsubst test/%.f90, %.o, $(wildcard test/*_test.f90)) fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 fruit.o fruit.mod: ext/FRUIT/src/fruit.f90

@@ -12,6 +12,7 @@ program unit_tests
     call random_generator_all_tests()
     call potential_all_tests()
     call initial_states_all_tests()
+    call field_all_tests()
     ! ================
     
     call fruit_summary()
@@ -136,5 +137,23 @@ contains
         call run_test_case(test_fcc_initial_state, "test_fcc_initial_state")
         call teardown     
     end subroutine initial_states_all_tests
+
+    subroutine field_all_tests()
+        use field_test
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_compute_density_field"
+        call set_unit_name ('test_compute_density_field')    
+        call run_test_case(test_compute_density_field, "test_compute_density_field")
+        call teardown      
+        
+        call setup
+        print *, " "
+        print *, " ..running test: test_allocate_field_arrays"
+        call set_unit_name ('test_allocate_field_arrays')    
+        call run_test_case(test_allocate_field_arrays, "test_allocate_field_arrays")
+        call teardown     
+    end subroutine field_all_tests
 
 end program unit_tests
