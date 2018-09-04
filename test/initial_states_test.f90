@@ -91,21 +91,15 @@ contains
 
 
     subroutine test_fcc_initial_state()
-        integer         :: i, j, k
-        real (real64)   :: FCC_potential_energy, potential_energy, b_range, kk
+        integer         :: i, j
+        real (real64)   :: FCC_potential_energy, potential_energy
         real (real64)   :: dx = 1e-5_real64
         logical :: silent = .true.
 
-        ! 5.4051005456115719
-        !do k = 0, 20
-        !kk = k
-        !b_range                  = 0.000000000000001_real64
-        !fcc_lattice_constant     = 5.4051005365358105_real64 - b_range/2.0_real64 + b_range * kk / 20.0_real64
-        !fcc_lattice_constant = 5.4051005365358105_real64
         lennard_jones_epsilon    = 1.0
         lennard_jones_sigma      = 3.405
         number_of_dimensions     = 3
-        fcc_lattice_constant = dsqrt(2.0_real64) * (2.0_real64)**(1.0_real64 / 6.0_real64) * lennard_jones_sigma
+        fcc_lattice_constant     = dsqrt(2.0_real64) * (2.0_real64)**(1.0_real64 / 6.0_real64) * lennard_jones_sigma
         fcc_number_of_unit_cells = 1
         initial_configuration    = "fcc"
         call setup_initial_state(positions, velocities, forces, masses, types, silent)
@@ -116,48 +110,32 @@ contains
         ! move all particles in every direction and check if the potential 
         ! energy ever decreases in any other configuration.
         call compute_forces(positions, forces)
-        !print *, "positions"
-        do i = 1, number_of_particles
-            !print *, positions(:,i) 
-        end do
-        print *, "forces"
-        do i = 1, number_of_particles
-            print *, forces(:,i) 
-        end do
-        print *, fcc_lattice_constant, k, maxval(abs(forces))
         FCC_potential_energy = V
-        !print *, "V/N"
-        !print *, V/number_of_particles 
-        
-        !do i = 1, number_of_particles
-        !    do j = 1, number_of_dimensions
-        !        
-        !        positions(j,i) = positions(j,i) + dx
-        !        call apply_periodic_boundary_conditions(positions)
-        !        call compute_forces(positions, forces)
-        !        potential_energy = V
-        !        positions(j,i) = positions(j,i) - dx
-        !        call apply_periodic_boundary_conditions(positions)
-        !        ! write (output_unit, fmt="( f15.10, f15.10 )") potential_energy, FCC_potential_energy
-        !        !call assert_true(FCC_potential_energy < potential_energy, char(i)//" test_fcc_initial_state : The FCC state is not the minimum of the potential energy")
-        !        if (.false.) then !(FCC_potential_energy > potential_energy) then
-        !            print *, i," ",j
-        !            print *, potential_energy, " ", FCC_potential_energy
-        !            print *, "forces"
-        !            !do k = 1, number_of_particles
-        !            !    print *, forces(:,k) 
-        !            !end do
-        !    
-        !        end if
-        !    end do
-        !end do
+        do i = 1, number_of_particles
+            do j = 1, number_of_dimensions
+                
+                positions(j,i) = positions(j,i) + dx
+                call apply_periodic_boundary_conditions(positions)
+                call compute_forces(positions, forces)
+                potential_energy = V
+                positions(j,i) = positions(j,i) - dx
+                call apply_periodic_boundary_conditions(positions)
+                call assert_true(FCC_potential_energy < potential_energy, char(i)//" test_fcc_initial_state : The FCC state is not the minimum of the potential energy")
+            end do
+        end do
+
+        ! If the FCC lattice is the minimum energy configuration, then all 
+        ! forces on every atom should vanish in this configuration.
+        call compute_forces(positions, forces)
+        do i = 1, number_of_particles
+            call assert_equals([0.0_real64, 0.0_real64, 0.0_real64], forces(:,i), 3, 1e-14_real64, char(i)//" test_fcc_initial_state : Particle net force should be zero in the FCC lattice")
+        end do
+
         deallocate(positions)
         deallocate(velocities)
         deallocate(forces)
         deallocate(types)
         deallocate(masses)
-        
-    !end do
     end subroutine test_fcc_initial_state
 
 end module initial_states_test
