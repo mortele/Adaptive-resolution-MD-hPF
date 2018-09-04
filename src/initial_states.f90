@@ -145,9 +145,9 @@ contains
         b = fcc_lattice_constant
 
         atom_counter = 1
-        do i = 1, fcc_number_of_unit_cells
-            do j = 1, fcc_number_of_unit_cells
-                do k = 1, fcc_number_of_unit_cells
+        do i = 0, fcc_number_of_unit_cells - 1
+            do j = 0, fcc_number_of_unit_cells - 1
+                do k = 0, fcc_number_of_unit_cells - 1
                     lattice_vector = i * unit_vector_x * b  +       &
                                      j * unit_vector_y * b  +       &
                                      k * unit_vector_z * b
