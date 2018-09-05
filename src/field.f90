@@ -131,6 +131,8 @@ contains
             density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) = density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) + vertex_contributions(1,1,1)
         end do
         print *, "field:::: ", density_field(:,1,1)
+        print *, "field:::: ", density_field(:,2,1)
+        print *, "field:::: ", density_field(:,3,1)
     end subroutine compute_density_field
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)

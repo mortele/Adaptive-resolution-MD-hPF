@@ -33,7 +33,7 @@ contains
     end subroutine teardown
 
     subroutine test_compute_density_field()
-        integer (int32) :: i !, j, k
+        integer (int32) :: i, j, k
 
         ! We start off with a 1D test of the density field computation, with a 
         ! single particle.
@@ -92,8 +92,78 @@ contains
         end do
 
         ! We now consider a 2D case with a single particle.
-        !positions(:,1) = []
-        
+        number_of_field_nodes = 3
+        number_of_particles   = 1
+        number_of_dimensions  = 3
+        system_size_x         = 3.0_real64
+        system_size_y         = 3.0_real64
+        system_size_z         = 3.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+
+        ! When placed right in between the four nodes at 
+        !
+        ! 1   [0, 0, 0]
+        ! 2   [1, 0, 0]
+        ! 3   [0, 1, 0]
+        ! 4   [1, 1, 0]
+        !
+        ! the mass of our single particle should be distributed evenly across 
+        ! all of them.
+        positions(:,1) = [0.5, 0.5, 0.0]
+        call compute_density_field(positions, masses)
+        do i = 1, 2
+            do j = 1,2
+                call assert_equals(0.25_real64, density_field(i,j,1), "30 test_compute_density_field : A particle in 2D placed in the middle of four density vertices should evenly distribute 25% of its mass onto each of these vertices, and contribute nothing to any others")
+            end do
+        end do
+
+        ! Next, check that the same holds at the very right hand side of the 
+        ! simulation box, i.e. that the periodic boundary conditions also work
+        ! correctly in 2D.
+        positions(:,1) = [2.5, 2.5, 0.0]
+        call compute_density_field(positions, masses)
+        call assert_equals(0.25_real64, density_field(1,1,1), "40 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
+        call assert_equals(0.25_real64, density_field(3,1,1), "41 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
+        call assert_equals(0.25_real64, density_field(1,3,1), "42 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
+        call assert_equals(0.25_real64, density_field(3,3,1), "43 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
+
+        ! Now we move on to full 3D tests (still with a single particle). 
+        number_of_field_nodes = 3
+        number_of_particles   = 1
+        number_of_dimensions  = 3
+        system_size_x         = 3.0_real64
+        system_size_y         = 3.0_real64
+        system_size_z         = 3.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+
+        ! Lets check that a particle placed in the center of the cube consisting
+        ! of the 8 closest density field vertices distribute its mass evenly
+        ! onto all 8.
+        positions(:,1) = [0.5, 0.5, 0.5]
+        call compute_density_field(positions, masses)
+        do i = 1, 2
+            do j = 1,2
+                do k = 1,2
+                    call assert_equals(1.0_real64 / 8.0_real64, density_field(i,j,k), "50 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices")
+                end do
+            end do
+        end do
+
+        ! Redo the same test, but now on the right hand side edge of the 
+        ! simulation box. In this way we check that the periodic boundary 
+        ! conditions on the density field works in the full 3D configuration.
+        positions(:,1) = [2.5, 2.5, 2.5]
+        call compute_density_field(positions, masses)
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,1), "60 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), "61 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), "62 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,3), "63 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,1), "64 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,3), "65 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,3), "66 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,3), "67 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+
+
     end subroutine test_compute_density_field
 
     subroutine test_allocate_field_arrays()
