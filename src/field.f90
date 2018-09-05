@@ -16,10 +16,14 @@ module field
 
 contains
 
-    subroutine compute_density_field(positions)
+    subroutine compute_density_field(positions, masses)
         implicit none
         real (real64), dimension(:,:), intent(in) :: positions
+        real (real64), dimension(:),   intent(in) :: masses
         
+        ! Tensor for holding the contribution to each of the density nodes 
+        ! closest to the particle in question. There are 8 such points, 
+        ! enclosing each particle in a cube of side lengths l.
         real (real64),   dimension(0:1,0:1,0:1) :: vertex_contributions
 
         ! Indices in the density field tensor corresponding to the vertices 
@@ -37,9 +41,10 @@ contains
         ! computed.
         real (real64),   dimension(:,:,:,:), allocatable :: node_positions
 
-        ! Internal position in the cube of nearest density vertex points.
+        ! Internal position inside the cube of 8 nearest density vertex points.
         real (real64),   dimension(:), allocatable :: p 
 
+        ! 
         real (real64)   :: l
         integer (int32) :: i, j, k
 
@@ -82,17 +87,13 @@ contains
             print *, "node_vector: ", (node_vector)
             print *, "p:           ", p
             print *, " ====== "
-            ! Sum of all the distances |p - vertex(i,j,k)| for all the 8 nearest
-            ! vertices.
-            ! sum_of_vertex_distances = sqrt(5.0 * ( p(1)**2 + p(2)**2 + p(3)**2 ) + 3 * l**2 - 2 * l * (p(1) + p(2) + p(3)))
-            
+
             ! Computing the contribution to each nearest neighbor density vertex
             ! from this particle.
             vertex_contributions(0,0,0) = (l - p(1)) * (l - p(2)) * (l - p(3)) / l**3
             vertex_contributions(1,0,0) =    p(1)    * (l - p(2)) * (l - p(3)) / l**3
             vertex_contributions(0,1,0) = (l - p(1)) *    p(2)    * (l - p(3)) / l**3
-            vertex_contributions(0,0,1) = (l - p(1)) * (l - p(2)) *    p(3)    / l**3
-            
+            vertex_contributions(0,0,1) = (l - p(1)) * (l - p(2)) *    p(3)    / l**3            
             vertex_contributions(1,1,0) =    p(1)    *    p(2)    * (l - p(3)) / l**3
             vertex_contributions(1,0,1) =    p(1)    * (l - p(2)) *    p(3)    / l**3
             vertex_contributions(0,1,1) = (l - p(1)) *    p(2)    *    p(3)    / l**3
@@ -112,19 +113,24 @@ contains
                 end if
             end do
             
-            ! print *, vertex_contributions(0,0,0) + vertex_contributions(1,0,0) + vertex_contributions(0,1,0) + vertex_contributions(0,0,1) + vertex_contributions(1,1,0) + vertex_contributions(1,0,1) + vertex_contributions(0,1,1) + vertex_contributions(1,1,1)
+            ! Scale the total contribution to the overall density field by the 
+            ! mass of the particle in question.
+            vertex_contributions = vertex_contributions * masses(i)
+            
+            ! The tensor vertex_contributions holds the contribution to the 
+            ! density field at the 8 nodes closest to the particle in question.
+            ! We now use the node_vector to map this onto the global indices of 
+            ! the density_field array and add the relevant contributions.
             density_field(node_vector(1),      node_vector(2),      node_vector(3))      = density_field(node_vector(1),      node_vector(2),      node_vector(3))      + vertex_contributions(0,0,0)
             density_field(node_vector_next(1), node_vector(2),      node_vector(3))      = density_field(node_vector_next(1), node_vector(2),      node_vector(3))      + vertex_contributions(1,0,0)
             density_field(node_vector(1),      node_vector_next(2), node_vector(3))      = density_field(node_vector(1),      node_vector_next(2), node_vector(3))      + vertex_contributions(0,1,0)
             density_field(node_vector(1),      node_vector(2),      node_vector_next(3)) = density_field(node_vector(1),      node_vector(2),      node_vector_next(3)) + vertex_contributions(0,0,1)
-
             density_field(node_vector_next(1), node_vector_next(2), node_vector(3))      = density_field(node_vector_next(1), node_vector_next(2), node_vector(3))      + vertex_contributions(1,1,0)
             density_field(node_vector_next(1), node_vector(2),      node_vector_next(3)) = density_field(node_vector_next(1), node_vector(2),      node_vector_next(3)) + vertex_contributions(1,0,1)
             density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) = density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) + vertex_contributions(0,1,1)
             density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) = density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) + vertex_contributions(1,1,1)
-
         end do
-
+        print *, "field:::: ", density_field(:,1,1)
     end subroutine compute_density_field
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
