@@ -20,21 +20,47 @@ contains
         implicit none
         real (real64), dimension(:,:), intent(in) :: positions
         
+        real (real64),   dimension(0:1,0:1,0:1) :: vertex_contributions
+
+        ! Indices in the density field tensor corresponding to the vertices 
+        ! closest to the particle with positions x_vertex < x, y_vertex < y, and 
+        ! z_vertex < z.
         integer (int32), dimension(:), allocatable :: node_vector
+
+        ! The cooresponding indices for the closest vertices with x_vertex > x,
+        ! y_vertex > y, and z_vertex > z. Accounts for the periodic boundary 
+        ! conditions, so if node_vector(i) equals number_of_field_nodes, then
+        ! node_vector_next(i) will be 1 and not number_of_field_nodes+1.
+        integer (int32), dimension(:), allocatable :: node_vector_next
 
         ! Internal position in the cube of nearest density vertex points.
         real (real64),   dimension(:), allocatable :: p 
 
-        real (real64)   :: sum_of_vertex_distances, l
+        real (real64)   :: l !sum_of_vertex_distances
         integer (int32) :: i, j
 
-        allocate(node_vector(number_of_dimensions))
-        allocate(p          (number_of_dimensions))
+        allocate(node_vector     (number_of_dimensions))
+        allocate(node_vector_next(number_of_dimensions))
+        allocate(p               (number_of_dimensions))
+        
+        ! Assuming equal number of field vertices in each spatial direction for 
+        ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
         l = system_size(1) / number_of_field_nodes
 
         do i = 1, number_of_particles
             do j = 1, number_of_dimensions 
                 node_vector(j) = floor(positions(j,i) / number_of_field_nodes * system_size(j))
+
+                ! Since node_vector indices start at 1, we need to add 1 here
+                ! because of the floor function used.
+                node_vector(j) = node_vector(j) + 1
+
+                ! Handle periodic boundary conditions for the density field.
+                if (node_vector(j) == number_of_field_nodes) then
+                    node_vector_next(j) = 1
+                else 
+                    node_vector_next(j) = node_vector(j) + 1
+                end if
             end do
             do j = 1, number_of_dimensions
                 p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes
@@ -42,7 +68,30 @@ contains
             
             ! Sum of all the distances |p - vertex(i,j,k)| for all the 8 nearest
             ! vertices.
-            sum_of_vertex_distances = 5 * ( p(1)**2 + p(2)**2 + p(3)**2 ) + 3 * l**2 - 2 * l * (p(1) + p(2) + p(3))
+            ! sum_of_vertex_distances = sqrt(5.0 * ( p(1)**2 + p(2)**2 + p(3)**2 ) + 3 * l**2 - 2 * l * (p(1) + p(2) + p(3)))
+
+            ! Computing the contribution to each nearest neighbor density vertex
+            ! from this particle.
+            vertex_contributions(0,0,0) = (l - p(1)) * (l - p(2)) * (l - p(3)) / l**3
+            vertex_contributions(1,0,0) =    p(1)    * (l - p(2)) * (l - p(3)) / l**3
+            vertex_contributions(0,1,0) = (l - p(1)) *    p(2)    * (l - p(3)) / l**3
+            vertex_contributions(0,0,1) = (l - p(1)) * (l - p(2)) *    p(3)    / l**3
+
+            vertex_contributions(1,1,0) =    p(1)    *    p(2)    * (l - p(3)) / l**3
+            vertex_contributions(1,0,1) =    p(1)    * (l - p(2)) *    p(3)    / l**3
+            vertex_contributions(0,1,1) = (l - p(1)) *    p(2)    *    p(3)    / l**3
+            vertex_contributions(1,1,1) =    p(1)    *    p(2)    *    p(3)    / l**3
+
+            ! print *, vertex_contributions(0,0,0) + vertex_contributions(1,0,0) + vertex_contributions(0,1,0) + vertex_contributions(0,0,1) + vertex_contributions(1,1,0) + vertex_contributions(1,0,1) + vertex_contributions(0,1,1) + vertex_contributions(1,1,1)
+            density_field(node_vector(1),      node_vector(2),      node_vector(3))      = density_field(node_vector(1),      node_vector(2),      node_vector(3))      + vertex_contributions(0,0,0)
+            density_field(node_vector_next(1), node_vector(2),      node_vector(3))      = density_field(node_vector_next(1), node_vector(2),      node_vector(3))      + vertex_contributions(1,0,0)
+            density_field(node_vector(1),      node_vector_next(2), node_vector(3))      = density_field(node_vector(1),      node_vector_next(2), node_vector(3))      + vertex_contributions(0,1,0)
+            density_field(node_vector(1),      node_vector(2),      node_vector_next(3)) = density_field(node_vector(1),      node_vector(2),      node_vector_next(3)) + vertex_contributions(0,0,1)
+
+            density_field(node_vector_next(1), node_vector_next(2), node_vector(3))      = density_field(node_vector_next(1), node_vector_next(2), node_vector(3))      + vertex_contributions(1,1,0)
+            density_field(node_vector_next(1), node_vector(2),      node_vector_next(3)) = density_field(node_vector_next(1), node_vector(2),      node_vector_next(3)) + vertex_contributions(1,0,1)
+            density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) = density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) + vertex_contributions(0,1,1)
+            density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) = density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) + vertex_contributions(1,1,1)
 
         end do
 
