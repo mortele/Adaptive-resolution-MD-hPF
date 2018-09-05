@@ -33,26 +33,75 @@ contains
         ! node_vector_next(i) will be 1 and not number_of_field_nodes+1.
         integer (int32), dimension(:), allocatable :: node_vector_next
 
+        ! Positions of the density field vertices on which the field is 
+        ! computed.
+        real (real64),   dimension(:,:,:,:), allocatable :: node_positions
+
         ! Internal position in the cube of nearest density vertex points.
         real (real64),   dimension(:), allocatable :: p 
 
-        real (real64)   :: l !sum_of_vertex_distances
-        integer (int32) :: i, j
+        real (real64)   :: l
+        integer (int32) :: i, j, k
+
+        density_field = 0
 
         allocate(node_vector     (number_of_dimensions))
         allocate(node_vector_next(number_of_dimensions))
+        allocate(node_positions  (number_of_dimensions, number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
         allocate(p               (number_of_dimensions))
         
         ! Assuming equal number of field vertices in each spatial direction for 
         ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
         l = system_size(1) / number_of_field_nodes
 
+        ! Compute the positions of the vertices.
+        do i = 1, number_of_field_nodes 
+            do j = 1, number_of_field_nodes 
+                do k = 1, number_of_field_nodes 
+                    node_positions(:,i,j,k) = [i-1,j-1,k-1] * l
+                end do
+            end do
+        end do
+
+        print *,"=====----=====----====="
+        print *,"nodes_pos:  ", node_positions(1,:,1,1)
+        print *,"=====----=====----====="
+
         do i = 1, number_of_particles
             do j = 1, number_of_dimensions 
-                node_vector(j) = floor(positions(j,i) / number_of_field_nodes * system_size(j))
+                node_vector(j) = floor(positions(j,i) / l)
+            end do
+            do j = 1, number_of_dimensions
+                p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes
+            end do
+            print *, " ====== "
+            print *, "pos/l:       ", positions(1,i) / l
+            print *, "l:           ", l
+            print *, "pos:         ", positions(:,i)
+            print *, "nodes:       ", (node_vector) * l
+            print *, "node_vector: ", (node_vector)
+            print *, "p:           ", p
+            print *, " ====== "
+            ! Sum of all the distances |p - vertex(i,j,k)| for all the 8 nearest
+            ! vertices.
+            ! sum_of_vertex_distances = sqrt(5.0 * ( p(1)**2 + p(2)**2 + p(3)**2 ) + 3 * l**2 - 2 * l * (p(1) + p(2) + p(3)))
+            
+            ! Computing the contribution to each nearest neighbor density vertex
+            ! from this particle.
+            vertex_contributions(0,0,0) = (l - p(1)) * (l - p(2)) * (l - p(3)) / l**3
+            vertex_contributions(1,0,0) =    p(1)    * (l - p(2)) * (l - p(3)) / l**3
+            vertex_contributions(0,1,0) = (l - p(1)) *    p(2)    * (l - p(3)) / l**3
+            vertex_contributions(0,0,1) = (l - p(1)) * (l - p(2)) *    p(3)    / l**3
+            
+            vertex_contributions(1,1,0) =    p(1)    *    p(2)    * (l - p(3)) / l**3
+            vertex_contributions(1,0,1) =    p(1)    * (l - p(2)) *    p(3)    / l**3
+            vertex_contributions(0,1,1) = (l - p(1)) *    p(2)    *    p(3)    / l**3
+            vertex_contributions(1,1,1) =    p(1)    *    p(2)    *    p(3)    / l**3
 
-                ! Since node_vector indices start at 1, we need to add 1 here
-                ! because of the floor function used.
+            ! Since node_vector indices start at 1, we need to add 1 here
+            ! because of the floor function used. It is convenient to use the 
+            ! 0:number_of_field_nodes-1 indexing until this point.
+            do j = 1, number_of_dimensions
                 node_vector(j) = node_vector(j) + 1
 
                 ! Handle periodic boundary conditions for the density field.
@@ -62,26 +111,7 @@ contains
                     node_vector_next(j) = node_vector(j) + 1
                 end if
             end do
-            do j = 1, number_of_dimensions
-                p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes
-            end do
             
-            ! Sum of all the distances |p - vertex(i,j,k)| for all the 8 nearest
-            ! vertices.
-            ! sum_of_vertex_distances = sqrt(5.0 * ( p(1)**2 + p(2)**2 + p(3)**2 ) + 3 * l**2 - 2 * l * (p(1) + p(2) + p(3)))
-
-            ! Computing the contribution to each nearest neighbor density vertex
-            ! from this particle.
-            vertex_contributions(0,0,0) = (l - p(1)) * (l - p(2)) * (l - p(3)) / l**3
-            vertex_contributions(1,0,0) =    p(1)    * (l - p(2)) * (l - p(3)) / l**3
-            vertex_contributions(0,1,0) = (l - p(1)) *    p(2)    * (l - p(3)) / l**3
-            vertex_contributions(0,0,1) = (l - p(1)) * (l - p(2)) *    p(3)    / l**3
-
-            vertex_contributions(1,1,0) =    p(1)    *    p(2)    * (l - p(3)) / l**3
-            vertex_contributions(1,0,1) =    p(1)    * (l - p(2)) *    p(3)    / l**3
-            vertex_contributions(0,1,1) = (l - p(1)) *    p(2)    *    p(3)    / l**3
-            vertex_contributions(1,1,1) =    p(1)    *    p(2)    *    p(3)    / l**3
-
             ! print *, vertex_contributions(0,0,0) + vertex_contributions(1,0,0) + vertex_contributions(0,1,0) + vertex_contributions(0,0,1) + vertex_contributions(1,1,0) + vertex_contributions(1,0,1) + vertex_contributions(0,1,1) + vertex_contributions(1,1,1)
             density_field(node_vector(1),      node_vector(2),      node_vector(3))      = density_field(node_vector(1),      node_vector(2),      node_vector(3))      + vertex_contributions(0,0,0)
             density_field(node_vector_next(1), node_vector(2),      node_vector(3))      = density_field(node_vector_next(1), node_vector(2),      node_vector(3))      + vertex_contributions(1,0,0)

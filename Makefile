@@ -2,7 +2,7 @@
 
 GFORTRAN  			= gfortran
 COMPILER_FLAGS 		= -fimplicit-none -fmodule-private -Wall -Wextra -Wconversion -std=f2008 -pedantic-errors -ffree-line-length-0 -Jbuild -ftest-coverage -fprofile-arcs
-OPTIMIZATION_FLAGS  = -Og 	# All default optimizations which dont interfer with 
+OPTIMIZATION_FLAGS  = #-Og 	# All default optimizations which dont interfer with 
 							# debugging flags and functionality.
 
 # TODO: Check if -frepack-arrays actually is faster.

@@ -32,29 +32,25 @@ contains
     end subroutine teardown
 
     subroutine test_compute_density_field()
-        integer (int32) :: i, j, k
+        !integer (int32) :: i, j, k
 
-        ! We start off with a 1D test of the density field computation.
-        number_of_field_nodes = 10
-        number_of_particles   = 10
+        ! We start off with a 1D test of the density field computation, with a 
+        ! single particle.
+        number_of_field_nodes = 3
+        number_of_particles   = 1
         number_of_dimensions  = 3
-        system_size_x         = 10.0_real64
-        system_size_y         = 10.0_real64
-        system_size_z         = 10.0_real64
+        system_size_x         = 3.0_real64
+        system_size_y         = 3.0_real64
+        system_size_z         = 3.0_real64
         system_size           = [system_size_x, system_size_y, system_size_z]
 
         call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
         allocate(positions(number_of_dimensions, number_of_particles))
-
-        do i = 1, number_of_particles
-            positions(1,i) = i-1    ! A line of equidistant particles, separated 
-                                    ! by a distance of 1.0.
-            positions(2:,i) = [0.0_real64, 0.0_real64]
-        end do
-
-
+        positions(:,1) = [0.5,0.0,0.0]
         call compute_density_field(positions)
-
+        call assert_equals(0.5_real64, density_field(1,1,1), "1  test_compute_density_field : A particle placed in the middle between field nodes 1 and 2 should distribute its mass evenly across the nodes")
+        call assert_equals(0.5_real64, density_field(2,1,1), "2  test_compute_density_field : A particle placed in the middle between field nodes 1 and 2 should distribute its mass evenly across the nodes")
+        
         
     end subroutine test_compute_density_field
 
