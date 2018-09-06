@@ -143,17 +143,17 @@ contains
 
         call setup
         print *, " "
-        print *, " ..running test: test_compute_density_field"
-        call set_unit_name ('test_compute_density_field')    
-        call run_test_case(test_compute_density_field, "test_compute_density_field")
-        call teardown      
-        
-        call setup
-        print *, " "
         print *, " ..running test: test_allocate_field_arrays"
         call set_unit_name ('test_allocate_field_arrays')    
         call run_test_case(test_allocate_field_arrays, "test_allocate_field_arrays")
         call teardown     
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_compute_density_field"
+        call set_unit_name ('test_compute_density_field')    
+        call run_test_case(test_compute_density_field, "test_compute_density_field")
+        call teardown              
     end subroutine field_all_tests
 
 end program unit_tests

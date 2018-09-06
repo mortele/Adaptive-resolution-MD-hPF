@@ -1,7 +1,8 @@
 module initial_states_test
     use, intrinsic :: iso_fortran_env, only: real64, int32, output_unit
     use fruit,          only:   assert_equals,                      &
-                                assert_true 
+                                assert_true,                        &
+                                assert_false
     use system,         only:   system_size,                        &
                                 apply_periodic_boundary_conditions    ! Subroutine
     use particles,      only:   positions,                          &
@@ -91,6 +92,23 @@ contains
         call assert_true(allocated(positions),                       "1  test_random_initial_state : Arrays not allocated by random_initial_state()")
         call assert_equals(number_of_dimensions, size(positions, 1), "2  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")
         call assert_equals(number_of_particles,  size(positions, 2), "3  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")
+        call assert_false(all(abs(positions - 0.0_real64) < 1e-10_real64), "4  test_random_initial_state : The random initial state did not position particles randomly (all particles left in [0,0,0]")
+        deallocate(positions)
+        deallocate(velocities)
+        deallocate(forces)
+        deallocate(masses)
+        deallocate(types)
+
+        ! Test the *default to random* if the initial_configuration string isnt
+        ! recognized.
+        number_of_dimensions  = 3
+        number_of_particles   = 10
+        initial_configuration = "this is not a recognized string"
+        call setup_initial_state(positions, velocities, forces, masses, types, silent)
+        call assert_true(allocated(positions),                       "5  test_random_initial_state : Arrays not allocated by random_initial_state()")
+        call assert_equals(number_of_dimensions, size(positions, 1), "6  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")
+        call assert_equals(number_of_particles,  size(positions, 2), "7  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")
+        call assert_false(all(abs(positions - 0.0_real64) < 1e-10_real64), "8  test_random_initial_state : The random initial state did not position particles randomly (all particles left in [0,0,0]")
 
         deallocate(positions)
         deallocate(velocities)
