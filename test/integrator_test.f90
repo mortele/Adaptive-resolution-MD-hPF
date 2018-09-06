@@ -163,9 +163,25 @@ contains
         call assert_equals(1.0_real64, positions(1,1),  "1  test_integrate_one_step : The one step integration shouldnt change the position of a particle when the velocities and forces are both zero")
         call assert_equals(0.0_real64, velocities(1,1), "2  test_integrate_one_step : The one step integration shouldnt change the velocity of a particle when the forces are set to zero")
 
-
+        ! Lets make sure that also the default force calculation produce the 
+        ! same result if we arrange for compute_forces to give no forces.
         lennard_jones_sigma     = 3.405
         lennard_jones_epsilon   = 1.0
+        call integrate_one_step(positions, velocities, forces) ! Default call
+
+        call assert_equals(1.0_real64, positions(1,1),  "1  test_integrate_one_step : The one step integration shouldnt change the position of a particle when the velocities and forces are both zero")
+        call assert_equals(0.0_real64, velocities(1,1), "2  test_integrate_one_step : The one step integration shouldnt change the velocity of a particle when the forces are set to zero")
+
+        
+        ! We next test a known case which we can compute by hand ....
+
+
+        deallocate(positions)
+        deallocate(velocities)
+        deallocate(forces)
+        deallocate(masses)
+
+        ! Now for some 3D tests.
     end subroutine test_integrate_one_step
 
     subroutine zero_force_calculator(positions, forces)
