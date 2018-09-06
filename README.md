@@ -3,12 +3,12 @@
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
 ## Adaptive resolution MD-hPF
-Hybrid particle-field method based on (the 2009 paper by Milano & Kawakatsu)[https://aip.scitation.org/doi/abs/10.1063/1.3142103]. The adaptive resolution interface is inspired by (the 2005 paper by Praprotnik, Delle Site, & Kremer)[https://aip.scitation.org/doi/pdf/10.1063/1.2132286]. The molecular dynamics is written loosely following (the book of Frenkel & Smith)[https://www.elsevier.com/books/understanding-molecular-simulation/frenkel/978-0-12-267351-1].
+Hybrid particle-field method based on [the 2009 paper by Milano & Kawakatsu](https://aip.scitation.org/doi/abs/10.1063/1.3142103). The adaptive resolution interface is inspired by [the 2005 paper by Praprotnik, Delle Site, & Kremer]](https://aip.scitation.org/doi/pdf/10.1063/1.2132286). The molecular dynamics is written loosely following [the book of Frenkel & Smith](https://www.elsevier.com/books/understanding-molecular-simulation/frenkel/978-0-12-267351-1).
 
 ### Dependencies
 Building the binaries from source requires 
-* the GNU Fortran compiler (GFortran)
-* GNU make
+* the GNU Fortran compiler (GFortran) *version ≥ 4.8.4*
+* GNU make *version ≥ 3.81*
 
 ### How to build
 Clone the repository,
