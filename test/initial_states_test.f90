@@ -63,11 +63,21 @@ contains
         call assert_equals(8, size(masses),       "12 test_allocate_arrays : masses array allocated to wrong size")
         call assert_equals(8, size(types),        "13 test_allocate_arrays : types array allocated to wrong size")
         
-        deallocate(positions)
-        deallocate(velocities)
-        deallocate(forces)
-        deallocate(masses)
-        deallocate(types)
+        if (allocated(positions)) then
+            deallocate(positions)
+        end if
+        if (allocated(velocities)) then
+            deallocate(velocities)
+        end if
+        if (allocated(forces)) then
+            deallocate(forces)
+        end if
+        if (allocated(masses)) then
+            deallocate(masses)
+        end if
+        if (allocated(types)) then
+            deallocate(types)
+        end if
     end subroutine test_allocate_arrays
 
 

@@ -154,20 +154,63 @@ contains
         ! conditions on the density field works in the full 3D configuration.
         positions(:,1) = [2.5, 2.5, 2.5]
         call compute_density_field(positions, masses)
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,1), "60 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), "61 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), "62 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,3), "63 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,1), "64 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,3), "65 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,3), "66 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,3), "67 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box)")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,1), "60 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), "61 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), "62 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,3), "63 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,1), "64 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,3), "65 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,3), "66 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,3), "67 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
 
-
+        ! We check that a particle placed on top of a density vertex contributes
+        ! its mass *only* to that single vertex in 3D.
+        do i = 1, number_of_field_nodes
+            do j = 1, number_of_field_nodes
+                do k = 1, number_of_field_nodes
+                    positions(:,1) = [real(i-1), real(j-1), real(k-1)]
+                    call compute_density_field(positions, masses)
+                    call assert_equals(1.0_real64, density_field(i,j,k), "70 test_compute_density_field : A particle placed on top of a density field vertex should contribute its mass to that single vertex and not to any other vertices")
+                    call assert_equals(0.0_real64, sum(density_field(i+1:,j+1:,k+1:))+sum(density_field(:i-1,:j-1,:k-1)), "70 test_compute_density_field : A particle placed on top of a density field vertex should contribute its mass to that single vertex and not to any other vertices")
+                end do
+            end do
+        end do
+        
+        deallocate(density_field)
+        deallocate(density_gradient)
+        deallocate(position_of_density_nodes)
     end subroutine test_compute_density_field
 
     subroutine test_allocate_field_arrays()
+        number_of_field_nodes = 3
+        number_of_dimensions  = 3
+        call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
+        call assert_true(allocated(density_field), "1  test_allocate_field_arrays : density_field array not allocated")
+        call assert_equals(number_of_field_nodes, size(density_field,1), "2  test_allocate_field_arrays : density_field array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(density_field,2), "3  test_allocate_field_arrays : density_field array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(density_field,3), "4  test_allocate_field_arrays : density_field array not allocated to the correct size")
 
+        call assert_true(allocated(density_gradient), "5  test_allocate_field_arrays : density_field array not allocated")
+        call assert_equals(number_of_dimensions,  size(density_gradient,1), "6  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(density_gradient,2), "7  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(density_gradient,3), "8  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(density_gradient,4), "9  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
+        
+        call assert_true(allocated(position_of_density_nodes), "10 test_allocate_field_arrays : density_field array not allocated")
+        call assert_equals(number_of_dimensions,  size(position_of_density_nodes,1), "11 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(position_of_density_nodes,2), "12 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(position_of_density_nodes,3), "13 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes, size(position_of_density_nodes,3), "14 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
+    
+        if (allocated(density_field)) then
+            deallocate(density_field)
+        end if
+        if (allocated(density_gradient)) then
+            deallocate(density_gradient)
+        end if
+        if (allocated(position_of_density_nodes)) then
+            deallocate(position_of_density_nodes)
+        end if
     end subroutine test_allocate_field_arrays
 
 end module field_test

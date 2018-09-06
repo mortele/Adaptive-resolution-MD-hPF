@@ -8,7 +8,7 @@ module field
     private 
 
     real (real64), public, dimension(:,:,:),   allocatable :: density_field
-    real (real64), public, dimension(:,:,:),   allocatable :: position_of_density_nodes
+    real (real64), public, dimension(:,:,:,:), allocatable :: position_of_density_nodes
     real (real64), public, dimension(:,:,:,:), allocatable :: density_gradient
 
     public ::   compute_density_field,              &
@@ -133,16 +133,24 @@ contains
         print *, "field:::: ", density_field(:,1,1)
         print *, "field:::: ", density_field(:,2,1)
         print *, "field:::: ", density_field(:,3,1)
+        print *, " "
+        print *, "field:::: ", density_field(:,1,2)
+        print *, "field:::: ", density_field(:,2,2)
+        print *, "field:::: ", density_field(:,3,2)
+        print *, " "
+        print *, "field:::: ", density_field(:,1,3)
+        print *, "field:::: ", density_field(:,2,3)
+        print *, "field:::: ", density_field(:,3,3)
     end subroutine compute_density_field
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
         implicit none
         real (real64), allocatable, dimension(:,:,:),   intent(in out) :: density_field
-        real (real64), allocatable, dimension(:,:,:),   intent(in out) :: position_of_density_nodes
+        real (real64), allocatable, dimension(:,:,:,:), intent(in out) :: position_of_density_nodes
         real (real64), allocatable, dimension(:,:,:,:), intent(in out) :: density_gradient
 
         allocate(density_field            (number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
-        allocate(position_of_density_nodes(number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
+        allocate(position_of_density_nodes(number_of_dimensions,  number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
         allocate(density_gradient         (number_of_dimensions,  number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
     end subroutine allocate_field_arrays
 
