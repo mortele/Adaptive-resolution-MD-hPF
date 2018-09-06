@@ -23,6 +23,7 @@ jobs:
     - stage: test
       script:
         - make clean
+        - make test -n
         - make test
         - ./bin/UnitTests.app
       after_success:
