@@ -19,6 +19,8 @@ jobs:
   include:
     - stage: build
       script:
+        - make -v
+        - gfortran -v        
         - make
     - stage: test
       script:
