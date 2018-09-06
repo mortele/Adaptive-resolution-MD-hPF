@@ -68,9 +68,9 @@ contains
             end do
         end do
 
-        print *,"=====----=====----====="
-        print *,"nodes_pos:  ", node_positions(1,:,1,1)
-        print *,"=====----=====----====="
+        !print *,"=====----=====----====="
+        !print *,"nodes_pos:  ", node_positions(1,:,1,1)
+        !print *,"=====----=====----====="
 
         do i = 1, number_of_particles
             do j = 1, number_of_dimensions 
@@ -79,14 +79,14 @@ contains
             do j = 1, number_of_dimensions
                 p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes
             end do
-            print *, " ====== "
-            print *, "pos/l:       ", positions(1,i) / l
-            print *, "l:           ", l
-            print *, "pos:         ", positions(:,i)
-            print *, "nodes:       ", (node_vector) * l
-            print *, "node_vector: ", (node_vector)
-            print *, "p:           ", p
-            print *, " ====== "
+            !print *, " ====== "
+            !print *, "pos/l:       ", positions(1,i) / l
+            !print *, "l:           ", l
+            !print *, "pos:         ", positions(:,i)
+            !print *, "nodes:       ", (node_vector) * l
+            !print *, "node_vector: ", (node_vector)
+            !print *, "p:           ", p
+            !print *, " ====== "
 
             ! Computing the contribution to each nearest neighbor density vertex
             ! from this particle.
@@ -130,17 +130,17 @@ contains
             density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) = density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) + vertex_contributions(0,1,1)
             density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) = density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) + vertex_contributions(1,1,1)
         end do
-        print *, "field:::: ", density_field(:,1,1)
-        print *, "field:::: ", density_field(:,2,1)
-        print *, "field:::: ", density_field(:,3,1)
-        print *, " "
-        print *, "field:::: ", density_field(:,1,2)
-        print *, "field:::: ", density_field(:,2,2)
-        print *, "field:::: ", density_field(:,3,2)
-        print *, " "
-        print *, "field:::: ", density_field(:,1,3)
-        print *, "field:::: ", density_field(:,2,3)
-        print *, "field:::: ", density_field(:,3,3)
+        !print *, "field:::: ", density_field(:,1,1)
+        !print *, "field:::: ", density_field(:,2,1)
+        !print *, "field:::: ", density_field(:,3,1)
+        !print *, " "
+        !print *, "field:::: ", density_field(:,1,2)
+        !print *, "field:::: ", density_field(:,2,2)
+        !print *, "field:::: ", density_field(:,3,2)
+        !print *, " "
+        !print *, "field:::: ", density_field(:,1,3)
+        !print *, "field:::: ", density_field(:,2,3)
+        !print *, "field:::: ", density_field(:,3,3)
     end subroutine compute_density_field
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)

@@ -14,6 +14,7 @@ program unit_tests
     call initial_states_all_tests()
     call field_all_tests()
     call sampler_all_tests()
+    call integrator_all_tests()
     ! ================
     
     call fruit_summary()
@@ -168,4 +169,31 @@ contains
         call teardown     
 
     end subroutine sampler_all_tests
+
+    subroutine integrator_all_tests()
+        use integrator_test
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_half_move"
+        call set_unit_name ('test_half_move')    
+        call run_test_case(test_half_move, "test_half_move")
+        call teardown     
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_move"
+        call set_unit_name ('test_move')    
+        call run_test_case(test_move, "test_move")
+        call teardown     
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_integrate_one_step"
+        call set_unit_name ('test_integrate_one_step')    
+        call run_test_case(test_integrate_one_step, "test_integrate_one_step")
+        call teardown     
+        
+    end subroutine integrator_all_tests
+
 end program unit_tests

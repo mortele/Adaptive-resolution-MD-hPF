@@ -9,16 +9,33 @@ module integrator
     implicit none
     private
 
-    public :: integrate_one_step
+    public ::   integrate_one_step,         &
+                half_move,                  &
+                move
 
+    ! To overload the integrate_one_step function in order to facilitate testing
+    ! testing with different force calculations, we write an explicit interface
+    ! using the almost identical subroutines. 
+    ! 
+    ! TODO: Figure out if this is horrible, awful, godforbidden bad practice to
+    !       basically just copy past 95% of the code in these subroutines. Is 
+    !       there a cleaner way to do this?
+    interface integrate_one_step
+        ! Takes arguments (position, velocities, forces) 
+        module procedure integrate_one_step_default_force
+        ! Takes arguments (position, velocities, forces, force_calculator) 
+        module procedure integrate_one_step_argument_force 
+    end interface integrate_one_step
 contains
 
-    ! Integrate a single step using the velocity Verlet algorithm.
-    subroutine integrate_one_step(positions, velocities, forces)
+    ! Integrate a single step using the velocity Verlet algorithm. Uses the 
+    ! default force calculator (potential module :: compute_forces).
+    subroutine integrate_one_step_default_force(positions, velocities, forces)
         implicit none
         real (real64), dimension(:,:), intent(in out) :: positions
         real (real64), dimension(:,:), intent(in out) :: velocities
         real (real64), dimension(:,:), intent(in out) :: forces
+
         logical, save :: first_step = .true.
 
         if (first_step) then
@@ -34,7 +51,40 @@ contains
         
         call compute_forces(positions,  forces)
         call half_move     (velocities, forces)
-    end subroutine integrate_one_step
+    end subroutine integrate_one_step_default_force
+
+
+    ! Integrate a single step using the velocity Verlet algorithm. Uses the 
+    ! specified force calculator given as argument.
+    subroutine integrate_one_step_argument_force(positions, velocities, forces, force_calculator)
+        implicit none
+        real (real64), dimension(:,:), intent(in out) :: positions
+        real (real64), dimension(:,:), intent(in out) :: velocities
+        real (real64), dimension(:,:), intent(in out) :: forces
+        interface 
+            subroutine force_calculator(pos, for)
+                use, intrinsic :: iso_fortran_env, only: real64
+                real (real64), dimension(:,:), intent(in)     :: pos
+                real (real64), dimension(:,:), intent(in out) :: for
+            end subroutine
+        end interface
+        
+        logical, save :: first_step = .true.
+
+        if (first_step) then
+            forces = 0
+            call force_calculator(positions, forces)
+            first_step = .false.
+        end if
+        
+        call half_move     (velocities, forces)
+        call move          (positions,  velocities)
+
+        call apply_periodic_boundary_conditions(positions)
+        
+        call force_calculator(positions,  forces)
+        call half_move       (velocities, forces)
+    end subroutine integrate_one_step_argument_force
 
     subroutine half_move(velocities, forces)
         implicit none
