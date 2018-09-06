@@ -176,6 +176,8 @@ contains
             end do
         end do
         
+        deallocate(positions)
+        deallocate(masses)
         deallocate(density_field)
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)

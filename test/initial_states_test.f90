@@ -103,7 +103,7 @@ contains
         ! recognized.
         number_of_dimensions  = 3
         number_of_particles   = 10
-        initial_configuration = "this is not a recognized string"
+        initial_configuration = "whatev"
         call setup_initial_state(positions, velocities, forces, masses, types, silent)
         call assert_true(allocated(positions),                       "5  test_random_initial_state : Arrays not allocated by random_initial_state()")
         call assert_equals(number_of_dimensions, size(positions, 1), "6  test_random_initial_state : Arrays not allocated to correct size random_initial_state()")

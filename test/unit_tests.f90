@@ -13,6 +13,7 @@ program unit_tests
     call potential_all_tests()
     call initial_states_all_tests()
     call field_all_tests()
+    call sampler_all_tests()
     ! ================
     
     call fruit_summary()
@@ -156,4 +157,15 @@ contains
         call teardown              
     end subroutine field_all_tests
 
+    subroutine sampler_all_tests()
+        use sampler_test
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_store_energy"
+        call set_unit_name ('test_store_energy')    
+        call run_test_case(test_store_energy, "test_store_energy")
+        call teardown     
+
+    end subroutine sampler_all_tests
 end program unit_tests

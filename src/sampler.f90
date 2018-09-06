@@ -1,7 +1,8 @@
 module sampler
     use, intrinsic :: iso_fortran_env, only: real64, int32
     use parameters, only:   number_of_time_steps
-    use particles,  only:   positions, forces
+    use particles,  only:   positions,      &
+                            forces
     use potential,  only:   compute_forces, &
                             Ek,             & ! Current total kinetic energy.
                             V,              & ! Current total potential energy. 
