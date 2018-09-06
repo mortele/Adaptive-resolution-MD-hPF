@@ -55,6 +55,11 @@ contains
         call assert_equals(V,  potential_energy(1), "2  test_store_energy : Stored potential energy does not equal computed potential energy in the potential module")
         call assert_equals(E,  total_energy(1),     "3  test_store_energy : Stored total energy does not equal computed total energy in the potential module")
 
+        deallocate(positions)
+        deallocate(velocities)
+        deallocate(forces)
+        deallocate(masses)
+        deallocate(types)
         deallocate(potential_energy)
         deallocate(kinetic_energy)
         deallocate(total_energy)
