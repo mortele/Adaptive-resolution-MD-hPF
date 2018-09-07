@@ -17,10 +17,14 @@ module integrator_test
                                     lennard_jones_sigma,        &
                                     lennard_jones_epsilon,      &
                                     time_step
-    use system,             only:   apply_periodic_boundary_conditions ! Subroutine
+    use system,             only:   system_size,                &
+                                    apply_periodic_boundary_conditions ! Subroutine
     implicit none
     
-    private ::  zero_force_calculator
+    real (real64), dimension(:), allocatable :: constant_force
+
+    private ::  zero_force_calculator,      &
+                constant_force_calculator
 
     public  ::  setup,                      &
                 teardown,                   &
@@ -145,6 +149,12 @@ contains
     end subroutine test_move
 
     subroutine test_integrate_one_step()
+        real (real64), allocatable, dimension(:) :: initial_velocity
+        real (real64), allocatable, dimension(:) :: initial_position
+        real (real64), allocatable, dimension(:) :: expected_velocity
+        real (real64), allocatable, dimension(:) :: expected_positions
+        integer (int32) :: i
+
         ! First we test with no forces, one particle, in 1D.
         number_of_dimensions  = 1
         number_of_particles   = 1
@@ -172,16 +182,72 @@ contains
         call assert_equals(1.0_real64, positions(1,1),  "1  test_integrate_one_step : The one step integration shouldnt change the position of a particle when the velocities and forces are both zero")
         call assert_equals(0.0_real64, velocities(1,1), "2  test_integrate_one_step : The one step integration shouldnt change the velocity of a particle when the forces are set to zero")
 
-        
-        ! We next test a known case which we can compute by hand ....
-
-
         deallocate(positions)
         deallocate(velocities)
         deallocate(forces)
-        deallocate(masses)
 
-        ! Now for some 3D tests.
+        ! We next test a known case which we can compute by hand:
+        !
+        ! If we set the force constant, equal to F0 = (a0,a0,a0), then the 
+        ! *velocity* obeys the recurrence relation
+        !
+        !    v       =   v      +  Δt  a  
+        !      i+1         i             0
+        ! 
+        ! with solution
+        ! 
+        !    v       =   v      +  i Δt a
+        !      i           0              0
+        !
+        ! The *position* obeys the recurrence relation 
+        !                             ╭     ╮       1    2
+        !    p       =   p      +  Δt │	v   │   +  ─── Δt  a
+        !      i+1         i          ╰   i ╯       2        0
+        !                             ╭                 ╮       1    2  
+        !            =   p      +  Δt │	v   +  i Δt a   │   +  ─── Δt  a    
+        !                  i          ╰   0           0 ╯       2        0 
+        !
+        ! with solution
+        !               i Δt ╭                      ╮
+        !    p       = ───── │ a   Δt i   +   2 v   │  + p
+        !      i         2   ╰   0                0 ╯      0
+        !
+        !
+        ! We test now if the velocity verlet algorithm satisfies this. Note 
+        ! that this should be satisfied *to machine precision*, i.e. ~1e-15.
+        number_of_particles  = 1
+        number_of_dimensions = 3
+        time_step            = 0.01
+        system_size          = [10.0, 10.0, 10.0]
+        allocate(constant_force   (number_of_dimensions))
+        allocate(expected_velocity(number_of_dimensions))
+        allocate(initial_velocity (number_of_dimensions))
+        allocate(initial_position (number_of_dimensions))
+        allocate(positions        (number_of_dimensions, number_of_particles))
+        allocate(velocities       (number_of_dimensions, number_of_particles))
+        allocate(forces           (number_of_dimensions, number_of_particles))
+        constant_force  = [ 0.85_real64,  2.0_real64,  -1.98_real64]
+        velocities(:,1) = [-3.3_real64,   0.0_real64,   1.5_real64]
+        positions (:,1) = [ 5.0_real64,   5.0_real64,   5.0_real64]
+        masses          = 1.0
+
+        expected_velocity  = velocities(:,1)
+        expected_positions = positions (:,1) 
+        initial_velocity   = velocities(:,1)
+        initial_position   = positions (:,1)
+
+        call constant_force_calculator(positions, forces)
+        do i = 1, 10
+            call integrate_one_step(positions, velocities, forces, constant_force_calculator)
+            expected_positions = 0.5_real64 * i * time_step * (constant_force * time_step * i + 2.0_real64 * initial_velocity) + initial_position
+            expected_velocity  = initial_velocity + time_step * i * constant_force
+            call assert_equals(expected_positions, positions(:,1),  3, 1e-14_real64, "20 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (position)")
+            call assert_equals(expected_velocity,  velocities(:,1), 3, 1e-14_real64, "10 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (velocity)")
+        end do
+
+
+        
+
     end subroutine test_integrate_one_step
 
     subroutine zero_force_calculator(positions, forces)
@@ -189,10 +255,23 @@ contains
         real (real64), dimension(:,:), intent(in)     :: positions
         real (real64), dimension(:,:), intent(in out) :: forces
 
-        ! forces = 0.0
-
         ! To make the compiler with -Wall -Wextra -pedantic-errors not complain
         ! about unused parameter positions.
         forces = 0.0 * positions 
     end subroutine
+
+    subroutine constant_force_calculator(positions, forces)
+        implicit none
+        real (real64), dimension(:,:), intent(in)     :: positions
+        real (real64), dimension(:,:), intent(in out) :: forces
+        integer (int32) :: i
+
+        do i = 1, number_of_particles
+            forces(:,i) = constant_force
+        end do
+
+        ! To make the compiler with -Wall -Wextra -pedantic-errors not complain
+        ! about unused parameter positions.
+        forces = forces + 0.0 * positions 
+    end subroutine constant_force_calculator
 end module integrator_test
