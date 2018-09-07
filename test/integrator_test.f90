@@ -22,14 +22,16 @@ module integrator_test
     implicit none
     
     real (real64), dimension(:), allocatable :: constant_force
+    integer (int32) :: step_number
 
-    private ::  zero_force_calculator,      &
-                constant_force_calculator
+    private ::  zero_force_calculator,          &
+                constant_force_calculator,      &
+                linear_time_force_calculator
 
-    public  ::  setup,                      &
-                teardown,                   &
-                test_integrate_one_step,    &
-                test_half_move,             &
+    public  ::  setup,                          &
+                teardown,                       &
+                test_integrate_one_step,        &
+                test_half_move,                 &
                 test_move
 contains
 
@@ -201,10 +203,10 @@ contains
         !
         ! The *position* obeys the recurrence relation 
         !                             ╭     ╮       1    2
-        !    p       =   p      +  Δt │	v   │   +  ─── Δt  a
+        !    p       =   p      +  Δt │ v   │   +  ─── Δt  a
         !      i+1         i          ╰   i ╯       2        0
         !                             ╭                 ╮       1    2  
-        !            =   p      +  Δt │	v   +  i Δt a   │   +  ─── Δt  a    
+        !            =   p      +  Δt │ v   +  i Δt a   │   +  ─── Δt  a    
         !                  i          ╰   0           0 ╯       2        0 
         !
         ! with solution
@@ -245,6 +247,46 @@ contains
             call assert_equals(expected_velocity,  velocities(:,1), 3, 1e-14_real64, "10 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (velocity)")
         end do
 
+        ! We now test a known case with a force which has a simple time 
+        ! dependence, F(t) = α[t,t,t], with α=1 with dimensions 
+        ! [mass][length]/[time]^3.
+        ! 
+        ! In this case the velocity obeys the relation
+        !                         α Δt ╭            ╮ 
+        !    v       =   v     + ───── │ 2 t  +  Δt │ 
+        !      i+1         0       2   ╰            ╯
+        ! 
+        ! with solution 
+        !                         1      2   2
+        !    v       =   v     + ─── α Δt  i               (1)
+        !      i           0      2
+        !
+        ! Note that we may test with F(t) = α[at, bt, ct], with a,b,c ∈ ℝ, 
+        ! Eq. (1) only needs to be multiplied by the corresponding constant in 
+        ! the second term on the right hand side.
+        constant_force  = [ 0.1_real64,   1.0_real64,  -2.0_real64] ! a,b,c
+        velocities(:,1) = [-3.3_real64,   0.0_real64,   1.5_real64]
+        positions (:,1) = [ 5.0_real64,   5.0_real64,   5.0_real64]
+        masses          = 1.0
+
+        expected_velocity  = velocities(:,1)
+        expected_positions = positions (:,1) 
+        initial_velocity   = velocities(:,1)
+        initial_position   = positions (:,1)
+
+        call linear_time_force_calculator(positions, forces)
+
+        ! To make the time t visible to the subroutine 
+        ! linear_time_force_calculator without having to mess with the explicit
+        ! interface, we just make the step index a private module variable.
+        do step_number = 1, 10  
+            i = step_number
+            call integrate_one_step(positions, velocities, forces, linear_time_force_calculator)
+            expected_positions = 0.5_real64 * i * time_step * (constant_force * time_step * i + 2.0_real64 * initial_velocity) + initial_position
+            expected_velocity  = initial_velocity + 0.5_real64 * constant_force * time_step**2 * i**2
+            !call assert_equals(expected_positions, positions(:,1),  3, 1e-14_real64, "30 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (position)")
+            call assert_equals(expected_velocity,  velocities(:,1), 3, 1e-14_real64, "40 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (velocity)")
+        end do
 
         
 
@@ -274,4 +316,24 @@ contains
         ! about unused parameter positions.
         forces = forces + 0.0 * positions 
     end subroutine constant_force_calculator
+
+    subroutine linear_time_force_calculator(positions, forces)
+        implicit none
+        real (real64), dimension(:,:), intent(in)     :: positions
+        real (real64), dimension(:,:), intent(in out) :: forces
+        integer (int32) :: i
+
+        do i = 1, number_of_particles
+            ! For convenience (read: laziness) we re-use the constant_force 
+            ! array to now hold the force parameters a,b,c, with 
+            ! F(t) = α[at, bt, ct], and α=1 with dimensions 
+            ! [mass][length]/[time]^3.
+            forces(:,i) = constant_force * time_step * step_number
+        end do
+
+        ! To make the compiler with -Wall -Wextra -pedantic-errors not complain
+        ! about unused parameter positions.
+        forces = forces + 0.0 * positions 
+    end subroutine linear_time_force_calculator
+
 end module integrator_test
