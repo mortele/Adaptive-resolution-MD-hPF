@@ -20,11 +20,11 @@ module file_writer
 
 contains
 
-    subroutine write_state(positions, time_step, types)
+    subroutine write_state(positions, current_time_step, types)
         implicit none
         real    (real64), dimension(:,:), intent(in)           :: positions
         integer (int32),  dimension(:),   optional, intent(in) :: types
-        integer (int32),                  optional, intent(in) :: time_step
+        integer (int32),                  optional, intent(in) :: current_time_step
         integer (int32)       :: i, j
         integer (int32), save :: file_ID 
         logical,         save :: file_is_open = .false.
@@ -48,7 +48,7 @@ contains
 
                 ! Create a new file.
                 open(   newunit = file_ID,          &
-                         file   = out_file_name,    &
+                        file    = out_file_name,    &
                         status  = "new",            &
                         action  = "write")
                 file_is_open = .true.
@@ -61,8 +61,8 @@ contains
         ! this second line to write the time step.
         write(file_ID, *) number_of_particles
 
-        if (present(time_step)) then
-            write(file_ID, *) "#time step ", time_step
+        if (present(current_time_step)) then
+            write(file_ID, *) "#current time step ", current_time_step
         else 
             write(file_ID, *) "#"
         end if

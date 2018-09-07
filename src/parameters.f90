@@ -16,7 +16,7 @@ module parameters
     !character (3), public :: initial_configuration = "fcc"
 
     ! FCC parameters. 
-    real (real64), public :: fcc_lattice_constant = 5.26
+    real (real64),   public :: fcc_lattice_constant     = 5.26
     integer (int32), public :: fcc_number_of_unit_cells = 5
 
     real (real64), public :: system_size_x = 10.0
