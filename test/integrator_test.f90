@@ -241,7 +241,7 @@ contains
         call constant_force_calculator(positions, forces)
         do i = 1, 10
             call integrate_one_step(positions, velocities, forces, constant_force_calculator)
-            expected_positions = 0.5_real64 * i * time_step * (constant_force * time_step * i + 2.0_real64 * initial_velocity) + initial_position
+            expected_positions = initial_position + 0.5_real64 * i * time_step * (constant_force * time_step * i + 2.0_real64 * initial_velocity)
             expected_velocity  = initial_velocity + time_step * i * constant_force
             call assert_equals(expected_positions, positions(:,1),  3, 1e-14_real64, "20 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (position)")
             call assert_equals(expected_velocity,  velocities(:,1), 3, 1e-14_real64, "10 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (velocity)")
@@ -252,18 +252,29 @@ contains
         ! [mass][length]/[time]^3.
         ! 
         ! In this case the velocity obeys the relation
-        !                         α Δt ╭            ╮ 
-        !    v       =   v     + ───── │ 2 t  +  Δt │ 
-        !      i+1         0       2   ╰            ╯
+        !                          α Δt ╭            ╮ 
+        !    v       =   v     +  ───── │ 2 t  +  Δt │ 
+        !      i+1         0        2   ╰            ╯
         ! 
         ! with solution 
-        !                         1      2   2
-        !    v       =   v     + ─── α Δt  i               (1)
-        !      i           0      2
+        !                          1      2   2
+        !    v       =   v     +  ─── α Δt  i               (1)
+        !      i           0       2
         !
         ! Note that we may test with F(t) = α[at, bt, ct], with a,b,c ∈ ℝ, 
         ! Eq. (1) only needs to be multiplied by the corresponding constant in 
         ! the second term on the right hand side.
+        ! 
+        ! The position recurrence relation takes the form 
+        !                            ╭         α    2  2 ╮    1      3
+        !    p       =   p     +  Δt │ v    + ─── Δt  i  │ + ─── α Δt  n
+        !      i+1         0         ╰   0     2         ╯    2 
+        ! 
+        ! with solution
+        !                          1      3   ╭  2      ╮      
+        !    p       =   p     +  ─── α Δt  i │ i  -  1 │ +  Δt n v
+        !      i           0       6          ╰         ╯           0
+        !
         constant_force  = [ 0.1_real64,   1.0_real64,  -2.0_real64] ! a,b,c
         velocities(:,1) = [-3.3_real64,   0.0_real64,   1.5_real64]
         positions (:,1) = [ 5.0_real64,   5.0_real64,   5.0_real64]
@@ -282,14 +293,17 @@ contains
         do step_number = 1, 10  
             i = step_number
             call integrate_one_step(positions, velocities, forces, linear_time_force_calculator)
-            expected_positions = 0.5_real64 * i * time_step * (constant_force * time_step * i + 2.0_real64 * initial_velocity) + initial_position
+            expected_positions = initial_position + (1.0_real64 / 6.0_real64) * constant_force * time_step**3 * i * (i**2 - 1.0_real64) + time_step * i * initial_velocity
             expected_velocity  = initial_velocity + 0.5_real64 * constant_force * time_step**2 * i**2
-            !call assert_equals(expected_positions, positions(:,1),  3, 1e-14_real64, "30 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (position)")
+            call assert_equals(expected_positions, positions(:,1),  3, 1e-14_real64, "30 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (position)")
             call assert_equals(expected_velocity,  velocities(:,1), 3, 1e-14_real64, "40 test_integrate_one_step : Integrating one step with constant force does not reproduce the known closed form difference equation solution (velocity)")
         end do
 
-        
 
+        deallocate(positions)
+        deallocate(velocities)
+        deallocate(forces)
+        deallocate(masses)
     end subroutine test_integrate_one_step
 
     subroutine zero_force_calculator(positions, forces)
