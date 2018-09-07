@@ -3,3 +3,7 @@
 *.app
 *.xyz
 *.out
+*.gcno
+*.gcda
+*.dSYM
+*.DS_Store
