@@ -79,6 +79,8 @@ sampler_test.o: test/sampler_test.f90 parameters.o particles.o sampler.o potenti
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 	
 integrator_test.o: test/integrator_test.f90 integrator.o potential.o particles.o parameters.o system.o fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 	
+file_writer_test.o: test/file_writer_test.f90 file_writer.o system.o parameters.o fruit.o
+	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@) 		
 unit_tests.o: unit_tests.f90 $(patsubst test/%.f90, %.o, $(wildcard test/*_test.f90)) fruit.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 fruit.o fruit.mod: ext/FRUIT/src/fruit.f90

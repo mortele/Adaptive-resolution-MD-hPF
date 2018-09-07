@@ -15,6 +15,7 @@ program unit_tests
     call field_all_tests()
     call sampler_all_tests()
     call integrator_all_tests()
+    call file_writer_all_tests()
     ! ================
     
     call fruit_summary()
@@ -195,5 +196,24 @@ contains
         call teardown     
         
     end subroutine integrator_all_tests
+
+    subroutine file_writer_all_tests()
+        use file_writer_test
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_write_state"
+        call set_unit_name ('test_write_state')    
+        call run_test_case(test_write_state, "test_write_state")
+        call teardown     
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_write_info"
+        call set_unit_name ('test_write_info')    
+        call run_test_case(test_write_info, "test_write_info")
+        call teardown     
+        
+    end subroutine file_writer_all_tests
 
 end program unit_tests

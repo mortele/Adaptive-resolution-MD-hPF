@@ -28,4 +28,5 @@ jobs:
         - make test
         - ./bin/UnitTests.app
       after_success:
-        - bash <(curl -s https://codecov.io/bash) -t f3e28ebb-cea3-4dd4-95c8-d5fca5566ddd
+        - bash <(curl -s https://codecov.io/bash)
+        #- bash <(curl -s https://codecov.io/bash) -t f3e28ebb-cea3-4dd4-95c8-d5fca5566ddd
