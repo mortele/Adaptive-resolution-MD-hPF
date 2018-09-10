@@ -202,6 +202,7 @@ contains
         integer (int32) :: i, j, k
         real (real64)   :: pi, x, real_i, real_number_of_field_nodes
         real (real64)   :: tollerance, h
+        real (real64)   :: convergence_rate(10), step_lengths(10), errors(10)
         logical         :: any_nonzero
 
         number_of_dimensions  = 3
@@ -330,6 +331,62 @@ contains
             x = system_size_x * (real_i / real_number_of_field_nodes)
             call assert_equals(exp(x), density_gradient(1,i,1,1), tollerance*exp(x+h), "5  test_compute_density_gradient : Gradient of the 1D exponential density field configuration not calculated correctly")
         end do
+
+        ! Let us redo the exponential test, while doubling the number of nodes
+        ! and try to figure out the error scaling w.r.t. the step length, h.
+        ! 
+        ! See: 
+        !
+        ! http://hplgit.github.io/INF5620/doc/notes/lecture_decay.html#___sec17
+        !
+        system_size_x         = 1.0_real64
+        system_size_y         = 1.0_real64
+        system_size_z         = 1.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+        number_of_field_nodes_x = 5
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+        
+        convergence_rate = 0
+        step_lengths     = 0
+
+        do j = 1, 10
+            ! Double the number of nodes each iteration, halving the step 
+            ! length.
+            if (j /= 1) then
+                number_of_field_nodes_x     = number_of_field_nodes_x * 2
+                number_of_field_nodes       = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+                real_number_of_field_nodes  = real(number_of_field_nodes_x)
+            end if
+            step_lengths(j) = system_size_x / real_number_of_field_nodes
+
+            deallocate(density_field)
+            deallocate(density_gradient)
+            allocate(density_field                         (number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+            allocate(density_gradient(number_of_dimensions, number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))            
+
+            do i = 1, number_of_field_nodes_x
+                real_i = real(i)
+                x = system_size_x * (real_i / real_number_of_field_nodes)
+                density_field(i,:,:) = exp(x)
+            end do
+            
+            call compute_density_gradient(density_field)
+
+            ! Since density_field(:,1,1) holds the values of exp(x), we just use
+            ! it as the known exact value that density_gradient *should* have.
+            errors(j) = (1.0_real64 / real_number_of_field_nodes) * norm2(density_gradient(1,:,1,1) - density_field(:,1,1))
+        end do
+
+        do j = 2, 10
+            convergence_rate(j) = log(errors(j-1) / errors(j)) / log(step_lengths(j-1) / step_lengths(j))
+            print *, convergence_rate(j)
+        end do
+
+
+
+
 
 
         deallocate(density_field)
