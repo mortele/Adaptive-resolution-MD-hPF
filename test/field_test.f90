@@ -189,6 +189,7 @@ contains
     subroutine test_compute_density_gradient()
         integer (int32) :: i, j, k
         real (real64)   :: pi, x, real_i, real_number_of_field_nodes
+        real (real64)   :: tollerance, h
         logical         :: any_nonzero
 
         number_of_dimensions  = 3
@@ -275,11 +276,46 @@ contains
         !          ε ∝ ─── = ─── │ ─── │  ≈ 0.00065797 ≈ 6.6e-4
         !               6     6  ╰ 100 ╯ 
         !
+        tollerance = 6.6e-4_real64
         do i = 1, number_of_field_nodes,10
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
-            call assert_equals(cos(x), density_gradient(1,i,1,1), 6.6e-4_real64, "4  test_compute_density_gradient : Gradient of the 1D sinusoidal density field configuration not calculated correctly")
+            call assert_equals(cos(x), density_gradient(1,i,1,1), tollerance, "4  test_compute_density_gradient : Gradient of the 1D sinusoidal density field configuration not calculated correctly")
         end do
+
+        ! Next, lets test an exponential.
+        system_size_x         = 1.0_real64
+        system_size_y         = 1.0_real64
+        system_size_z         = 1.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+        do i = 1, number_of_field_nodes
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            density_field(i,:,:) = exp(x)
+        end do
+        call compute_density_gradient(density_field)
+
+        ! In this case the f'''(x) term is just an exponential, so the error 
+        ! term takes the form 
+        !            2
+        !           h   ξ       1  ╭  1  ╮2  ξ                    ξ
+        !    ε  ∝  ─── e    =  ─── │ ─── │  e  ≈ 1.6666667e-05 * e,
+        !           6           6  ╰ 100 ╯ 
+        !
+        ! with x-h < ξ < x+h. Since exp(x) is monotonically increasing, the 
+        ! maximum value of exp(ξ) is exp(x+h). We verify now that the error is 
+        ! always smaller than 
+        !                           x+h
+        !    ε  =  1.6666667e-05 * e
+        !
+        tollerance  = 1.666666667e-5
+        h           = real(system_size_x / number_of_field_nodes) ! Step size
+        do i = 2, number_of_field_nodes-1,10
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            call assert_equals(exp(x), density_gradient(1,i,1,1), tollerance*exp(x+h), "5  test_compute_density_gradient : Gradient of the 1D exponential density field configuration not calculated correctly")
+        end do
+
 
         deallocate(density_field)
         deallocate(density_gradient)
