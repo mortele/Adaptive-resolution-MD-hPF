@@ -156,7 +156,15 @@ contains
         print *, " ..running test: test_compute_density_field"
         call set_unit_name ('test_compute_density_field')    
         call run_test_case(test_compute_density_field, "test_compute_density_field")
-        call teardown              
+        call teardown        
+        
+        call setup
+        print *, " "
+        print *, " ..running test: test_compute_density_gradient"
+        call set_unit_name ('test_compute_density_gradient')    
+        call run_test_case(test_compute_density_gradient, "test_compute_density_gradient")
+        call teardown        
+        
     end subroutine field_all_tests
 
     subroutine sampler_all_tests()

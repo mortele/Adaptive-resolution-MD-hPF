@@ -16,7 +16,11 @@ module integrator_test
                                     number_of_time_steps,       &
                                     lennard_jones_sigma,        &
                                     lennard_jones_epsilon,      &
-                                    time_step
+                                    time_step,                  &
+                                    system_size_x,              &
+                                    system_size_y,              &
+                                    system_size_z
+        
     use system,             only:   system_size,                &
                                     apply_periodic_boundary_conditions ! Subroutine
     implicit none
@@ -49,6 +53,10 @@ contains
         number_of_dimensions  = 1
         number_of_particles   = 1
         time_step             = 0.01
+        system_size_x         = 10.0_real64
+        system_size_y         = 10.0_real64
+        system_size_z         = 10.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
         allocate(velocities (number_of_dimensions, number_of_particles))
         allocate(forces     (number_of_dimensions, number_of_particles))
         allocate(masses     (number_of_particles))
@@ -107,6 +115,10 @@ contains
         number_of_dimensions  = 1
         number_of_particles   = 1
         time_step             = 0.01
+        system_size_x         = 10.0_real64
+        system_size_y         = 10.0_real64
+        system_size_z         = 10.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
         allocate(positions  (number_of_dimensions, number_of_particles))
         allocate(velocities (number_of_dimensions, number_of_particles))
         positions   = 0.0
@@ -161,6 +173,10 @@ contains
         number_of_dimensions  = 1
         number_of_particles   = 1
         time_step             = 0.01
+        system_size_x         = 10.0_real64
+        system_size_y         = 10.0_real64
+        system_size_z         = 10.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
         allocate(positions  (number_of_dimensions, number_of_particles))
         allocate(velocities (number_of_dimensions, number_of_particles))
         allocate(forces     (number_of_dimensions, number_of_particles))

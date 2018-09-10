@@ -7,12 +7,25 @@ module field
     implicit none
     private 
 
+    ! The distance between density vertices.
+    real (real64), private :: l
+
     real (real64), public, dimension(:,:,:),   allocatable :: density_field
     real (real64), public, dimension(:,:,:,:), allocatable :: position_of_density_nodes
     real (real64), public, dimension(:,:,:,:), allocatable :: density_gradient
 
-    public ::   compute_density_field,              &
-                allocate_field_arrays
+
+    public  ::  compute_density_field,                      &
+                allocate_field_arrays,                      &
+                compute_density_gradient
+
+    private ::  compute_density_gradient_2,                 &
+                compute_density_gradient_higher_order
+
+    interface compute_density_gradient
+        module procedure compute_density_gradient_2
+        module procedure compute_density_gradient_higher_order
+    end interface
 
 contains
 
@@ -44,8 +57,6 @@ contains
         ! Internal position inside the cube of 8 nearest density vertex points.
         real (real64),   dimension(:), allocatable :: p 
 
-        ! 
-        real (real64)   :: l
         integer (int32) :: i, j, k
 
         density_field = 0
@@ -68,10 +79,6 @@ contains
             end do
         end do
 
-        !print *,"=====----=====----====="
-        !print *,"nodes_pos:  ", node_positions(1,:,1,1)
-        !print *,"=====----=====----====="
-
         do i = 1, number_of_particles
             do j = 1, number_of_dimensions 
                 node_vector(j) = floor(positions(j,i) / l)
@@ -79,14 +86,6 @@ contains
             do j = 1, number_of_dimensions
                 p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes
             end do
-            !print *, " ====== "
-            !print *, "pos/l:       ", positions(1,i) / l
-            !print *, "l:           ", l
-            !print *, "pos:         ", positions(:,i)
-            !print *, "nodes:       ", (node_vector) * l
-            !print *, "node_vector: ", (node_vector)
-            !print *, "p:           ", p
-            !print *, " ====== "
 
             ! Computing the contribution to each nearest neighbor density vertex
             ! from this particle.
@@ -130,18 +129,75 @@ contains
             density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) = density_field(node_vector(1),      node_vector_next(2), node_vector_next(3)) + vertex_contributions(0,1,1)
             density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) = density_field(node_vector_next(1), node_vector_next(2), node_vector_next(3)) + vertex_contributions(1,1,1)
         end do
-        !print *, "field:::: ", density_field(:,1,1)
-        !print *, "field:::: ", density_field(:,2,1)
-        !print *, "field:::: ", density_field(:,3,1)
-        !print *, " "
-        !print *, "field:::: ", density_field(:,1,2)
-        !print *, "field:::: ", density_field(:,2,2)
-        !print *, "field:::: ", density_field(:,3,2)
-        !print *, " "
-        !print *, "field:::: ", density_field(:,1,3)
-        !print *, "field:::: ", density_field(:,2,3)
-        !print *, "field:::: ", density_field(:,3,3)
     end subroutine compute_density_field
+
+    subroutine compute_density_gradient_2(density_field)
+        real (real64), dimension(:,:,:), intent(in) :: density_field
+        integer (int32) :: i, j, k
+        integer (int32) :: i_next,     j_next,     k_next
+        integer (int32) :: i_previous, j_previous, k_previous
+
+        ! Assuming equal number of field vertices in each spatial direction for 
+        ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
+        l = system_size(1) / number_of_field_nodes
+
+        density_gradient = 0
+
+        do i = 1, number_of_field_nodes
+            do j = 1, number_of_field_nodes
+                do k = 1, number_of_field_nodes
+                    i_next      = i + 1
+                    i_previous  = i - 1
+
+                    j_next      = j + 1
+                    j_previous  = j - 1
+
+                    k_next      = k + 1
+                    k_previous  = k - 1
+
+                    ! Periodic boundary conditions.
+                    if (i == 1) then
+                        i_previous = number_of_field_nodes
+                    end if
+                    if (i == number_of_field_nodes) then
+                        i_next = 1
+                    end if
+                    if (j == 1) then
+                        j_previous = number_of_field_nodes
+                    end if
+                    if (j == number_of_field_nodes) then
+                        j_next = 1
+                    end if
+                    if (k == 1) then
+                        k_previous = number_of_field_nodes
+                    end if
+                    if (k == number_of_field_nodes) then
+                        k_next = 1
+                    end if
+
+                    density_gradient(1,i,j,k) = (density_field(i_next, j,      k     ) - density_field(i_previous, j,          k         )) / (2.0_real64 * l)
+                    density_gradient(2,i,j,k) = (density_field(i,      j_next, k     ) - density_field(i,          j_previous, k         )) / (2.0_real64 * l)
+                    density_gradient(3,i,j,k) = (density_field(i,      j,      k_next) - density_field(i,          j,          k_previous)) / (2.0_real64 * l)
+                end do
+            end do
+        end do
+    end subroutine compute_density_gradient_2
+
+    subroutine compute_density_gradient_higher_order(density_field, order)
+        real (real64), dimension(:,:,:), intent(in) :: density_field
+        integer, intent(in) :: order
+
+        !integer (int32) :: i, j, k
+        !integer (int32) :: i_next,     j_next,     k_next
+        !integer (int32) :: i_previous, j_previous, k_previous
+
+        ! Assuming equal number of field vertices in each spatial direction for 
+        ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
+        l = system_size(1) / number_of_field_nodes
+
+        density_gradient = 0
+
+    end subroutine compute_density_gradient_higher_order
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
         implicit none

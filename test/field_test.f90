@@ -1,7 +1,8 @@
 module field_test
     use, intrinsic :: iso_fortran_env,  only: int32, real64
-    use fruit,      only:   assert_equals,                       &
-                            assert_true
+    use fruit,      only:   assert_equals,                      &
+                            assert_true,                        &
+                            assert_false
     use system,     only:   system_size
     use parameters, only:   number_of_field_nodes,              &
                             number_of_dimensions,               &
@@ -13,7 +14,8 @@ module field_test
                             compute_density_field,              & ! Submodule
                             density_field,                      &
                             position_of_density_nodes,          &
-                            density_gradient
+                            density_gradient,                   &
+                            compute_density_gradient              ! Subroutine
     
     use particles,  only:   positions,                          &
                             masses
@@ -23,7 +25,8 @@ module field_test
     public  ::  setup,                          &
                 teardown,                       &
                 test_compute_density_field,     &
-                test_allocate_field_arrays
+                test_allocate_field_arrays,     &
+                test_compute_density_gradient
 contains
 
     subroutine setup
@@ -182,6 +185,60 @@ contains
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)
     end subroutine test_compute_density_field
+
+    subroutine test_compute_density_gradient()
+        integer (int32) :: i, j, k
+        real (real64)   :: pi
+        logical         :: any_nonzero
+
+        number_of_dimensions  = 3
+        number_of_particles   = 1
+        number_of_field_nodes = 100
+        system_size_x         = 1.0_real64
+        system_size_y         = 1.0_real64
+        system_size_z         = 1.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+        allocate(density_field      (                     number_of_field_nodes,number_of_field_nodes,number_of_field_nodes))
+        allocate(density_gradient   (number_of_dimensions,number_of_field_nodes,number_of_field_nodes,number_of_field_nodes))
+
+        ! We first test on a constant density field configuration. The gradient
+        ! should vanish everywhere.
+        density_field = 3.5
+        call compute_density_gradient(density_field)
+        any_nonzero = any(density_gradient /= 0.0)
+        call assert_false(any_nonzero, "1  test_compute_density_gradient : At least one element of density_gradient was computed to be non-zero for a constant density field configuration")
+
+        ! Secondly, we see if a 1D linear density is differentiated correctly.
+        do i = 1, number_of_field_nodes
+            density_field(i,:,:) = 1.25 * real(i) / real(number_of_field_nodes)
+        end do
+        call compute_density_gradient(density_field)
+
+        do i = 2, number_of_field_nodes-1, 10
+            !print *, 1.25, density_gradient(1,i,1,1)
+            call assert_equals(1.25_real64, density_gradient(1,i,1,1), 0.02_real64, "2  test_compute_density_gradient : The gradient of a linear density field configuration was not calculated correctly.")
+        end do
+
+
+
+        ! Test if compute_density_gradient() can differentiate a sinusoidal 
+        ! function in 1D.
+        pi = acos(-1.0_real64)
+        do i = 1, number_of_field_nodes
+            !density_gradient(:,i,:,:) = sin(2.0*pi*real(i) / real(number_of_field_nodes))
+            !print *, density_gradient(1,i,1,1)
+
+        end do
+
+        do i = 1, number_of_field_nodes
+            !call assert_equals(cos(2.0*pi*real(i)/real(number_of_field_nodes)) * 2.0*pi/real(number_of_field_nodes), density_gradient(1,i,1,1), "1  test_compute_density_gradient : Gradient of the 1D sinusoidal density field configuration not calculated correctly")
+            !print *, cos(2.0*pi*real(i)/real(number_of_field_nodes)) * 2.0*pi/real(number_of_field_nodes), density_gradient(1,i,1,1)
+        end do
+
+        deallocate(density_field)
+        deallocate(density_gradient)
+
+    end subroutine test_compute_density_gradient
 
     subroutine test_allocate_field_arrays()
         number_of_field_nodes = 3
