@@ -188,7 +188,7 @@ contains
 
     subroutine test_compute_density_gradient()
         integer (int32) :: i, j, k
-        real (real64)   :: pi
+        real (real64)   :: pi, x, real_i, real_number_of_field_nodes
         logical         :: any_nonzero
 
         number_of_dimensions  = 3
@@ -209,30 +209,76 @@ contains
         call assert_false(any_nonzero, "1  test_compute_density_gradient : At least one element of density_gradient was computed to be non-zero for a constant density field configuration")
 
         ! Secondly, we see if a 1D linear density is differentiated correctly.
+        real_number_of_field_nodes  = real(number_of_field_nodes)
         do i = 1, number_of_field_nodes
-            density_field(i,:,:) = 1.25 * real(i) / real(number_of_field_nodes)
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            density_field(i,:,:) = 1.25_real64 * x
         end do
         call compute_density_gradient(density_field)
 
+        ! Excluding the boundary points, since the density field has a 
+        ! discontinuity at the x=0 and x=1 edges.
         do i = 2, number_of_field_nodes-1, 10
-            !print *, 1.25, density_gradient(1,i,1,1)
-            call assert_equals(1.25_real64, density_gradient(1,i,1,1), 0.02_real64, "2  test_compute_density_gradient : The gradient of a linear density field configuration was not calculated correctly.")
+            call assert_equals(1.25_real64, density_gradient(1,i,1,1), 1e-13_real64, "2  test_compute_density_gradient : The gradient of a linear density field configuration was not calculated correctly.")
+        end do
+
+        ! We now try a second order polynomial.
+        system_size_x         = 3.0_real64
+        system_size_y         = 3.0_real64
+        system_size_z         = 3.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+        do i = 1, number_of_field_nodes
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            density_field(i,:,:) = (x - 1.5_real64)**2 + 0.75_real64 * x
+        end do
+        call compute_density_gradient(density_field)
+
+        ! Excluding the boundary points, since the density field has a 
+        ! discontinuity at the x=0 and x=1 edges.
+        do i = 2, number_of_field_nodes-1, 10
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            call assert_equals(2.0_real64*(x-1.5_real64) + 0.75_real64, density_gradient(1,i,1,1), 1e-13_real64, "3  test_compute_density_gradient : The gradient of a linear density field configuration was not calculated correctly.")
         end do
 
 
-
-        ! Test if compute_density_gradient() can differentiate a sinusoidal 
-        ! function in 1D.
-        pi = acos(-1.0_real64)
+        ! Next we test if compute_density_gradient() can differentiate a 
+        ! sinusoidal function in 1D.
+        pi = 3.141592653589793238462643383279502884197169399375105820974
+        system_size_x         = 2.0_real64*pi
+        system_size_y         = 2.0_real64*pi
+        system_size_z         = 2.0_real64*pi
+        system_size           = [system_size_x, system_size_y, system_size_z]
         do i = 1, number_of_field_nodes
-            !density_gradient(:,i,:,:) = sin(2.0*pi*real(i) / real(number_of_field_nodes))
-            !print *, density_gradient(1,i,1,1)
-
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            density_field(i,:,:) = sin(x)
         end do
+        call compute_density_gradient(density_field)
 
-        do i = 1, number_of_field_nodes
-            !call assert_equals(cos(2.0*pi*real(i)/real(number_of_field_nodes)) * 2.0*pi/real(number_of_field_nodes), density_gradient(1,i,1,1), "1  test_compute_density_gradient : Gradient of the 1D sinusoidal density field configuration not calculated correctly")
-            !print *, cos(2.0*pi*real(i)/real(number_of_field_nodes)) * 2.0*pi/real(number_of_field_nodes), density_gradient(1,i,1,1)
+        ! The error in the central difference approximation used is bounded by
+        !     1                  1           2
+        !    ─── R (x ± h)   =  ─── f'''(ξ) h,      x-h < ξ < x+h .
+        !    2 h  2              6
+        !
+        ! Since the derivatives of sines and cosines are themselves sines and 
+        ! consines, the f'''(ξ) term is bounded in absolute value by 1. This 
+        ! means that the error in the approximation should be less than 
+        !                                           
+        !                  f(x+h) - f(x-h)           
+        !    f'(x)   =    ─────────────────  +  ε,   
+        !                        2 h                
+        !                2           
+        !               h     1  ╭ 2 π ╮2
+        !          ε ∝ ─── = ─── │ ─── │  ≈ 0.00065797 ≈ 6.6e-4
+        !               6     6  ╰ 100 ╯ 
+        !
+        do i = 1, number_of_field_nodes,10
+            real_i = real(i)
+            x = system_size_x * (real_i / real_number_of_field_nodes)
+            call assert_equals(cos(x), density_gradient(1,i,1,1), 6.6e-4_real64, "4  test_compute_density_gradient : Gradient of the 1D sinusoidal density field configuration not calculated correctly")
         end do
 
         deallocate(density_field)
