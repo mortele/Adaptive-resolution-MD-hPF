@@ -28,3 +28,18 @@ or
 > ./bin/UnitTests.app
 ```
 
+### TODO
+* Finish testing `file_writer.f90`
+    - Semi-automate visualization with VMD(?)
+* Test `compute_density_field()` to make sure a variable number of field nodes in each direction works properly
+* Finish testing `compute_density_gradient()`
+* Perform **larger than unit-test scale** testing of MD code and FCC lattice
+* Implement cell lists and neighbor lists
+* Implement *hybrid particle-field* force calculation and test energies
+* Implement higher order central difference schemes for calculating the gradient density
+* Test with very high density field resolution that we recreate all-atom MD dynamics (is higher order derivative schemes neccessary for this?)
+* Experiment with how high field resolution is needed before FCC lattice is energetically stable in the hPF case
+* Implement adaptive resolution hPF-MD interface 
+    - Test energy conservation as particles diffuse across the boundary
+    - Test that net drift across the boundary in both directions is zero
+

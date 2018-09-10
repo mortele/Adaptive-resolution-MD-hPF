@@ -1,19 +1,22 @@
 module field
     use, intrinsic :: iso_fortran_env, only: real64, int32
     use system,          only:  system_size
-    use parameters,      only:  number_of_field_nodes,              &
+    use parameters,      only:  number_of_field_nodes_x,            &
+                                number_of_field_nodes_y,            &
+                                number_of_field_nodes_z,            &
                                 number_of_dimensions,               &
                                 number_of_particles
     implicit none
     private 
 
     ! The distance between density vertices.
-    real (real64), private :: l
+    real (real64), private :: lx, ly, lz
+    real (real64), private, dimension(:), allocatable :: l
 
     real (real64), public, dimension(:,:,:),   allocatable :: density_field
     real (real64), public, dimension(:,:,:,:), allocatable :: position_of_density_nodes
     real (real64), public, dimension(:,:,:,:), allocatable :: density_gradient
-
+    real (real64), public, dimension(:),       allocatable :: number_of_field_nodes
 
     public  ::  compute_density_field,                      &
                 allocate_field_arrays,                      &
@@ -63,17 +66,25 @@ contains
 
         allocate(node_vector     (number_of_dimensions))
         allocate(node_vector_next(number_of_dimensions))
-        allocate(node_positions  (number_of_dimensions, number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
+        allocate(node_positions  (number_of_dimensions, number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
         allocate(p               (number_of_dimensions))
         
-        ! Assuming equal number of field vertices in each spatial direction for 
-        ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
-        l = system_size(1) / number_of_field_nodes
+        ! Distance between each vertex in x, y, and z directions.
+        lx = system_size(1) / number_of_field_nodes_x
+        ly = system_size(2) / number_of_field_nodes_y
+        lz = system_size(3) / number_of_field_nodes_z
+
+        if (.not. allocated(l)) then
+            allocate(l(number_of_dimensions))
+        end if
+        l  = [lx, ly, lz]
+
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
 
         ! Compute the positions of the vertices.
-        do i = 1, number_of_field_nodes 
-            do j = 1, number_of_field_nodes 
-                do k = 1, number_of_field_nodes 
+        do i = 1, number_of_field_nodes_x
+            do j = 1, number_of_field_nodes_y 
+                do k = 1, number_of_field_nodes_z 
                     node_positions(:,i,j,k) = [i-1,j-1,k-1] * l
                 end do
             end do
@@ -81,22 +92,22 @@ contains
 
         do i = 1, number_of_particles
             do j = 1, number_of_dimensions 
-                node_vector(j) = floor(positions(j,i) / l)
+                node_vector(j) = floor(positions(j,i) / l(j))
             end do
             do j = 1, number_of_dimensions
-                p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes
+                p(j) = positions(j,i) - node_vector(j) * system_size(j) / number_of_field_nodes(j)
             end do
 
             ! Computing the contribution to each nearest neighbor density vertex
             ! from this particle.
-            vertex_contributions(0,0,0) = (l - p(1)) * (l - p(2)) * (l - p(3)) / l**3
-            vertex_contributions(1,0,0) =    p(1)    * (l - p(2)) * (l - p(3)) / l**3
-            vertex_contributions(0,1,0) = (l - p(1)) *    p(2)    * (l - p(3)) / l**3
-            vertex_contributions(0,0,1) = (l - p(1)) * (l - p(2)) *    p(3)    / l**3            
-            vertex_contributions(1,1,0) =    p(1)    *    p(2)    * (l - p(3)) / l**3
-            vertex_contributions(1,0,1) =    p(1)    * (l - p(2)) *    p(3)    / l**3
-            vertex_contributions(0,1,1) = (l - p(1)) *    p(2)    *    p(3)    / l**3
-            vertex_contributions(1,1,1) =    p(1)    *    p(2)    *    p(3)    / l**3
+            vertex_contributions(0,0,0) = (lx - p(1)) * (ly - p(2)) * (lz - p(3)) / (lx * ly * lz)
+            vertex_contributions(1,0,0) =    p(1)     * (ly - p(2)) * (lz - p(3)) / (lx * ly * lz)
+            vertex_contributions(0,1,0) = (lx - p(1)) *    p(2)     * (lz - p(3)) / (lx * ly * lz)
+            vertex_contributions(0,0,1) = (lx - p(1)) * (ly - p(2)) *    p(3)     / (lx * ly * lz)
+            vertex_contributions(1,1,0) =    p(1)     *    p(2)     * (lz - p(3)) / (lx * ly * lz)
+            vertex_contributions(1,0,1) =    p(1)     * (ly - p(2)) *    p(3)     / (lx * ly * lz)
+            vertex_contributions(0,1,1) = (lx - p(1)) *    p(2)     *    p(3)     / (lx * ly * lz)
+            vertex_contributions(1,1,1) =    p(1)     *    p(2)     *    p(3)     / (lx * ly * lz)
 
             ! Since node_vector indices start at 1, we need to add 1 here
             ! because of the floor function used. It is convenient to use the 
@@ -105,7 +116,7 @@ contains
                 node_vector(j) = node_vector(j) + 1
 
                 ! Handle periodic boundary conditions for the density field.
-                if (node_vector(j) == number_of_field_nodes) then
+                if (node_vector(j) == number_of_field_nodes(j)) then
                     node_vector_next(j) = 1
                 else 
                     node_vector_next(j) = node_vector(j) + 1
@@ -137,15 +148,21 @@ contains
         integer (int32) :: i_next,     j_next,     k_next
         integer (int32) :: i_previous, j_previous, k_previous
 
-        ! Assuming equal number of field vertices in each spatial direction for 
-        ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
-        l = system_size(1) / number_of_field_nodes
+        ! Distance between each density vertex.
+        lx = system_size(1) / number_of_field_nodes_x
+        ly = system_size(2) / number_of_field_nodes_y
+        lz = system_size(3) / number_of_field_nodes_z
+
+        if (.not. allocated(l)) then
+            allocate(l(number_of_dimensions))
+        end if
+        l  = [lx, ly, lz]
 
         density_gradient = 0
 
-        do i = 1, number_of_field_nodes
-            do j = 1, number_of_field_nodes
-                do k = 1, number_of_field_nodes
+        do i = 1, number_of_field_nodes_x
+            do j = 1, number_of_field_nodes_y
+                do k = 1, number_of_field_nodes_z
                     i_next      = i + 1
                     i_previous  = i - 1
 
@@ -157,27 +174,27 @@ contains
 
                     ! Periodic boundary conditions.
                     if (i == 1) then
-                        i_previous = number_of_field_nodes
+                        i_previous = number_of_field_nodes_x
                     end if
-                    if (i == number_of_field_nodes) then
+                    if (i == number_of_field_nodes_x) then
                         i_next = 1
                     end if
                     if (j == 1) then
-                        j_previous = number_of_field_nodes
+                        j_previous = number_of_field_nodes_y
                     end if
-                    if (j == number_of_field_nodes) then
+                    if (j == number_of_field_nodes_y) then
                         j_next = 1
                     end if
                     if (k == 1) then
-                        k_previous = number_of_field_nodes
+                        k_previous = number_of_field_nodes_z
                     end if
-                    if (k == number_of_field_nodes) then
+                    if (k == number_of_field_nodes_z ) then
                         k_next = 1
                     end if
 
-                    density_gradient(1,i,j,k) = (density_field(i_next, j,      k     ) - density_field(i_previous, j,          k         )) / (2.0_real64 * l)
-                    density_gradient(2,i,j,k) = (density_field(i,      j_next, k     ) - density_field(i,          j_previous, k         )) / (2.0_real64 * l)
-                    density_gradient(3,i,j,k) = (density_field(i,      j,      k_next) - density_field(i,          j,          k_previous)) / (2.0_real64 * l)
+                    density_gradient(1,i,j,k) = (density_field(i_next, j,      k     ) - density_field(i_previous, j,          k         )) / (2.0_real64 * lx)
+                    density_gradient(2,i,j,k) = (density_field(i,      j_next, k     ) - density_field(i,          j_previous, k         )) / (2.0_real64 * ly)
+                    density_gradient(3,i,j,k) = (density_field(i,      j,      k_next) - density_field(i,          j,          k_previous)) / (2.0_real64 * lz)
                 end do
             end do
         end do
@@ -193,7 +210,16 @@ contains
 
         ! Assuming equal number of field vertices in each spatial direction for 
         ! now, so l = system_size(i) / number_of_field_nodes, i = 1,2,3 (x,y,z).
-        l = system_size(1) / number_of_field_nodes
+        lx = system_size(1) / number_of_field_nodes_x
+        ly = system_size(2) / number_of_field_nodes_y
+        lz = system_size(3) / number_of_field_nodes_z
+
+        if (.not. allocated(l)) then
+            allocate(l(number_of_dimensions))
+        end if
+        l  = [lx, ly, lz]
+
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
 
         density_gradient = 0
 
@@ -205,9 +231,9 @@ contains
         real (real64), allocatable, dimension(:,:,:,:), intent(in out) :: position_of_density_nodes
         real (real64), allocatable, dimension(:,:,:,:), intent(in out) :: density_gradient
 
-        allocate(density_field            (number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
-        allocate(position_of_density_nodes(number_of_dimensions,  number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
-        allocate(density_gradient         (number_of_dimensions,  number_of_field_nodes, number_of_field_nodes, number_of_field_nodes))
+        allocate(density_field            (number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+        allocate(position_of_density_nodes(number_of_dimensions,  number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+        allocate(density_gradient         (number_of_dimensions,  number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
     end subroutine allocate_field_arrays
 
 end module field

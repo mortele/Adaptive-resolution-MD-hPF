@@ -4,7 +4,9 @@ module field_test
                             assert_true,                        &
                             assert_false
     use system,     only:   system_size
-    use parameters, only:   number_of_field_nodes,              &
+    use parameters, only:   number_of_field_nodes_x,            &
+                            number_of_field_nodes_y,            &
+                            number_of_field_nodes_z,            &
                             number_of_dimensions,               &
                             number_of_particles,                &
                             system_size_x,                      &
@@ -15,6 +17,7 @@ module field_test
                             density_field,                      &
                             position_of_density_nodes,          &
                             density_gradient,                   &
+                            number_of_field_nodes,              &
                             compute_density_gradient              ! Subroutine
     
     use particles,  only:   positions,                          &
@@ -40,7 +43,10 @@ contains
 
         ! We start off with a 1D test of the density field computation, with a 
         ! single particle.
-        number_of_field_nodes = 3
+        number_of_field_nodes_x = 3
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
         number_of_particles   = 1
         number_of_dimensions  = 3
         system_size_x         = 3.0_real64
@@ -95,7 +101,10 @@ contains
         end do
 
         ! We now consider a 2D case with a single particle.
-        number_of_field_nodes = 3
+        number_of_field_nodes_x = 3
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
         number_of_particles   = 1
         number_of_dimensions  = 3
         system_size_x         = 3.0_real64
@@ -131,7 +140,10 @@ contains
         call assert_equals(0.25_real64, density_field(3,3,1), "43 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
 
         ! Now we move on to full 3D tests (still with a single particle). 
-        number_of_field_nodes = 3
+        number_of_field_nodes_x = 3
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
         number_of_particles   = 1
         number_of_dimensions  = 3
         system_size_x         = 3.0_real64
@@ -168,9 +180,9 @@ contains
 
         ! We check that a particle placed on top of a density vertex contributes
         ! its mass *only* to that single vertex in 3D.
-        do i = 1, number_of_field_nodes
-            do j = 1, number_of_field_nodes
-                do k = 1, number_of_field_nodes
+        do i = 1, number_of_field_nodes_x
+            do j = 1, number_of_field_nodes_y
+                do k = 1, number_of_field_nodes_z
                     positions(:,1) = [real(i-1), real(j-1), real(k-1)]
                     call compute_density_field(positions, masses)
                     call assert_equals(1.0_real64, density_field(i,j,k), "70 test_compute_density_field : A particle placed on top of a density field vertex should contribute its mass to that single vertex and not to any other vertices")
@@ -194,13 +206,16 @@ contains
 
         number_of_dimensions  = 3
         number_of_particles   = 1
-        number_of_field_nodes = 100
+        number_of_field_nodes_x = 100
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
         system_size_x         = 1.0_real64
         system_size_y         = 1.0_real64
         system_size_z         = 1.0_real64
         system_size           = [system_size_x, system_size_y, system_size_z]
-        allocate(density_field      (                     number_of_field_nodes,number_of_field_nodes,number_of_field_nodes))
-        allocate(density_gradient   (number_of_dimensions,number_of_field_nodes,number_of_field_nodes,number_of_field_nodes))
+        allocate(density_field      (                     number_of_field_nodes_x,number_of_field_nodes_y,number_of_field_nodes_z))
+        allocate(density_gradient   (number_of_dimensions,number_of_field_nodes_x,number_of_field_nodes_y,number_of_field_nodes_z))
 
         ! We first test on a constant density field configuration. The gradient
         ! should vanish everywhere.
@@ -210,8 +225,8 @@ contains
         call assert_false(any_nonzero, "1  test_compute_density_gradient : At least one element of density_gradient was computed to be non-zero for a constant density field configuration")
 
         ! Secondly, we see if a 1D linear density is differentiated correctly.
-        real_number_of_field_nodes  = real(number_of_field_nodes)
-        do i = 1, number_of_field_nodes
+        real_number_of_field_nodes  = real(number_of_field_nodes_x)
+        do i = 1, number_of_field_nodes_x
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             density_field(i,:,:) = 1.25_real64 * x
@@ -220,7 +235,7 @@ contains
 
         ! Excluding the boundary points, since the density field has a 
         ! discontinuity at the x=0 and x=1 edges.
-        do i = 2, number_of_field_nodes-1, 10
+        do i = 2, number_of_field_nodes_x-1, 10
             call assert_equals(1.25_real64, density_gradient(1,i,1,1), 1e-13_real64, "2  test_compute_density_gradient : The gradient of a linear density field configuration was not calculated correctly.")
         end do
 
@@ -229,7 +244,7 @@ contains
         system_size_y         = 3.0_real64
         system_size_z         = 3.0_real64
         system_size           = [system_size_x, system_size_y, system_size_z]
-        do i = 1, number_of_field_nodes
+        do i = 1, number_of_field_nodes_x
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             density_field(i,:,:) = (x - 1.5_real64)**2 + 0.75_real64 * x
@@ -238,7 +253,7 @@ contains
 
         ! Excluding the boundary points, since the density field has a 
         ! discontinuity at the x=0 and x=1 edges.
-        do i = 2, number_of_field_nodes-1, 10
+        do i = 2, number_of_field_nodes_x-1, 10
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             call assert_equals(2.0_real64*(x-1.5_real64) + 0.75_real64, density_gradient(1,i,1,1), 1e-13_real64, "3  test_compute_density_gradient : The gradient of a linear density field configuration was not calculated correctly.")
@@ -252,7 +267,7 @@ contains
         system_size_y         = 2.0_real64*pi
         system_size_z         = 2.0_real64*pi
         system_size           = [system_size_x, system_size_y, system_size_z]
-        do i = 1, number_of_field_nodes
+        do i = 1, number_of_field_nodes_x
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             density_field(i,:,:) = sin(x)
@@ -277,7 +292,7 @@ contains
         !               6     6  ╰ 100 ╯ 
         !
         tollerance = 6.6e-4_real64
-        do i = 1, number_of_field_nodes,10
+        do i = 1, number_of_field_nodes_x,10
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             call assert_equals(cos(x), density_gradient(1,i,1,1), tollerance, "4  test_compute_density_gradient : Gradient of the 1D sinusoidal density field configuration not calculated correctly")
@@ -288,7 +303,7 @@ contains
         system_size_y         = 1.0_real64
         system_size_z         = 1.0_real64
         system_size           = [system_size_x, system_size_y, system_size_z]
-        do i = 1, number_of_field_nodes
+        do i = 1, number_of_field_nodes_x
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             density_field(i,:,:) = exp(x)
@@ -309,8 +324,8 @@ contains
         !    ε  =  1.6666667e-05 * e
         !
         tollerance  = 1.666666667e-5
-        h           = real(system_size_x / number_of_field_nodes) ! Step size
-        do i = 2, number_of_field_nodes-1,10
+        h           = real(system_size_x / number_of_field_nodes_x) ! Step size
+        do i = 2, number_of_field_nodes_x-1,10
             real_i = real(i)
             x = system_size_x * (real_i / real_number_of_field_nodes)
             call assert_equals(exp(x), density_gradient(1,i,1,1), tollerance*exp(x+h), "5  test_compute_density_gradient : Gradient of the 1D exponential density field configuration not calculated correctly")
@@ -323,25 +338,28 @@ contains
     end subroutine test_compute_density_gradient
 
     subroutine test_allocate_field_arrays()
-        number_of_field_nodes = 3
+        number_of_field_nodes_x = 7
+        number_of_field_nodes_y = 11
+        number_of_field_nodes_z = 16
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
         number_of_dimensions  = 3
         call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
         call assert_true(allocated(density_field), "1  test_allocate_field_arrays : density_field array not allocated")
-        call assert_equals(number_of_field_nodes, size(density_field,1), "2  test_allocate_field_arrays : density_field array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(density_field,2), "3  test_allocate_field_arrays : density_field array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(density_field,3), "4  test_allocate_field_arrays : density_field array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_x, size(density_field,1), "2  test_allocate_field_arrays : density_field x array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_y, size(density_field,2), "3  test_allocate_field_arrays : density_field y array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_z, size(density_field,3), "4  test_allocate_field_arrays : density_field z array not allocated to the correct size")
 
         call assert_true(allocated(density_gradient), "5  test_allocate_field_arrays : density_field array not allocated")
         call assert_equals(number_of_dimensions,  size(density_gradient,1), "6  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(density_gradient,2), "7  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(density_gradient,3), "8  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(density_gradient,4), "9  test_allocate_field_arrays : density_gradient array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_x, size(density_gradient,2), "7  test_allocate_field_arrays : density_gradient x array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_y, size(density_gradient,3), "8  test_allocate_field_arrays : density_gradient y array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_z, size(density_gradient,4), "9  test_allocate_field_arrays : density_gradient z array not allocated to the correct size")
         
         call assert_true(allocated(position_of_density_nodes), "10 test_allocate_field_arrays : density_field array not allocated")
         call assert_equals(number_of_dimensions,  size(position_of_density_nodes,1), "11 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(position_of_density_nodes,2), "12 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(position_of_density_nodes,3), "13 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
-        call assert_equals(number_of_field_nodes, size(position_of_density_nodes,3), "14 test_allocate_field_arrays : position_of_density_nodes array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_x, size(position_of_density_nodes,2), "12 test_allocate_field_arrays : position_of_density_nodes x array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_y, size(position_of_density_nodes,3), "13 test_allocate_field_arrays : position_of_density_nodes y array not allocated to the correct size")
+        call assert_equals(number_of_field_nodes_z, size(position_of_density_nodes,4), "14 test_allocate_field_arrays : position_of_density_nodes z array not allocated to the correct size")
     
         if (allocated(density_field)) then
             deallocate(density_field)
