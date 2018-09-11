@@ -199,10 +199,12 @@ contains
     end subroutine test_compute_density_field
 
     subroutine test_compute_density_gradient()
-        integer (int32) :: i, j, k
+        integer (int32) :: i, j, k, N
         real (real64)   :: pi, x, real_i, real_number_of_field_nodes
         real (real64)   :: tollerance, h
-        real (real64)   :: convergence_rate(10), step_lengths(10), errors(10)
+        real (real64), allocatable, dimension(:) :: convergence_rate,       &
+                                                    step_lengths,           &
+                                                    errors
         logical         :: any_nonzero
 
         number_of_dimensions  = 3
@@ -348,10 +350,16 @@ contains
         number_of_field_nodes_z = 3
         number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
         
+        N = 17
+        allocate(convergence_rate(N))
+        allocate(step_lengths(N))
+        allocate(errors(N))
         convergence_rate = 0
         step_lengths     = 0
+        errors           = 0
+        
 
-        do j = 1, 10
+        do j = 1, N
             ! Double the number of nodes each iteration, halving the step 
             ! length.
             if (j /= 1) then
@@ -383,11 +391,13 @@ contains
 
             ! Since density_field(:,1,1) holds the values of exp(x), we just use
             ! it as the known exact value that density_gradient *should* have.
-            errors(j) = sum(density_gradient(1,2:number_of_field_nodes_x-1,1,1) - density_field(2:number_of_field_nodes_x-1,1,1))
-            errors(j) = sqrt( step_lengths(j) * errors(j)**2 )
+            
+            errors(j) = maxval(density_gradient(1,2:number_of_field_nodes_x-1,1,1) - density_field(2:number_of_field_nodes_x-1,1,1))
+            !errors(j) = sum(density_gradient(1,2:number_of_field_nodes_x-1,1,1) - density_field(2:number_of_field_nodes_x-1,1,1))
+            !errors(j) = sqrt( step_lengths(j)**2 * errors(j)**2 )
         end do
 
-        do j = 2, 10
+        do j = 3, N
             convergence_rate(j) = log(errors(j-1) / errors(j)) / log(step_lengths(j-1) / step_lengths(j))
             print *, step_lengths(j),  convergence_rate(j)
         end do
