@@ -360,7 +360,9 @@ contains
                 real_number_of_field_nodes  = real(number_of_field_nodes_x)
             end if
             step_lengths(j) = system_size_x / real_number_of_field_nodes
-
+            
+            !print *, number_of_field_nodes_x
+            
             deallocate(density_field)
             deallocate(density_gradient)
             allocate(density_field                         (number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
@@ -374,17 +376,23 @@ contains
             
             call compute_density_gradient(density_field)
 
+            do i = 2, number_of_field_nodes_x-1, 100
+                print *, number_of_field_nodes_x, i,  density_field(i,1,1), density_gradient(1,i,1,1), abs(density_field(i,1,1) - density_gradient(1,i,1,1))
+            end do
+            print *, ""
+
             ! Since density_field(:,1,1) holds the values of exp(x), we just use
             ! it as the known exact value that density_gradient *should* have.
-            errors(j) = (1.0_real64 / real_number_of_field_nodes) * norm2(density_gradient(1,:,1,1) - density_field(:,1,1))
+            errors(j) = sum(density_gradient(1,2:number_of_field_nodes_x-1,1,1) - density_field(2:number_of_field_nodes_x-1,1,1))
+            errors(j) = sqrt( step_lengths(j) * errors(j)**2 )
         end do
 
         do j = 2, 10
             convergence_rate(j) = log(errors(j-1) / errors(j)) / log(step_lengths(j-1) / step_lengths(j))
-            print *, convergence_rate(j)
+            print *, step_lengths(j),  convergence_rate(j)
         end do
 
-
+        
 
 
 
