@@ -16,7 +16,10 @@ module file_writer
     implicit none
     private
 
-    public :: write_state, write_info
+    public ::   write_state,            &
+                read_state,             &
+                close_outfile,          &
+                write_info             
 
 contains
 
@@ -91,6 +94,31 @@ contains
         end do
     end subroutine write_state
 
+    subroutine read_state(file_name, positions, types)
+        implicit none
+        character  (len=*), intent(in) :: file_name
+        real   (real64), dimension(:,:), intent(in out) :: positions
+        integer (int32), dimension(:),    intent(in out) :: types
+        
+        integer (int32), save :: file_ID
+        integer :: status
+        logical :: file_exists
+
+        inquire(file = file_name, exist = file_exists)
+        if (file_exists) then
+            open(   newunit = file_ID,      &
+                    file    = file_name,    &
+                    status  = "old",        &
+                    action  = "read")
+        else 
+            error stop "Error: The file <" // file_name // "> does not exist."
+        end if 
+
+
+
+
+    end subroutine read_state
+
     subroutine write_info
         implicit none
         integer (int32), save :: file_ID 
@@ -124,4 +152,15 @@ contains
         write(file_ID, *) "step_length ", step_length
         close(file_ID)
     end subroutine write_info
+
+    subroutine close_outfile() 
+        logical :: is_open
+        integer :: file_ID
+
+        inquire(file = out_file_name, opened = is_open, number = file_ID)
+
+        if (is_open) then
+            close(file_ID, status = "keep")
+        end if 
+    end subroutine
 end module file_writer

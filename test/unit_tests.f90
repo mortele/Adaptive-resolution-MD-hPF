@@ -217,6 +217,13 @@ contains
 
         call setup
         print *, " "
+        print *, " ..running test: test_read_state"
+        call set_unit_name ('test_read_state')    
+        call run_test_case(test_read_state, "test_read_state")
+        call teardown   
+
+        call setup
+        print *, " "
         print *, " ..running test: test_write_info"
         call set_unit_name ('test_write_info')    
         call run_test_case(test_write_info, "test_write_info")

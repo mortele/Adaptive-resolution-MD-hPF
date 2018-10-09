@@ -3,6 +3,8 @@ module file_writer_test
     use fruit,              only:   assert_equals,              & ! Subroutine
                                     assert_true                   ! Subroutine
     use file_writer,        only:   write_state,                & ! Subroutine
+                                    read_state,                 & ! Subroutine
+                                    close_outfile,              & ! Subroutine
                                     write_info                    ! Subroutine
     use system,             only:   system_size
     use particles,          only:   positions,                  &
@@ -26,6 +28,7 @@ module file_writer_test
     public  ::  setup,                      &
                 teardown,                   &
                 test_write_state,           &
+                test_read_state,            &
                 test_write_info
 
 contains
@@ -73,7 +76,30 @@ contains
         deallocate(types)
     end subroutine
 
+    subroutine test_read_state()
+        implicit none
+
+        number_of_dimensions = 1
+        number_of_particles  = 3
+
+        allocate(positions (number_of_dimensions, number_of_particles))
+        allocate(types     (number_of_particles))
+
+        call random_number(positions)
+        types = 1
+
+        call write_state(positions, 1, types)
+        call close_outfile()
+        call read_state(out_file_name, positions, types)
+
+        deallocate(positions)
+        deallocate(types)
+
+
+    end subroutine
+
     subroutine test_write_info()
     end subroutine
+
 
 end module file_writer_test

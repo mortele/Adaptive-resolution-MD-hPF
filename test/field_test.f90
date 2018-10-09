@@ -390,11 +390,7 @@ contains
             convergence_rate(j) = log(errors(j-1) / errors(j)) / log(step_lengths(j-1) / step_lengths(j))
         end do
         call assert_equals(2.0_real64, convergence_rate(N), 0.001_real64, "6  test_compute_density_gradient : The computed convergence rate of the central finite difference scheme used in compute_density_gradient is not sufficiently close to 2.0")
-        
-
-
-
-
+    
         deallocate(density_field)
         deallocate(density_gradient)
 
