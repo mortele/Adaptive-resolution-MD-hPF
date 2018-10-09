@@ -30,10 +30,17 @@ contains
         integer (int32),                  optional, intent(in) :: current_time_step
         integer (int32)       :: i, j
         integer (int32), save :: file_ID 
-        logical,         save :: file_is_open = .false.
-        logical               :: file_exists
+        logical :: file_exists
+        logical :: file_is_open
         
         ! If the file is not open, we have to open it before we continue.
+        inquire(file = out_file_name, exist = file_exists)
+        if (file_exists) then
+            inquire(file = out_file_name, opened = file_is_open)
+        else 
+            file_is_open = .false.
+        end if
+
         if (.not. file_is_open)  then
 
             ! Check if the file exists.
@@ -96,12 +103,16 @@ contains
 
     subroutine read_state(file_name, positions, types)
         implicit none
-        character  (len=*), intent(in) :: file_name
-        real   (real64), dimension(:,:), intent(in out) :: positions
-        integer (int32), dimension(:),    intent(in out) :: types
+        character  (len=*),                  intent(in)     :: file_name
+        real       (real64), dimension(:,:), intent(in out) :: positions
+        integer    (int32),  dimension(:),   intent(in out) :: types
         
-        integer (int32), save :: file_ID
-        integer :: status
+        integer (int32) ::  number_of_particles_in_file,        &
+                            time_step_in_file,                  &
+                            file_ID,                            &
+                            i
+        real (real64), dimension(:), allocatable :: type_position_line
+        character (len=200) :: time_step_line
         logical :: file_exists
 
         inquire(file = file_name, exist = file_exists)
@@ -113,6 +124,32 @@ contains
         else 
             error stop "Error: The file <" // file_name // "> does not exist."
         end if 
+
+        read(file_ID, *) number_of_particles_in_file
+        read(file_ID, *) time_step_line
+
+        !print *, "number_of_particles_in_file: ", number_of_particles_in_file
+        !print *, "time_step_line: ", time_step_line
+
+        allocate(type_position_line (number_of_dimensions+1))
+
+        do i = 1, number_of_particles_in_file
+            read(file_ID, *) type_position_line
+            !print *, "type_position_line: ", type_position_line
+            types(i) = int(type_position_line(1))
+            positions(:,i) = type_position_line(2:number_of_dimensions+1)
+        end do
+
+        number_of_particles = number_of_particles_in_file
+        
+        !print *, "positions :"
+        do i = 1, number_of_particles
+            !print *, positions(:,i)
+        end do
+
+
+
+
 
 
 
@@ -152,6 +189,7 @@ contains
         write(file_ID, *) "step_length ", step_length
         close(file_ID)
     end subroutine write_info
+
 
     subroutine close_outfile() 
         logical :: is_open

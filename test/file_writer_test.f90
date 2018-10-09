@@ -81,17 +81,26 @@ contains
 
         number_of_dimensions = 1
         number_of_particles  = 3
+        out_file_name        = "testingfw.xyz"
+
 
         allocate(positions (number_of_dimensions, number_of_particles))
         allocate(types     (number_of_particles))
 
-        call random_number(positions)
-        types = 1
+        positions(1,1) = 25985.25_real64
+        positions(1,2) = 95224.10_real64
+        positions(1,3) = 0.259827_real64
+        types(1) = 1
+        types(2) = 2
+        types(3) = 30
 
+        call close_outfile()
         call write_state(positions, 1, types)
         call close_outfile()
         call read_state(out_file_name, positions, types)
 
+        call assert_equals([25985.25_real64, 95224.10_real64, 0.259827_real64], positions(1,:), 3, 1e-15_real64, "1  test_read_state : read positions are not equal to the positions just written to file")
+        call assert_equals([1,2,30], types, 3, "2  test_read_state : read types are not equal to the types just written to file")
         deallocate(positions)
         deallocate(types)
 
