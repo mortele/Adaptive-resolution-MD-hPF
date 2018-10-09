@@ -122,12 +122,14 @@ contains
                     status  = "old",        &
                     action  = "read")
         else 
-            error stop "Error: The file <" // file_name // "> does not exist."
+            print *, "Attempted to open file ", file_name
+            error stop "Error: The file does not exist."
         end if 
 
         read(file_ID, *) number_of_particles_in_file
         read(file_ID, *) time_step_line
 
+        print * , "Error: The file <" // file_name // "> does not exist."
         !print *, "number_of_particles_in_file: ", number_of_particles_in_file
         !print *, "time_step_line: ", time_step_line
 
