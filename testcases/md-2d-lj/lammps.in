@@ -13,8 +13,8 @@ set             type 1 z 0.05
 mass            1 1.0
 velocity        all create 2.5 11111
 
-pair_style      lj/cut 50.0
-pair_coeff      1 1 1.0 1.0 10.0
+pair_style      lj/cut 4.0
+pair_coeff      1 1 1.0 1.0 4.0
 
 neighbor        0.3 bin
 neigh_modify    every 1 delay 0 check no

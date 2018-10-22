@@ -10,7 +10,7 @@ module potential
     implicit none
     private 
 
-    real (real64), public :: sigma6, sigma12
+    real (real64), public :: sigma6, sigma12, cutoff_squared
     real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
 
     public :: lennard_jones_force, lennard_jones_potential
@@ -29,6 +29,7 @@ contains
         
         sigma6  = lennard_jones_sigma**6
         sigma12 = lennard_jones_sigma**12
+        cutoff_squared = lennard_jones_cutoff**2
 
         forces  = 0.0_real64 ! All elements of dimension(3,:) array is set to zero. 
         V       = 0.0_real64
@@ -43,11 +44,13 @@ contains
                 distance_vector = compute_distance_minimum_image(distance_vector)
                 
                 dr_squared      = dot_product(distance_vector, distance_vector)
-                force           = lennard_jones_force(dr_squared)
-                forces(:,i)     = forces(:,i) + force * distance_vector
-                forces(:,j)     = forces(:,j) - force * distance_vector
+                if (dr_squared < cutoff_squared) then
+                    force           = lennard_jones_force(dr_squared)
+                    forces(:,i)     = forces(:,i) + force * distance_vector
+                    forces(:,j)     = forces(:,j) - force * distance_vector
                 
-                V = V + lennard_jones_potential(dr_squared)
+                    V = V + lennard_jones_potential(dr_squared)
+                end if
             end do
         end do
 

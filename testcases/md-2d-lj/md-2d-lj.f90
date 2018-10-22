@@ -35,16 +35,13 @@ program md2dlj
     time_step               = 0.001_real64
     lennard_jones_sigma     = 1.0_real64
     lennard_jones_epsilon   = 1.0_real64
+    lennard_jones_cutoff    = 4.0_real64
 
     call read_state_lammps(lammps_file, positions, velocities, forces, types, masses)
     
     call compute_forces(positions, forces)
-
-    call write_forces_to_file(forces)
-    do i = 1, 10
-        print '(F20.15,F20.15,F20.15)', forces(:,i)
-    end do
-
+    call write_array_to_file("forces.dump",     forces)
+    call write_array_to_file("positions.dump",  positions)
 
     contains 
         subroutine open_file(file_name, file_ID)
@@ -71,15 +68,16 @@ program md2dlj
         end subroutine
 
 
-        subroutine write_forces_to_file(forces)
+        subroutine write_array_to_file(file_name, array)
             implicit none
-            real (real64), dimension(:,:), allocatable, intent(in) :: forces
+            character (len=*), intent(in) :: file_name
+            real (real64), dimension(:,:), allocatable, intent(in) :: array
             integer (int32) :: i, file_ID
             
-            call open_file("forces.dump", file_ID)
+            call open_file(file_name, file_ID)
 
             do i = 1, number_of_particles
-                write(file_ID, '(F20.15,F20.15,F20.15)') forces(:,i)
+                write(file_ID, '(F20.15,F20.15,F20.15)') array(:,i)
             end do
         end subroutine
 
