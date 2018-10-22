@@ -78,7 +78,11 @@ contains
 
     subroutine test_read_state()
         implicit none
-
+        real (real64),   dimension(:,:), allocatable :: positions_read
+        real (real64),   dimension(:),   allocatable :: types_real
+        integer (int32), dimension(:),   allocatable :: types_read
+        integer (int32) :: i
+        
         number_of_dimensions = 1
         number_of_particles  = 3
         out_file_name        = "testingfw.xyz"
@@ -98,11 +102,42 @@ contains
         call write_state(positions, 1, types)
         call close_outfile()
         call read_state(out_file_name, positions, types)
+        call close_outfile()
 
         call assert_equals([25985.25_real64, 95224.10_real64, 0.259827_real64], positions(1,:), 3, 1e-15_real64, "1  test_read_state : read positions are not equal to the positions just written to file")
         call assert_equals([1,2,30], types, 3, "2  test_read_state : read types are not equal to the types just written to file")
         deallocate(positions)
         deallocate(types)
+
+        number_of_particles  = 10
+        number_of_dimensions = 3
+        allocate(positions     (number_of_dimensions, number_of_particles))
+        allocate(positions_read(number_of_dimensions, number_of_particles))
+        allocate(types         (number_of_particles))
+        allocate(types_real    (number_of_particles))
+        allocate(types_read    (number_of_particles))
+        call random_number(positions)
+        call random_number(types_real)
+        types       = floor(10 * types_real)
+        positions   = 10_real64 * positions
+        
+        call close_outfile()
+        call write_state(positions, 1, types)
+        call close_outfile()
+        call read_state(out_file_name, positions_read, types_read)
+        call close_outfile()
+
+        do i = 1, number_of_particles
+            call assert_equals(positions(:,i), positions_read(:,i), 3, "3  test_read_state : read positions are not equal to the positions just written to file")
+            call assert_equals(types(i),       types_read(i),          "4  test_read_state : read types are not equal to the types just written to file")
+        end do
+
+
+        deallocate(positions)
+        deallocate(positions_read)
+        deallocate(types)
+        deallocate(types_real)
+        deallocate(types_read)
 
 
     end subroutine

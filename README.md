@@ -42,4 +42,6 @@ or
 * Implement adaptive resolution hPF-MD interface 
     - Test energy conservation as particles diffuse across the boundary
     - Test that net drift across the boundary in both directions is zero
+* Implement chemical potential sampling in MD
+* Implement chemical potential sampling in hPF
 

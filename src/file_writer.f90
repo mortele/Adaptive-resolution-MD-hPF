@@ -129,40 +129,21 @@ contains
         read(file_ID, *) number_of_particles_in_file
         read(file_ID, *) time_step_line
 
-        print * , "Error: The file <" // file_name // "> does not exist."
-        !print *, "number_of_particles_in_file: ", number_of_particles_in_file
-        !print *, "time_step_line: ", time_step_line
-
         allocate(type_position_line (number_of_dimensions+1))
 
         do i = 1, number_of_particles_in_file
             read(file_ID, *) type_position_line
-            !print *, "type_position_line: ", type_position_line
             types(i) = int(type_position_line(1))
             positions(:,i) = type_position_line(2:number_of_dimensions+1)
         end do
 
         number_of_particles = number_of_particles_in_file
-        
-        !print *, "positions :"
-        do i = 1, number_of_particles
-            !print *, positions(:,i)
-        end do
-
-
-
-
-
-
-
-
     end subroutine read_state
 
     subroutine write_info
         implicit none
         integer (int32), save :: file_ID 
         logical               :: file_exists
-
 
         ! Check if the file exists.
         inquire(file = info_file_name, exist = file_exists)
