@@ -131,7 +131,6 @@ contains
             call assert_equals(types(i),       types_read(i),          "4  test_read_state : read types are not equal to the types just written to file")
         end do
 
-
         deallocate(positions)
         deallocate(positions_read)
         deallocate(types)
