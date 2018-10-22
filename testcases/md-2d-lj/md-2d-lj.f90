@@ -32,7 +32,7 @@ program md2dlj
     character (len=*), parameter :: lammps_file = "lammps.dump"
     integer (int32) :: i
     
-    time_step               = 0.001_real64
+    time_step               = 0.01_real64
     lennard_jones_sigma     = 1.0_real64
     lennard_jones_epsilon   = 1.0_real64
     lennard_jones_cutoff    = 4.0_real64
@@ -42,6 +42,9 @@ program md2dlj
     call compute_forces(positions, forces)
     call write_array_to_file("forces.dump",     forces)
     call write_array_to_file("positions.dump",  positions)
+
+    call integrate_one_step(positions, velocities, forces)
+    call write_array_to_file("positions2.dump", positions)
 
     contains 
         subroutine open_file(file_name, file_ID)

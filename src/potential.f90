@@ -10,7 +10,7 @@ module potential
     implicit none
     private 
 
-    real (real64), public :: sigma6, sigma12, cutoff_squared
+    real (real64), public :: sigma6, sigma12, cutoff_squared, potential_at_cutoff
     real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
 
     public :: lennard_jones_force, lennard_jones_potential
@@ -24,12 +24,18 @@ contains
         real (real64), dimension(:,:), intent(in out)  :: forces
         real (real64), dimension(number_of_dimensions) :: distance_vector,  &
                                                           force
-        real (real64)   :: dr_squared
+        real (real64)   :: dr_squared, r2, r6, r12
         integer (int32) :: i, j
         
         sigma6  = lennard_jones_sigma**6
         sigma12 = lennard_jones_sigma**12
+        
+        ! Calculate the cutoff potential energy.
         cutoff_squared = lennard_jones_cutoff**2
+        r2 = 1.0_real64 / cutoff_squared
+        r6 = r2*r2*r2
+        r12 = r6*r6
+        potential_at_cutoff = 4.0_real64 * lennard_jones_epsilon * sigma6 * r6 * (sigma6 * r6 - 1.0_real64)
 
         forces  = 0.0_real64 ! All elements of dimension(3,:) array is set to zero. 
         V       = 0.0_real64
@@ -67,9 +73,9 @@ contains
         real (real64) :: F_divided_by_r
         real (real64) :: r2, r6, eps
         eps = lennard_jones_epsilon  ! Simply aliasing the variable for brevity.
-        r2  = 1.0 / dr_squared
+        r2  = 1.0_real64 / dr_squared
         r6  = r2 * r2 * r2
-        F_divided_by_r = 24.0 * sigma6 * eps * r6  * (1.0 - 2.0 * r6 * sigma6) * r2
+        F_divided_by_r = 24.0_real64 * sigma6 * eps * r6  * (1.0_real64 - 2.0_real64 * r6 * sigma6) * r2
     end function lennard_jones_force
 
     pure function lennard_jones_potential(dr_squared) result(potential)
@@ -78,9 +84,9 @@ contains
         real (real64) :: potential
         real (real64) :: r2, r6, eps
         eps = lennard_jones_epsilon  ! Simply aliasing the variable for brevity.
-        r2  = 1.0 / dr_squared
+        r2  = 1.0_real64 / dr_squared
         r6  = r2 * r2 * r2
-        potential = 4 * eps * sigma6 * r6 * (sigma6 * r6 - 1.0)
+        potential = 4.0_real64 * eps * sigma6 * r6 * (sigma6 * r6 - 1.0_real64) - potential_at_cutoff
     end function lennard_jones_potential
 
 end module potential
