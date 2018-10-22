@@ -1,0 +1,35 @@
+# 2d Lennard-Jones gas
+units           lj
+dimension       2
+boundary        p p p
+atom_style      atomic
+
+lattice         sq 1.0
+region          simbox block 0 10 0 10 0.0 0.1
+create_box      1 simbox
+create_atoms    1 box
+
+mass            1 1.0
+velocity        all create 2.5 11111
+
+pair_style      lj/cut 5.0
+pair_coeff      1 1 1.0 1.0 5.0
+
+neighbor        0.3 bin
+neigh_modify    every 1 delay 0 check no
+
+compute         keatom  all ke/atom
+compute         peatom  all pe/atom
+compute         ke      all reduce sum c_keatom
+compute         pe      all reduce sum c_peatom
+variable        ketot equal ke
+variable        petot equal pe
+variable        step  equal step
+
+timestep        0.001
+fix             1 all print 1 "${step} ${ketot} ${petot}" file lammps.energy screen "no" title "#step ke pe"
+fix             2 all nve
+
+dump            1 all custom 1 lammps.dump id type x y z vx vy vz fx fy fz c_keatom c_peatom 
+run             0
+run             10
