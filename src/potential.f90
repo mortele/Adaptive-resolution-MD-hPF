@@ -30,9 +30,9 @@ contains
         sigma6  = lennard_jones_sigma**6
         sigma12 = lennard_jones_sigma**12
 
-        forces  = 0  ! All elements of dimension(3,:) array is set to zero. 
-        V       = 0
-        Ek      = 0
+        forces  = 0.0_real64 ! All elements of dimension(3,:) array is set to zero. 
+        V       = 0.0_real64
+        Ek      = 0.0_real64
 
         do i = 1, number_of_particles
             do j = i + 1, number_of_particles

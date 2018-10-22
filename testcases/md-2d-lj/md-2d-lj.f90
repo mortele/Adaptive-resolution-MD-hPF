@@ -31,15 +31,56 @@ program md2dlj
     implicit none
     character (len=*), parameter :: lammps_file = "lammps.dump"
     integer (int32) :: i
-
+    
+    time_step               = 0.001_real64
+    lennard_jones_sigma     = 1.0_real64
+    lennard_jones_epsilon   = 1.0_real64
 
     call read_state_lammps(lammps_file, positions, velocities, forces, types, masses)
     
     call compute_forces(positions, forces)
 
+    call write_forces_to_file(forces)
     do i = 1, 10
-        print '(F20.15,F20.15,F20.15)', positions(:,i)
+        print '(F20.15,F20.15,F20.15)', forces(:,i)
     end do
 
+
+    contains 
+        subroutine open_file(file_name, file_ID)
+            implicit none
+            character (len=*), intent(in)     :: file_name
+            integer (int32),   intent(in out) :: file_ID
+            logical :: file_exists
+
+            inquire(file = file_name, exist = file_exists)   
+            if (file_exists) then
+                ! Replace the existing file.
+                open(   newunit = file_ID,          &
+                        file    = file_name,        &
+                        status  = "replace",        &
+                        action  = "write")
+            else 
+    
+                ! Create a new file.
+                open(   newunit = file_ID,          &
+                        file    = file_name,        &
+                        status  = "new",            &
+                        action  = "write")
+            end if
+        end subroutine
+
+
+        subroutine write_forces_to_file(forces)
+            implicit none
+            real (real64), dimension(:,:), allocatable, intent(in) :: forces
+            integer (int32) :: i, file_ID
+            
+            call open_file("forces.dump", file_ID)
+
+            do i = 1, number_of_particles
+                write(file_ID, '(F20.15,F20.15,F20.15)') forces(:,i)
+            end do
+        end subroutine
 
 end program
