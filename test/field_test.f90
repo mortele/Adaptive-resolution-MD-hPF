@@ -265,7 +265,7 @@ contains
 
         ! Next we test if compute_density_gradient() can differentiate a 
         ! sinusoidal function in 1D.
-        pi = 3.141592653589793238462643383279502884197169399375105820974
+        pi = 3.141592653589793238462643383279502884197169399375105820974_real64
         system_size_x         = 2.0_real64*pi
         system_size_y         = 2.0_real64*pi
         system_size_z         = 2.0_real64*pi

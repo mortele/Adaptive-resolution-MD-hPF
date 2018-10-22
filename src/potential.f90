@@ -1,6 +1,7 @@
 module potential
     use, intrinsic :: iso_fortran_env, only: real64, int32
-    use system,     only: compute_distance_minimum_image    ! Function 
+    use system,     only: compute_distance_minimum_image,   & ! Function 
+                          system_size
     use particles,  only: masses, velocities
     use parameters, only: number_of_particles,      &
                           lennard_jones_epsilon,    &
@@ -24,7 +25,7 @@ contains
         real (real64), dimension(:,:), intent(in out)  :: forces
         real (real64), dimension(number_of_dimensions) :: distance_vector,  &
                                                           force
-        real (real64)   :: dr_squared, r2, r6, r12
+        real (real64)   :: dr_squared, r2, r6, r12, pi, volume, Vtail
         integer (int32) :: i, j
         
         sigma6  = lennard_jones_sigma**6
@@ -64,6 +65,12 @@ contains
             Ek = Ek + 0.5 * masses(i) * dot_product(velocities(:,i), velocities(:, i))
         end do
 
+        ! Tail corrections for the Lennard-Jones cutoff
+        pi = 3.141592653589793238462643383279502884197169399375105820974_real64
+        volume = system_size(1) * system_size(2) * system_size(3)
+        Vtail = (8.0_real64 / 3.0_real64) * pi * lennard_jones_epsilon * lennard_jones_sigma**3 * number_of_particles / volume * ((1.0_real64 / 3.0_real64) * (lennard_jones_sigma/lennard_jones_cutoff)**9 - (lennard_jones_sigma/lennard_jones_cutoff)**3)
+        print *, Vtail
+        V = V + Vtail
         E = V + Ek
     end subroutine compute_forces
 

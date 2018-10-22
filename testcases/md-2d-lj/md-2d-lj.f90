@@ -32,7 +32,7 @@ program md2dlj
     character (len=*), parameter :: lammps_file = "lammps.dump"
     integer (int32) :: i
     
-    time_step               = 0.01_real64
+    time_step               = 0.001_real64
     lennard_jones_sigma     = 1.0_real64
     lennard_jones_epsilon   = 1.0_real64
     lennard_jones_cutoff    = 4.0_real64
@@ -43,8 +43,15 @@ program md2dlj
     call write_array_to_file("forces.dump",     forces)
     call write_array_to_file("positions.dump",  positions)
 
+    call write_energy_to_file(Ek, V)
     call integrate_one_step(positions, velocities, forces)
     call write_array_to_file("positions2.dump", positions)
+    call write_energy_to_file(Ek, V)
+
+    do i = 1, 8
+        call integrate_one_step(positions, velocities, forces)
+        call write_energy_to_file(Ek, V)
+    end do
 
     contains 
         subroutine open_file(file_name, file_ID)
@@ -70,6 +77,23 @@ program md2dlj
             end if
         end subroutine
 
+        subroutine write_energy_to_file(kinetic_energy, potential_energy)
+            implicit none
+            real (real64), intent(in) :: kinetic_energy, potential_energy
+            character (len=*), parameter :: file_name = "energy.dump"
+            integer (int32), save :: file_ID
+            logical, save :: file_open = .false.
+
+            if (.not. file_open) then
+                call open_file(file_name, file_ID)
+                file_open = .true.
+            end if
+
+            write(file_ID, '(F20.15,F20.15,F20.15)')                                &
+                            kinetic_energy/number_of_particles,                     &
+                            potential_energy/number_of_particles,                   &
+                            (kinetic_energy+potential_energy)/number_of_particles
+        end subroutine
 
         subroutine write_array_to_file(file_name, array)
             implicit none

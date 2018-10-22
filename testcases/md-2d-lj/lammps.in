@@ -27,7 +27,7 @@ variable        ketot equal ke
 variable        petot equal pe
 variable        step  equal step
 
-timestep        0.01
+timestep        0.001
 fix             1 all print 1 "${step} ${ketot} ${petot}" file lammps.energy screen "no" title "#step ke pe"
 fix             2 all nve
 
