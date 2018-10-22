@@ -82,11 +82,10 @@ contains
         real (real64),   dimension(:),   allocatable :: types_real
         integer (int32), dimension(:),   allocatable :: types_read
         integer (int32) :: i
-        
+
         number_of_dimensions = 1
         number_of_particles  = 3
         out_file_name        = "testingfw.xyz"
-
 
         allocate(positions (number_of_dimensions, number_of_particles))
         allocate(types     (number_of_particles))
@@ -132,14 +131,11 @@ contains
             call assert_equals(types(i),       types_read(i),          "4  test_read_state : read types are not equal to the types just written to file")
         end do
 
-
         deallocate(positions)
         deallocate(positions_read)
         deallocate(types)
         deallocate(types_real)
         deallocate(types_read)
-
-
     end subroutine
 
     subroutine test_write_info()

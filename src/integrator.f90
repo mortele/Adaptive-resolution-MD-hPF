@@ -13,12 +13,12 @@ module integrator
                 half_move,                  &
                 move
 
-    ! To overload the integrate_one_step function in order to facilitate testing
+    ! To overload the integrate_one_step function in order to facilitate 
     ! testing with different force calculations, we write an explicit interface
     ! using the almost identical subroutines. 
     ! 
     ! TODO: Figure out if this is horrible, awful, godforbidden bad practice to
-    !       basically just copy past 95% of the code in these subroutines. Is 
+    !       basically just copy paste 95% of the code in these subroutines. Is 
     !       there a cleaner way to do this?
     interface integrate_one_step
         ! Takes arguments (position, velocities, forces) 
@@ -39,7 +39,7 @@ contains
         logical, save :: first_step = .true.
 
         if (first_step) then
-            forces = 0
+            forces = 0.0_real64
             call compute_forces(positions, forces)
             first_step = .false.
         end if
@@ -72,7 +72,7 @@ contains
         logical, save :: first_step = .true.
 
         if (first_step) then
-            forces = 0
+            forces = 0.0_real64
             call force_calculator(positions, forces)
             first_step = .false.
         end if
@@ -93,7 +93,7 @@ contains
         integer (int32) :: i
         
         do i = 1, number_of_particles
-            velocities(:, i) = velocities(:, i) + 0.5 * time_step / masses(i) * forces(:, i)
+            velocities(:, i) = velocities(:, i) + 0.5_real64 * time_step / masses(i) * forces(:, i)
         end do
     end subroutine half_move
 

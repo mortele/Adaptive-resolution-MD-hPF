@@ -7,3 +7,6 @@
 *.gcda
 *.dSYM
 *.DS_Store
+log.lammps
+lammps.dump
+lammps.energy

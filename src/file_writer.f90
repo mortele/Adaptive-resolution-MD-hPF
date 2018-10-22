@@ -10,7 +10,10 @@ module file_writer
                             time_step,              &
                             step_length,            &
                             number_of_time_steps,   &
-                            info_file_name
+                            info_file_name,         &
+                            system_size_x,          &
+                            system_size_y,          &
+                            system_size_z          
 
     
     implicit none
@@ -19,7 +22,8 @@ module file_writer
     public ::   write_state,            &
                 read_state,             &
                 close_outfile,          &
-                write_info             
+                write_info,             &
+                read_state_lammps           
 
 contains
 
@@ -173,6 +177,70 @@ contains
         close(file_ID)
     end subroutine write_info
 
+
+    subroutine read_state_lammps(file_name, positions, velocities, forces, types, masses)
+        real (real64),   dimension(:,:), intent(in out), allocatable :: positions
+        real (real64),   dimension(:,:), intent(in out), allocatable :: velocities
+        real (real64),   dimension(:,:), intent(in out), allocatable :: forces
+        real (real64),   dimension(:),   intent(in out), allocatable :: masses
+        integer (int32), dimension(:),   intent(in out), allocatable :: types
+        character (len=*), intent(in) :: file_name
+
+        integer (int32) ::  time_step_in_file,                  &
+                            file_ID,                            &
+                            i, j,                               &
+                            atom
+        real (real64), dimension(:), allocatable :: type_position_line
+        character (len=200) :: line
+        real (real64)   :: double
+        integer (int32) :: int
+        logical :: file_exists
+
+        inquire(file = file_name, exist = file_exists)
+        if (file_exists) then
+            open(   newunit = file_ID,      &
+            file    = file_name,    &
+            status  = "old",        &
+            action  = "read")
+        else 
+            print *, "Attempted to open file ", file_name
+            error stop "Error: The file does not exist."
+        end if 
+        do j = 1, 2
+            do i = 1, 3
+                read(file_ID, *) line
+            end do
+            read(file_ID, *) number_of_particles
+            read(file_ID, *) line
+            read(file_ID, *) system_size_x, system_size_x
+            read(file_ID, *) system_size_y, system_size_y
+            read(file_ID, *) system_size_z, system_size_z
+            system_size = [system_size_x, system_size_y, system_size_z]
+            read(file_ID, *) line
+            
+            number_of_dimensions = 3
+            if (j == 1) then
+                allocate(positions  (number_of_dimensions, number_of_particles))
+                allocate(velocities (number_of_dimensions, number_of_particles))
+                allocate(forces     (number_of_dimensions, number_of_particles))
+                allocate(types      (number_of_particles))
+                allocate(masses     (number_of_particles))
+            end if
+            forces = 0.0_real64
+
+            do i = 1, number_of_particles
+                read(file_ID, *)    int,                &
+                                    types(i),           &
+                                    masses(i),          &
+                                    positions(1,i),     &
+                                    positions(2,i),     &
+                                    positions(3,i),     &
+                                    velocities(1,i),    &
+                                    velocities(2,i),    &
+                                    velocities(3,i)
+            end do
+        end do
+    end subroutine
 
     subroutine close_outfile() 
         logical :: is_open
