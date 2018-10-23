@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 os.chdir("../")
 lmp = "/usr/local/bin/lmp_serial"
 subprocess.run("make clean",         shell=True, stdout=subprocess.PIPE)
-subprocess.run("make",               shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+subprocess.run("make -j8",           shell=True, stdout=subprocess.PIPE)#, stderr=subprocess.PIPE)
 subprocess.run(lmp + " < lammps.in", shell=True)
 subprocess.run("./md-2d-lj.app",     shell=True, stdout=subprocess.PIPE)
 os.chdir("analysis")

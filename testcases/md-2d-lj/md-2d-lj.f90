@@ -89,10 +89,9 @@ program md2dlj
                 file_open = .true.
             end if
 
-            write(file_ID, '(F20.15,F20.15,F20.15)')                                &
+            write(file_ID, '(F20.15,F20.15)')                                &
                             kinetic_energy/number_of_particles,                     &
-                            potential_energy/number_of_particles,                   &
-                            (kinetic_energy+potential_energy)/number_of_particles
+                            potential_energy/number_of_particles
         end subroutine
 
         subroutine write_array_to_file(file_name, array)
