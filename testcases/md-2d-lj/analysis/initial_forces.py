@@ -28,28 +28,21 @@ def getValuesLammps(step=0) :
             forces[:,i]     = line[9:12]
     return positions, velocities, forces
 
+def readValues(fileName) :
+    values = np.empty(shape=(3,100))
+    with open(os.path.join(os.path.dirname(__file__), '..', fileName)) as inFile :
+        content = inFile.readlines()
+        for i in range(len(content)) :
+            values = np.array([float(s) for s in content[i].split()])
+    return values
 
 
 # Read positions/forces.dump and lammps.dump 
-forces_md        = np.empty(shape=(3,100))
-positions_md     = np.empty(shape=(3,100))
-positions2_md    = np.empty(shape=(3,100))
+forces_md        = readValues('forces.dump')
+positions_md     = readValues('positions.dump')
+positions2_md    = readValues('positions2.dump')
 positions_lammps, _, forces_lammps = getValuesLammps(0)
 
-with open(os.path.join(os.path.dirname(__file__), '..', 'forces.dump')) as inFile :
-    content = inFile.readlines()
-    for i in range(len(content)) :
-        forces_md[:,i] = np.array([float(s) for s in content[i].split()])
-
-with open(os.path.join(os.path.dirname(__file__), '..', 'positions.dump')) as inFile :
-    content = inFile.readlines()
-    for i in range(len(content)) :
-        positions_md[:,i] = np.array([float(s) for s in content[i].split()])
-
-with open(os.path.join(os.path.dirname(__file__), '..', 'positions2.dump')) as inFile :
-    content = inFile.readlines()
-    for i in range(len(content)) :
-        positions2_md[:,i] = np.array([float(s) for s in content[i].split()])
 
 
 plt.figure()

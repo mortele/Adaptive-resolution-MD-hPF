@@ -32,11 +32,17 @@ contains
         real    (real64), dimension(:),   allocatable, intent(in out) :: masses
         integer (int32),  dimension(:),   allocatable, intent(in out) :: types
         logical,          optional,       intent(in)     :: silent
-
+        logical          :: silent_local
         integer (int32)  :: i, j, printing_unit
         real    (real64) :: T
         real    (real64), dimension(:) :: S(number_of_dimensions)
         T = temperature
+
+        if (.not. present(silent)) then
+            silent_local = .false.
+        else 
+            silent_local = silent
+        end if
 
         if (.not. allocated(positions)) then
             call allocate_arrays(positions, velocities, forces, masses, types)
@@ -75,7 +81,7 @@ contains
         ! Aliasing system_size for brevity while printing to terminal.
         S = system_size
 
-        if (.not. silent) then
+        if (.not. silent_local) then
             ! Print to standard out (terminal).
             printing_unit = output_unit
         else 
@@ -178,12 +184,16 @@ contains
         real    (real64), dimension(:),   allocatable, intent(in out) :: masses
         integer (int32),  dimension(:),   allocatable, intent(in out) :: types
         logical,          optional,                    intent(in out) :: silent
-
+        logical          :: silent_local
         integer (int32)  :: printing_unit
+
         if (.not. present(silent)) then
-            silent = .false.
+            silent_local = .false.
+        else 
+            silent_local = silent
         end if
-        if (.not. silent) then
+
+        if (.not. silent_local) then
             ! Print to standard out (terminal).
             printing_unit = output_unit
         else 
@@ -193,14 +203,14 @@ contains
 
         select case (initial_configuration)
         case ("fcc")             
-            call print_fcc_warning(silent)
+            call print_fcc_warning(silent_local)
             number_of_particles = 4 * fcc_number_of_unit_cells**3
             system_size_x = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size_y = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size_z = fcc_number_of_unit_cells * fcc_lattice_constant
             system_size   = [system_size_x, system_size_y, system_size_z]
             call allocate_arrays(positions, velocities, forces, masses, types)
-            call fcc_initial_state(positions, velocities, masses, types, silent)
+            call fcc_initial_state(positions, velocities, masses, types, silent_local)
 
         case ("random") 
             call allocate_arrays(positions, velocities, forces, masses, types)
@@ -218,7 +228,7 @@ contains
             write(printing_unit, *) "   <", initial_configuration, ">"
             write(printing_unit, *) "   was not recognized. Defaulting to a random system."
             if (present(silent)) then
-                call random_initial_state(positions, velocities, masses, types, silent)
+                call random_initial_state(positions, velocities, masses, types, silent_local)
             else 
                 call random_initial_state(positions, velocities, masses, types)
             end if

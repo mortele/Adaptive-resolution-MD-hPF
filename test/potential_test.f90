@@ -46,6 +46,7 @@ contains
         tollerance            = 1e-10
         lennard_jones_epsilon = 1.25875
         lennard_jones_sigma   = 3.29852
+        lennard_jones_cutoff  = 1000.0
         sigma6  = lennard_jones_sigma**6
         sigma12 = lennard_jones_sigma**12
 
@@ -70,6 +71,7 @@ contains
         tollerance            = 1e-10
         lennard_jones_epsilon = 1.25875
         lennard_jones_sigma   = 3.29852
+        lennard_jones_cutoff  = 1000.0
         sigma6  = lennard_jones_sigma**6
         sigma12 = lennard_jones_sigma**12
 
@@ -93,6 +95,7 @@ contains
         tollerance            = 1e-10
         lennard_jones_epsilon = 1.25875
         lennard_jones_sigma   = 3.29852
+        lennard_jones_cutoff  = 1000.0
 
         ! Tests involving only a single particle.
         number_of_particles = 1

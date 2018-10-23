@@ -50,7 +50,8 @@ contains
                 ! boundary condition distance between two particles.
                 distance_vector = compute_distance_minimum_image(distance_vector)
                 
-                dr_squared      = dot_product(distance_vector, distance_vector)
+                !dr_squared      = dot_product(distance_vector, distance_vector)
+                dr_squared = distance_vector(1)**2 + distance_vector(2)**2 + distance_vector(3)**2
                 if (dr_squared < cutoff_squared) then
                     force           = lennard_jones_force(dr_squared)
                     forces(:,i)     = forces(:,i) + force * distance_vector
@@ -69,7 +70,7 @@ contains
         pi = 3.141592653589793238462643383279502884197169399375105820974_real64
         volume = system_size(1) * system_size(2) * system_size(3)
         Vtail = (8.0_real64 / 3.0_real64) * pi * lennard_jones_epsilon * lennard_jones_sigma**3 * number_of_particles / volume * ((1.0_real64 / 3.0_real64) * (lennard_jones_sigma/lennard_jones_cutoff)**9 - (lennard_jones_sigma/lennard_jones_cutoff)**3)
-        print *, Vtail
+        !print *, Vtail
         !V = V + Vtail
         E = V + Ek
     end subroutine compute_forces
