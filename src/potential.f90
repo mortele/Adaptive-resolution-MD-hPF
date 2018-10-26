@@ -39,6 +39,7 @@ contains
         potential_at_cutoff = 4.0_real64 * lennard_jones_epsilon * sigma6 * r6 * (sigma6 * r6 - 1.0_real64)
 
         forces  = 0.0_real64 ! All elements of dimension(3,:) array is set to zero. 
+        force   = 0.0_real64
         V       = 0.0_real64
         Ek      = 0.0_real64
 
@@ -56,8 +57,16 @@ contains
                     force           = lennard_jones_force(dr_squared)
                     forces(:,i)     = forces(:,i) + force * distance_vector
                     forces(:,j)     = forces(:,j) - force * distance_vector
-                
+                    
                     V = V + lennard_jones_potential(dr_squared)
+                    
+                    !if ((i==2) .and. (j==11)) then
+                    !    print *, "ri:    ", positions(:2,i)
+                    !    print *, "rj:    ", positions(:2,j)
+                    !    print *, "delr:  ", distance_vector(1), distance_vector(2), distance_vector(3)
+                    !    print *, "r2:    ", dr_squared
+                    !    print *, "force: ", force(1)
+                    !end if
                 end if
             end do
         end do

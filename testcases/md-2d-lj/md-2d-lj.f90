@@ -37,9 +37,11 @@ program md2dlj
     lennard_jones_epsilon   = 1.0_real64
     lennard_jones_cutoff    = 4.0_real64
 
+
     ! Start on the second LAMMPS step and compare positions, velocities, and
     ! energies.
-    call read_state_lammps(lammps_file, 2, positions, velocities, forces, types, masses)
+    call read_state_lammps(lammps_file, 3, positions, velocities, forces, types, masses)
+    forces = 0.0_real64
     call compute_forces(positions, forces)
     call write_array_to_file("positions.dump",   positions)
     call write_array_to_file("velocities.dump",  velocities)
@@ -55,11 +57,13 @@ program md2dlj
     call read_state_lammps(lammps_file, 1, positions, velocities, forces, types, masses)
     call compute_forces(positions, forces)
 
-    do i = 1, 1000
+    do i = 1, 10
         call write_state(positions, i, types)
         call write_energy_to_file(Ek, V)
         call integrate_one_step(positions, velocities, forces)
     end do
+
+    print *, "md-2d-lj.f90 exited with exit code 0"
 
     contains 
         subroutine open_file(file_name, file_ID)

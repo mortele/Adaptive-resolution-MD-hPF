@@ -11,7 +11,7 @@ def compileAndRun() :
     subprocess.run("make clean",         shell=True, stdout=subprocess.PIPE)
     subprocess.run("make -j8",           shell=True, stdout=subprocess.PIPE)#, stderr=subprocess.PIPE)
     subprocess.run(lmp + " < lammps.in", shell=True)
-    subprocess.run("./md-2d-lj.app",     shell=True, stdout=subprocess.PIPE)
+    subprocess.run("./md-2d-lj.app",     shell=True)
     os.chdir("analysis")
 
 def getValuesLammps(step=0) :
@@ -50,13 +50,14 @@ if __name__ == '__main__':
     velocities_md    = readValues('velocities.dump')
     forces_md        = readValues('forces.dump')
 
-    positions2_md    = readValues('positions.dump')
-    velocities2_md   = readValues('velocities.dump')
-    forces2_md       = readValues('forces.dump')
+    positions2_md    = readValues('positions2.dump')
+    velocities2_md   = readValues('velocities2.dump')
+    forces2_md       = readValues('forces2.dump')
 
-    positions_lammps,  velocities_lammps,  forces_lammps  = getValuesLammps(0)
-    positions2_lammps, velocities2_lammps, forces2_lammps = getValuesLammps(1)
+    positions_lammps,  velocities_lammps,  forces_lammps  = getValuesLammps(1)
+    positions2_lammps, velocities2_lammps, forces2_lammps = getValuesLammps(2)
 
+    print(positions_lammps[:,0])
     markersize = 3.0
     low_limit = 0.9e-16
     up_limit = 1e-0
@@ -111,7 +112,6 @@ if __name__ == '__main__':
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
     plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'positions-secondstep.png'), transparent=True, bbox_inches='tight')
-    plt.show()
 
     # VELOCITY STEP 2
     plt.figure()
@@ -124,7 +124,6 @@ if __name__ == '__main__':
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
     plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'velocities-secondstep.png'), transparent=True, bbox_inches='tight')
-    plt.show()
 
     # FORCES STEP 2
     plt.figure()

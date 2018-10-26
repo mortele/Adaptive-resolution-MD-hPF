@@ -138,32 +138,28 @@
 
 
 
-\subsubsection*{Positions}
-Loading initial positions from a LAMMPS output file gives equal positions to within machine precision, c.f.\ \fig{1}. After a single time step at $\Delta t=0.001$, positions deviate from the LAMMPS trajectories by between $10^{-15}$ and $10^{-16}$, as seen in \fig{2}. 
+\subsubsection*{Positions and velocities}
+Loading initial positions from a LAMMPS output file gives equal positions to within machine precision, c.f.\ \fig{1}. After a single time step at $\Delta t=0.001$, positions deviate from the LAMMPS trajectories by between $10^{-15}$ and $10^{-16}$, as seen in \fig{1}. 
 
 Note that the first $100$ points represent the $x$ coordinate of all $N=100$ particles, the subsequent $100$ points reprents the $y$ coordinate, while the last $100$ are the $z$ component of the positions. Since we are working in 2D, the positions and forces in the $z$-direction should always vanish.
 
-\begin{figure}
+\begin{figure*}[p!]
 \centering
-\includegraphics[width=0.8\linewidth]{positions-firststep.png}
-\caption{Positions read in by the subroutine \inlinepy{read_state_lammps} in the \inlinepy{file_writer} module, after being dumped by \inlinepy{dump (...) x y z (...)} in \inlinepy{lammps.in} input script. Difference between LAMMPS output and the imported Fortran positions shown\textemdash should be zero to machine precision, which it is.\label{fig:1}}
-\end{figure}
-\begin{figure}
-\centering
-\includegraphics[width=0.8\linewidth]{positions-secondstep.png}
-\caption{Positions after a single time step at $\Delta t=0.001$, as compared to the LAMMPS trajectory positions. \label{fig:2}}
-\end{figure}
+\subfloat[positions, step 1] {\includegraphics[width=0.45\linewidth]{positions-firststep.png}}
+\subfloat[positions, step 2] {\includegraphics[width=0.45\linewidth]{positions-secondstep.png}} \\
+
+\subfloat[velocities, step 1] {\includegraphics[width=0.45\linewidth]{velocities-firststep.png}}
+\subfloat[velocities, step 2] {\includegraphics[width=0.45\linewidth]{velocities-secondstep.png}} \\
+
+\subfloat[forces, step 1] {\includegraphics[width=0.45\linewidth]{forces-firststep.png}}
+\subfloat[forces, step 2] {\includegraphics[width=0.45\linewidth]{forces-secondstep.png}}
+\caption{Positions and velocities read in from LAMMPS data on the left hand side, and comparison with subsequent LAMMPS data after integrating a single time step on the right hand side. The forces are calculated for both time steps, and the comparison with LAMMPS reference data is shown in the bottom two subplots.\label{fig:1}}
+\end{figure*}
 
 
 
 \subsubsection*{Forces}
 The initial forces\textemdash calculated at the exact positions of the LAMMPS particles\textemdash deviate from the LAMMPS values by up to $10^{-12}$, c.f.\ \fig{3}.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.8\linewidth]{forces-firststep.png}
-\caption{\label{fig:3}}
-\end{figure}
 
 
 
