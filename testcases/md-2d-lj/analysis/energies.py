@@ -33,7 +33,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'kinetic-energy.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__), '..',  'figures', 'kinetic-energy.png'), transparent=True, bbox_inches='tight')
     #plt.show()
     
     plt.figure()
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'potential-energy.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'potential-energy.png'), transparent=True, bbox_inches='tight')
 
 
     lammps_total = np.sum(lammps_energies, axis=0) 
@@ -69,5 +69,5 @@ if __name__ == '__main__':
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
     plt.legend(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'total-energy.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'total-energy.png'), transparent=True, bbox_inches='tight')
     plt.show()

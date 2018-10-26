@@ -75,7 +75,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'positions-firststep.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'positions-firststep.png'), transparent=True, bbox_inches='tight')
 
     # VELOCITY STEP 1
     plt.figure()
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'velocities-firststep.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'velocities-firststep.png'), transparent=True, bbox_inches='tight')
     
     # FORCES STEP 1
     plt.figure()
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     plt.subplots_adjust(left=0.3)
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'forces-firststep.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'forces-firststep.png'), transparent=True, bbox_inches='tight')
 
     # POSITION STEP 2
     plt.figure()
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'positions-secondstep.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'positions-secondstep.png'), transparent=True, bbox_inches='tight')
 
     # VELOCITY STEP 2
     plt.figure()
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'velocities-secondstep.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__), '..', 'figures', 'velocities-secondstep.png'), transparent=True, bbox_inches='tight')
 
     # FORCES STEP 2
     plt.figure()
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     plt.ylim((low_limit, up_limit))
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'forces-secondstep.png'), transparent=True, bbox_inches='tight')
+    plt.savefig(os.path.join(os.path.dirname(__file__),  '..', 'figures', 'forces-secondstep.png'), transparent=True, bbox_inches='tight')
     
     plt.show()
 
