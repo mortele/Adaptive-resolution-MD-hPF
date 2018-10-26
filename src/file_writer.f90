@@ -199,9 +199,9 @@ contains
         inquire(file = file_name, exist = file_exists)
         if (file_exists) then
             open(   newunit = file_ID,      &
-            file    = file_name,    &
-            status  = "old",        &
-            action  = "read")
+                    file    = file_name,    &
+                    status  = "old",        &
+                    action  = "read")
         else 
             print *, "Attempted to open file ", file_name
             error stop "Error: The file does not exist."
@@ -229,6 +229,7 @@ contains
             forces = 0.0_real64
 
             do i = 1, number_of_particles
+                !read(file_ID, fmt='(I3,I3,F20.15,F20.15,F20.15,F20.15,F20.15,F20.15,F20.15)')    int,                &
                 read(file_ID, *)    int,                &
                                     types(i),           &
                                     masses(i),          &

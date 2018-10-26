@@ -48,5 +48,5 @@ fix             1 all print 1 "${tstep} ${ketot} ${petot}" file lammps.energy sc
 fix             2 all nve
 
 dump            1 all custom 1 lammps.dump id type mass x y z vx vy vz fx fy fz c_keatom c_peatom 
-dump_modify     1 format line "%3d %d %3.1f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f"
-run             10
+dump_modify     1 format line "%3d %3d %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f"
+run             11

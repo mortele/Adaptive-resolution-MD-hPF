@@ -38,12 +38,13 @@ program md2dlj
     lennard_jones_cutoff    = 4.0_real64
 
     call read_state_lammps(lammps_file, positions, velocities, forces, types, masses)
-    
+
     call write_state(positions, 0, types)
 
     call compute_forces(positions, forces)
     call write_array_to_file("forces.dump",     forces)
     call write_array_to_file("positions.dump",  positions)
+    call write_array_to_file("velocities.dump", velocities)
 
     call write_energy_to_file(Ek, V)
     call integrate_one_step(positions, velocities, forces)
