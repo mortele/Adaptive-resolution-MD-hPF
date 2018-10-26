@@ -1,0 +1,191 @@
+\documentclass[a4paper, twocolumn]{article}
+
+% Included packages ---------------------------------------------------------- %
+\usepackage{lipsum}                          % Generate random, blind, filler-text.
+\usepackage[utf8]{inputenc}                  % utf-8 encoding, æ, ø , å, etc.
+\usepackage{a4wide}                          % Adjust margins to better fit A4 format.
+\usepackage{array}                           % Matrices.
+\usepackage{dsfont}                          % Math symbols.
+\usepackage{amsmath}                         % Math symbols, and enhanced matrices.
+\usepackage{amsfonts}                        % Math fonts.
+\usepackage{amssymb}                         % Additional symbols.
+\usepackage{mathrsfs}                        % Most additional symbols.
+\usepackage[pdftex]{graphicx}                % Improved inclusion of .pdf-graphics files.
+\usepackage{sidecap}                         % Floats with captions to the right/left.
+\usepackage{enumerate}                       % Change counters (arabic, roman, etc.).
+\usepackage{floatrow}                        % Multi-figure floats.
+\usepackage{subfig}                          % Multi-figure floats.
+\usepackage{bm}                              % Bolded text in math mode.
+\usepackage[framemethod=default]{mdframed}   % Make boxes.
+\usepackage{listings}                        % For including source code.
+\usepackage{mathtools}                       % Underbrackets, overbrackets.
+\usepackage[dvipsnames]{xcolor}              % Colors.
+\usepackage{capt-of}                         % Caption things which are not floats.
+\usepackage{fontawesome}                     % Github icon, etc. \faGithub
+\usepackage{sidecap}                         % Floats with captions on the side.
+\usepackage{tabularx}                        % Tables and stuff.
+\usepackage{tabulary}                        % Tables and stuff.
+\usepackage[sf,sl,outermarks]{titlesec}      % Change fonts in section{}, subsection{}, etc.
+\usepackage[subfigure]{tocloft}              % Change spacing between numbers and titles in TOC.
+\usepackage{booktabs}                        % \toprule, \midrule, etc. for tables.
+\usepackage{siunitx}                         % Allows S table column, aligning on decimal point.
+\usepackage{chngcntr}                        % Change counter behaviour, supress increment of sub counters.
+\usepackage[%                                % Adds functionality to captions.
+  tableposition = top,
+  labelsep      = period,
+  justification = raggedright,
+  format        = hang,
+  ]{caption}                                 
+\usepackage[%                                % Interactive references and links, colored.
+  colorlinks  = true,
+  linkcolor   = black,
+  urlcolor    = blue,
+  citecolor   = black,
+  linktocpage = true,
+  ]{hyperref}            
+\usepackage[%                                % References, in super-script form.
+  autocite    = superscript,
+  backend     = biber,
+  sortcites   = true,
+  style       = numeric-comp,
+  sorting     = none,
+  url         = false,
+  ]{biblatex}
+\usepackage[autostyle, english = american]{csquotes} % Assure quotation marks are inserted correctly aligned left/right.
+\MakeOuterQuote{"}
+
+% Package settings ----------------------------------------------------------- %
+\renewcommand{\thesection}{\Roman{section}}         % I, II, III, IV, etc. section numbering
+\renewcommand{\thesubsection}{\Alph{subsection}}    % A, B, C, etc. subsection numbering
+\renewcommand{\thesubsubsection}{}                  % Remove subsubsection numbering.
+\floatsetup[table]{capposition=top}                 % Place table captions above the table.
+\captionsetup[subfigure]{labelformat=empty}         % Remove the (a), (b), etc. tags from subfigures.
+\advance\cftsecnumwidth 1.0em\relax                 % Set the spacing between section headings and titles in TOC with tocloft.
+\advance\cftsubsecindent 1.0em\relax                % Set the spacing between subsection headings and titles in TOC with tocloft.
+\advance\cftsubsecnumwidth 1.0em\relax              % Set the spacing between subsubsection headings and titles in TOC with tocloft.
+\newcommand{\listingsfont}{\ttfamily}
+\newcommand{\inlinepy}[1]{\lstinline[language={python}]{#1}}
+\newcommand{\inlinecc}[1]{\lstinline[language={c++}]{#1}}
+\counterwithout*{subsection}{section}               % Dont reset the subsection counter on new \section{} calls.
+\renewcommand{\figurename}{FIG.}                    % Captions of figures read FIG.
+\renewcommand{\tablename}{TABLE}                    % Captions of tables read TABLE 
+\renewcommand{\thetable}{\Roman{table}}             % Number tables with roman numerals.
+
+% Section headings settings -------------------------------------------------- %
+\titleformat{\section}[hang]  % {command}[shape]
+  {\normalfont\bfseries}      % {format}
+  {\thesection.}              % {label}
+  {2ex}                       % {sep}
+  {\centering\MakeUppercase}  % {before-code}[after-code]
+
+\titleformat{\subsection}[hang] % {command}[shape]
+  {\normalfont\bfseries}        % {format}
+  {\thesubsection.}             % {label}
+  {1ex}                         % {sep}
+  {\centering}                  % {before-code}[after-code]
+
+\titleformat{\subsubsection}[hang]  % {command}[shape]
+  {\normalfont\bfseries}            % {format}
+  {}                                % {label}
+  {1ex}                             % {sep}
+  {\centering}                      % {before-code}[after-code]
+
+
+% References ----------------------------------------------------------------- %
+\newcommand{\Fig}[1]{Fig.\ \ref{fig:#1}}
+\newcommand{\fig}[1]{Fig.\ \ref{fig:#1}}
+\newcommand{\eq} [1]{Eq.\ (\ref{eq:#1})}
+\newcommand{\Eq} [1]{Eq.\ (\ref{eq:#1})}
+\newcommand{\tab}[1]{Table \ref{tab:#1}}
+\newcommand{\Tab}[1]{Table \ref{tab:#1}}
+
+% Matrices ------------------------------------------------------------------- %
+\newcommand{\mat} [2]{\begin{matrix}[#1] #2 \end{matrix}}    % Nothing enclosing it.
+\newcommand{\pmat}[2]{\begin{pmatrix}[#1] #2 \end{pmatrix}}  % Enclosing parentheses.
+\newcommand{\bmat}[2]{\begin{bmatrix}[#1] #2 \end{bmatrix}}  % Enclosing square brackets.
+\newcommand{\vmat}[2]{\begin{vmatrix}[#1] #2 \end{vmatrix}}  % Enclosing vertical bars.
+\newcommand{\Vmat}[2]{\begin{Vmatrix}[#1] #2 \end{Vmatrix}}  % Enclosing double bars.
+
+% Manually set alignment of rows / columns in matrices (mat, pmat, etc.) ----- %
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+
+% figures in multicols environment ------------------------------------------- %
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+
+% Set bibliography file and path for images.
+\graphicspath{{figures/}}
+
+% Black frame with gray background ------------------------------------------ %
+\definecolor{gray}{gray}{0.9}
+\newmdenv[linecolor=white,backgroundcolor=gray]{grayframe}
+
+
+% Title
+\font\titlefont=cmr12 at 16pt
+\title{{\titlefont Test case: 2D Lennard-Jones fluid versus lammps output}}
+\author{Morten Ledum \\ \faGithub \ {\small \href{https://github.com/mortele}{github.com/mortele}}}
+% ---------------------------------------------------------------------------- %
+% ---------------------------------------------------------------------------- %
+\begin{document}
+\maketitle
+
+
+
+\subsubsection*{Positions}
+Loading initial positions from a LAMMPS output file gives equal positions to within machine precision, c.f.\ \fig{1}. After a single time step at $\Delta t=0.001$, positions deviate from the LAMMPS trajectories by between $10^{-15}$ and $10^{-16}$, as seen in \fig{2}. 
+
+Note that the first $100$ points represent the $x$ coordinate of all $N=100$ particles, the subsequent $100$ points reprents the $y$ coordinate, while the last $100$ are the $z$ component of the positions. Since we are working in 2D, the positions and forces in the $z$-direction should always vanish.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\linewidth]{positions-firststep.png}
+\caption{Positions read in by the subroutine \inlinepy{read_state_lammps} in the \inlinepy{file_writer} module, after being dumped by \inlinepy{dump (...) x y z (...)} in \inlinepy{lammps.in} input script. Difference between LAMMPS output and the imported Fortran positions shown\textemdash should be zero to machine precision, which it is.\label{fig:1}}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\linewidth]{positions-secondstep.png}
+\caption{Positions after a single time step at $\Delta t=0.001$, as compared to the LAMMPS trajectory positions. \label{fig:2}}
+\end{figure}
+
+
+
+\subsubsection*{Forces}
+The initial forces\textemdash calculated at the exact positions of the LAMMPS particles\textemdash deviate from the LAMMPS values by up to $10^{-12}$, c.f.\ \fig{3}.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\linewidth]{forces-firststep.png}
+\caption{\label{fig:3}}
+\end{figure}
+
+
+
+\subsubsection*{Energies}
+Total energies calculated deviate from 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\linewidth]{kinetic-energy.png}
+\caption{\label{fig:4}}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\linewidth]{potential-energy.png}
+\caption{\label{fig:5}}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\linewidth]{total-energy.png}
+\caption{\label{fig:6}}
+\end{figure}
+\end{document}
+
+
+

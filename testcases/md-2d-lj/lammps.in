@@ -44,7 +44,7 @@ variable        petot equal pe
 variable        tstep equal step
 
 timestep        0.001
-fix             1 all print 1 "${tstep} ${ketot} ${petot}" file lammps.energy screen "no" title "#step ke pe"
+fix             1 all print 1 "${tstep} ${ketot} ${petot}" file lammps.energy screen "no" title "#"
 fix             2 all nve
 
 dump            1 all custom 1 lammps.dump id type mass x y z vx vy vz fx fy fz c_keatom c_peatom 
