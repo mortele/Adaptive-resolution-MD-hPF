@@ -37,25 +37,28 @@ program md2dlj
     lennard_jones_epsilon   = 1.0_real64
     lennard_jones_cutoff    = 4.0_real64
 
-    call read_state_lammps(lammps_file, positions, velocities, forces, types, masses)
-
-    call write_state(positions, 0, types)
-
+    ! Start on the second LAMMPS step and compare positions, velocities, and
+    ! energies.
+    call read_state_lammps(lammps_file, 2, positions, velocities, forces, types, masses)
     call compute_forces(positions, forces)
-    call write_array_to_file("forces.dump",     forces)
-    call write_array_to_file("positions.dump",  positions)
-    call write_array_to_file("velocities.dump", velocities)
-
-    call write_energy_to_file(Ek, V)
+    call write_array_to_file("positions.dump",   positions)
+    call write_array_to_file("velocities.dump",  velocities)
+    call write_array_to_file("forces.dump",      forces)
+    
+    ! Integrate a single step, and compare again.
     call integrate_one_step(positions, velocities, forces)
-    call write_array_to_file("positions2.dump", positions)
-    call write_energy_to_file(Ek, V)
+    call write_array_to_file("positions2.dump",  positions)
+    call write_array_to_file("velocities2.dump", velocities)
+    call write_array_to_file("forces2.dump",     forces)
+    
+    ! Reload on initial LAMMPS step and integrate.
+    call read_state_lammps(lammps_file, 1, positions, velocities, forces, types, masses)
+    call compute_forces(positions, forces)
 
-    call write_state(positions, 1, types)
-    do i = 1, 8
-        call integrate_one_step(positions, velocities, forces)
+    do i = 1, 1000
+        call write_state(positions, i, types)
         call write_energy_to_file(Ek, V)
-        call write_state(positions, i+2, types)
+        call integrate_one_step(positions, velocities, forces)
     end do
 
     contains 
@@ -108,7 +111,7 @@ program md2dlj
             call open_file(file_name, file_ID)
 
             do i = 1, number_of_particles
-                write(file_ID, '(F20.15,F20.15,F20.15)') array(:,i)
+                write(file_ID, '(F25.15,F25.15,F25.15)') array(:,i)
             end do
         end subroutine
 

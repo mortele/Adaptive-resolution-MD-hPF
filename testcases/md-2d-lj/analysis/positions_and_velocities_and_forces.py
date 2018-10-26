@@ -46,29 +46,25 @@ if __name__ == '__main__':
     compileAndRun()
 
     # Read positions/forces.dump and lammps.dump 
-    forces_md        = readValues('forces.dump')
     positions_md     = readValues('positions.dump')
-    positions2_md    = readValues('positions2.dump')
     velocities_md    = readValues('velocities.dump')
-    positions_lammps, velocities_lammps, forces_lammps = getValuesLammps(0)
+    forces_md        = readValues('forces.dump')
+
+    positions2_md    = readValues('positions.dump')
+    velocities2_md   = readValues('velocities.dump')
+    forces2_md       = readValues('forces.dump')
+
+    positions_lammps,  velocities_lammps,  forces_lammps  = getValuesLammps(0)
+    positions2_lammps, velocities2_lammps, forces2_lammps = getValuesLammps(1)
 
     markersize = 3.0
     low_limit = 0.9e-16
     up_limit = 1e-0
     fontsize = 16
 
-    plt.figure()
     plt.rc('text', usetex=True)
-    difference = np.abs(np.ravel(forces_md)-np.ravel(forces_lammps))
-    difference[difference<1e-16] = 1e-16
-    plt.semilogy(difference, 'r.', markersize=markersize)
-    plt.ylabel(r"$|F_{md} - F_{lammps}|$", fontsize=fontsize)
-    plt.ylim((low_limit, up_limit))
-    plt.subplots_adjust(left=0.3)
-    plt.xticks(fontsize=fontsize)
-    plt.yticks(fontsize=fontsize)
-    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'forces-firststep.png'), transparent=True, bbox_inches='tight')
 
+    # POSITION STEP 1
     plt.figure()
     difference = np.abs(np.ravel(positions_md)-np.ravel(positions_lammps))
     difference[difference<1e-16] = 1e-16
@@ -80,6 +76,7 @@ if __name__ == '__main__':
     plt.yticks(fontsize=fontsize)
     plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'positions-firststep.png'), transparent=True, bbox_inches='tight')
 
+    # VELOCITY STEP 1
     plt.figure()
     difference = np.abs(np.ravel(velocities_md)-np.ravel(velocities_lammps))
     difference[difference<1e-16] = 1e-16
@@ -90,10 +87,22 @@ if __name__ == '__main__':
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
     plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'velocities-firststep.png'), transparent=True, bbox_inches='tight')
-
+    
+    # FORCES STEP 1
     plt.figure()
-    positions_lammps, _, _ = getValuesLammps(1)
-    difference = np.abs(np.ravel(positions2_md)-np.ravel(positions_lammps))
+    difference = np.abs(np.ravel(forces_md)-np.ravel(forces_lammps))
+    difference[difference<1e-16] = 1e-16
+    plt.semilogy(difference, 'r.', markersize=markersize)
+    plt.ylabel(r"$|F_{1,md} - F_{1,lammps}|$", fontsize=fontsize)
+    plt.ylim((low_limit, up_limit))
+    plt.subplots_adjust(left=0.3)
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
+    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'forces-firststep.png'), transparent=True, bbox_inches='tight')
+
+    # POSITION STEP 2
+    plt.figure()
+    difference = np.abs(np.ravel(positions2_md)-np.ravel(positions2_lammps))
     difference[difference<1e-16] = 1e-16
     plt.semilogy(difference, 'r.', markersize=markersize)
     plt.ylabel(r"$|r_{2,md} - r_{2,lammps}|$", fontsize=fontsize)
@@ -104,4 +113,30 @@ if __name__ == '__main__':
     plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'positions-secondstep.png'), transparent=True, bbox_inches='tight')
     plt.show()
 
+    # VELOCITY STEP 2
+    plt.figure()
+    difference = np.abs(np.ravel(velocities2_md)-np.ravel(velocities2_lammps))
+    difference[difference<1e-16] = 1e-16
+    plt.semilogy(difference, 'r.', markersize=markersize)
+    plt.ylabel(r"$|v_{2,md} - v_{2,lammps}|$", fontsize=fontsize)
+    plt.subplots_adjust(left=0.3)
+    plt.ylim((low_limit, up_limit))
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
+    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'velocities-secondstep.png'), transparent=True, bbox_inches='tight')
+    plt.show()
+
+    # FORCES STEP 2
+    plt.figure()
+    difference = np.abs(np.ravel(forces2_md)-np.ravel(forces2_lammps))
+    difference[difference<1e-16] = 1e-16
+    plt.semilogy(difference, 'r.', markersize=markersize)
+    plt.ylabel(r"$|F_{2,md} - F_{2,lammps}|$", fontsize=fontsize)
+    plt.subplots_adjust(left=0.3)
+    plt.ylim((low_limit, up_limit))
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
+    plt.savefig(os.path.join(os.path.dirname(__file__), 'figures', 'forces-secondstep.png'), transparent=True, bbox_inches='tight')
+    
+    plt.show()
 

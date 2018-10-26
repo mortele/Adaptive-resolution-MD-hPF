@@ -52,12 +52,17 @@ if __name__ == '__main__':
     md_total     = np.sum(md_energies, axis=0)
     md_diff      = np.array([np.abs(md_total[i]-md_total[0]) for i in range(len(md_total))])
     md_diff[0]   = 1e-16
+    lammps_diff   = np.array([np.abs(lammps_total[i]-lammps_total[0]) for i in range(len(lammps_total))])
+    lammps_diff[0] = 1e-16
+
+    print(lammps_total)
 
     plt.figure()
     difference = np.abs(md_total - lammps_total)
     difference[difference<1e-16] = 1e-16
     plt.semilogy(difference, 'b-o', markersize=markersize, label=r'$|E_{md}-E_{lammps}|$')
     plt.semilogy(md_diff,    'r-o', markersize=markersize, label=r'$|\Delta E_{md}|$')
+    plt.semilogy(lammps_diff,    'k-o', markersize=markersize, label=r'$|\Delta E_{lammps}|$')
     plt.ylabel(r"$|\Delta E_{total}|$", fontsize=fontsize)
     plt.subplots_adjust(left=0.3)
     plt.ylim((low_limit, up_limit))

@@ -13,7 +13,7 @@ atom_style      atomic
 #   o ----
 # 
 # with all z-components set to 0.05 to avoid the periodic boundary at z=0.
-lattice         sq 1.0
+lattice         sq 2.0
 region          simbox block 0 10 0 10 0.0 0.1
 create_box      1 simbox
 create_atoms    1 box
@@ -49,4 +49,4 @@ fix             2 all nve
 
 dump            1 all custom 1 lammps.dump id type mass x y z vx vy vz fx fy fz c_keatom c_peatom 
 dump_modify     1 format line "%3d %3d %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f %20.15f"
-run             11
+run             10

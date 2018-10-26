@@ -26,3 +26,4 @@ lammps.energy
 *.toc
 *.pyc
 .pytest_cache/
+*.dump

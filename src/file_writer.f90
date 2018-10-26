@@ -178,7 +178,8 @@ contains
     end subroutine write_info
 
 
-    subroutine read_state_lammps(file_name, positions, velocities, forces, types, masses)
+    subroutine read_state_lammps(file_name, time_step, positions, velocities, forces, types, masses)
+        integer, intent(in) :: time_step
         real (real64),   dimension(:,:), intent(in out), allocatable :: positions
         real (real64),   dimension(:,:), intent(in out), allocatable :: velocities
         real (real64),   dimension(:,:), intent(in out), allocatable :: forces
@@ -187,17 +188,21 @@ contains
         character (len=*), intent(in) :: file_name
 
         integer (int32) ::  time_step_in_file,                  &
-                            file_ID,                            &
                             i, j,                               &
                             atom
+        integer (int32) :: file_ID
         real (real64), dimension(:), allocatable :: type_position_line
         character (len=200) :: line
         real (real64)   :: double
         integer (int32) :: int
-        logical :: file_exists
+        logical :: file_exists, file_opened
 
         inquire(file = file_name, exist = file_exists)
         if (file_exists) then
+            inquire(file = file_name, opened = file_opened)
+            if (file_opened) then
+                close(file_ID)
+            end if
             open(   newunit = file_ID,      &
                     file    = file_name,    &
                     status  = "old",        &
@@ -206,7 +211,7 @@ contains
             print *, "Attempted to open file ", file_name
             error stop "Error: The file does not exist."
         end if 
-        do j = 1, 2
+        do j = 1, time_step
             do i = 1, 3
                 read(file_ID, *) line
             end do
@@ -219,7 +224,7 @@ contains
             read(file_ID, *) line
             
             number_of_dimensions = 3
-            if (j == 1) then
+            if (.not. allocated(positions)) then
                 allocate(positions  (number_of_dimensions, number_of_particles))
                 allocate(velocities (number_of_dimensions, number_of_particles))
                 allocate(forces     (number_of_dimensions, number_of_particles))
@@ -241,6 +246,7 @@ contains
                                     velocities(3,i)
             end do
         end do
+        close(file_ID)
     end subroutine
 
     subroutine close_outfile() 
