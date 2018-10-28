@@ -80,7 +80,6 @@ contains
         else 
             write(file_ID, *) "#"
         end if
-        
         do i = 1, number_of_particles  
 
             ! The start of each row is the particle identifier, contained in

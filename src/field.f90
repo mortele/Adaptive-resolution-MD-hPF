@@ -86,6 +86,7 @@ contains
             do j = 1, number_of_field_nodes_y 
                 do k = 1, number_of_field_nodes_z 
                     node_positions(:,i,j,k) = [i-1,j-1,k-1] * l
+                    position_of_density_nodes(:,i,j,k) = node_positions(:,i,j,k)
                 end do
             end do
         end do

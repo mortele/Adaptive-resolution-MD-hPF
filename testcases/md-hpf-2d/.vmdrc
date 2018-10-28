@@ -1,0 +1,7 @@
+mol default style CPK
+mol addfile positions.xyz filebonds off autobonds off 
+topo addbond 1 2
+display resize 1000 800
+
+atomselect top "index > 1200 and x > 42.42"
+atomselect0 list
