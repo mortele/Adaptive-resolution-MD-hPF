@@ -1,7 +1,58 @@
+menu main on
+menu graphics on
+
+
 mol default style CPK
 mol addfile positions.xyz filebonds off autobonds off 
-topo addbond 1 2
 display resize 1000 800
 
+atomselect top "index > 1200 and x < 42.42"
 atomselect top "index > 1200 and x > 42.42"
-atomselect0 list
+atomselect top "index < 1200"
+
+#atomselect0 --> d field w. x > 0.5*sim box
+#atomselect1 --> d field w. x < 0.5*sim box
+#atomselect2 --> all atoms
+
+set shown  atomselect0
+set hidden atomselect1
+set atoms  atomselect2
+
+$shown set radius 0.5
+$hidden set radius 0.5
+
+#$shown moveby {0.0 0.0 35.0}
+
+
+package require topotools 1.0 
+
+foreach i [$shown get index] {
+	set close [atomselect top "within 10 of index $i"]
+	foreach j [$close get index] {
+		if {$i != $j} {
+			if {$j > 1200} {
+				topo addbond $i $j
+			}
+		}
+	}
+}
+
+topo addbond 1200 1201
+topo addbond 1200 1205
+topo addbond 1225 1226
+topo addbond 1226 1227
+topo addbond 1227 1228
+topo addbond 1228 1229
+set first [atomselect top "index 1200"]
+$first set radius 0.5
+#$shown  moveby {0.0 0.0 -35.0}
+
+
+user add key q {rotate z by 10}
+user add key a {rotate z by -10} 
+
+user add key w {rotate y by 10} 
+user add key s {rotate y by -10} 
+
+user add key e {rotate x by 10} 
+user add key d {rotate x by -10} 

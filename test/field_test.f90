@@ -18,7 +18,8 @@ module field_test
                             position_of_density_nodes,          &
                             density_gradient,                   &
                             number_of_field_nodes,              &
-                            compute_density_gradient              ! Subroutine
+                            compute_density_gradient,           & ! Subroutine
+                            interpolate_density_field             ! Subroutine
     
     use particles,  only:   positions,                          &
                             masses
@@ -29,7 +30,8 @@ module field_test
                 teardown,                       &
                 test_compute_density_field,     &
                 test_allocate_field_arrays,     &
-                test_compute_density_gradient
+                test_compute_density_gradient,  &
+                test_interpolate_density_field
 contains
 
     subroutine setup
@@ -430,5 +432,56 @@ contains
             deallocate(position_of_density_nodes)
         end if
     end subroutine test_allocate_field_arrays
+
+    subroutine test_interpolate_density_field()
+        implicit none
+        integer (int32) :: i, j, k
+        real (real64), allocatable, dimension(:) :: point
+        real (real64) :: interpolated_density
+
+        ! We start with a single cube (8 density lattice points) with the 
+        ! density at (0,0,0) being 1 and vanishing at all other lattice points.
+        ! The interpolated density at points on the face of the cube *should* be
+        ! 1-d, with d being the distance between the point and the (0,0,0) 
+        ! lattice point.
+        number_of_field_nodes_x = 2
+        number_of_field_nodes_y = 2
+        number_of_field_nodes_z = 2
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+        number_of_particles   = 1
+        number_of_dimensions  = 3
+        system_size_x         = 2.0_real64
+        system_size_y         = 2.0_real64
+        system_size_z         = 2.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+
+        if (allocated(positions)) then
+            deallocate(positions)
+        end if
+        if (allocated(masses)) then
+            deallocate(masses) 
+        end if
+
+        call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
+        density_field = 0.0_real64
+        allocate(point(number_of_dimensions))
+        allocate(positions(number_of_dimensions, number_of_particles))
+        allocate(masses   (number_of_particles))
+        masses         = 1.0
+        positions(:,1) = [0.0, 0.0, 0.0]
+        
+        ! This call sets up position_of_density_nodes, so it is neccessary even
+        ! though we throw away the computed density values.
+        call compute_density_field(positions, masses)
+        density_field = 0.0_real64
+        density_field(1,1,1) = 1.0_real64
+        point = 0.0_real64
+        point(1) = 0.5_real64
+
+        interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, point)
+        
+        deallocate(positions)
+        deallocate(masses)
+    end subroutine test_interpolate_density_field
 
 end module field_test

@@ -1,5 +1,5 @@
 program mdhpf2d
-    use, intrinsic :: iso_fortran_env,    only: real64, int32
+    use, intrinsic :: iso_fortran_env,    only: real64, int32, output_unit
     use particles,          only: positions,                &
                                   velocities,               &
                                   forces,                   &
@@ -78,17 +78,27 @@ program mdhpf2d
     allocate(field_visualization_positions(number_of_dimensions, number_of_particles+number_of_field_nodes_total))
 
     do i = 1, 1000
+        if (modulo(i,10) == 0) then
+            write(output_unit, fmt="(f10.1,a1)", advance="no") (i / 1000.0)*100, "%"
+            write(output_unit, fmt="(a2)", advance="no") char(13) ! carriage return, \r
+        end if
         !call write_state(positions, i, types)
         !call write_state_density_visualization(positions, field_visualization_positions, i, types)
-        call write_energy_to_file(Ek, V)
+        !call write_energy_to_file(Ek, V)
         call integrate_one_step(positions, velocities, forces)
-        call compute_density_field(positions, masses)
+        !call compute_density_field(positions, masses)
     end do
+    print *, "thermalization done"
 
-    do i = 1, 1000
+    do i = 1, 10000
+        if (modulo(i,10) == 0) then
+            write(output_unit, fmt="(f10.1,a1)", advance="no") (i / 1000.0)*100, "%"
+            write(output_unit, fmt="(a2)", advance="no") char(13) ! carriage return, \r
+        end if
+
         !call write_state(positions, i, types)
         call write_state_density_visualization(positions, field_visualization_positions, i, types)
-        call write_energy_to_file(Ek, V)
+        !call write_energy_to_file(Ek, V)
         call integrate_one_step(positions, velocities, forces)
         call compute_density_field(positions, masses)
     end do
@@ -181,8 +191,11 @@ program mdhpf2d
                     do k = 1, number_of_field_nodes_z
                         sum_z = sum_z + density_field(i,j,k)
                     end do
-                    field_visualization_positions(3, index) = field_visualization_positions(3, index) + 1.0_real64 + sum_z
-                    index = index + 1                    
+                    field_visualization_positions(3, index) = ((field_visualization_positions(3, index) + sum_z)**(1./3.))**3 - 15
+                    index = index + 1
+                    if (field_visualization_positions(1, index) > system_size_x / 2.0) then
+                        field_visualization_positions(3, index) = field_visualization_positions(3, index) + 50
+                    end if
                 end do
             end do
         end subroutine

@@ -20,7 +20,8 @@ module field
 
     public  ::  compute_density_field,                      &
                 allocate_field_arrays,                      &
-                compute_density_gradient
+                compute_density_gradient,                   &
+                interpolate_density_field
 
     private ::  compute_density_gradient_2,                 &
                 compute_density_gradient_higher_order
@@ -225,6 +226,60 @@ contains
         density_gradient = 0
 
     end subroutine compute_density_gradient_higher_order
+
+    real (real64) function interpolate_density_field(density_field,             &
+                                                     position_of_density_nodes, &
+                                                     point)                     &
+                result(interpolated_density)
+        implicit none
+        real (real64), allocatable, intent(in), dimension(:,:,:)   :: density_field
+        real (real64), allocatable, intent(in), dimension(:,:,:,:) :: position_of_density_nodes
+        real (real64), allocatable, intent(in), dimension(:)       :: point
+
+        integer :: j, i, k, x, y, z
+        integer, allocatable, dimension(:) :: node_vector
+        real (real64), allocatable, dimension(:) :: partial_volume, cube
+        real (real64) :: lattice_edge, point_edge
+
+        ! There are 2ⁿ nearest neighbor lattice points in a system of n 
+        ! dimensions, i.e. a hyper-cube in n dimensions has 2ⁿ corners.
+        allocate(partial_volume(2**number_of_dimensions))
+        allocate(node_vector(number_of_dimensions))
+        allocate(cube(number_of_dimensions))
+
+        ! Compute which field densities are closest, i.e. which (hyper-)cube we 
+        ! are in.
+        do j = 1, number_of_dimensions 
+            node_vector(j) = floor(point(j) / l(j)) + 1
+        end do
+        
+        ! Compute the partial volumes enclosed by the (hyper-)cubes with corners 
+        ! in the interpolation point, and the field density vertices.
+        interpolated_density = 0.0_real64
+        do j = 1, 2**number_of_dimensions
+
+            ! Compute the cube sides of the partial volume corresponding to 
+            ! lattice vertex j.
+            do i = 1, number_of_dimensions
+                lattice_edge = position_of_density_nodes(i, node_vector(1), node_vector(2), node_vector(3))
+                point_edge   = point(i)
+                cube(i) = abs(lattice_edge - point_edge)
+                print *, cube(i)
+            end do
+
+            partial_volume(j) = cube(1)
+            do i = 2, number_of_dimensions
+                partial_volume(j) = partial_volume(j) * cube(i)
+            end do
+        end do
+        do i = 1, 2**number_of_dimensions
+            print *, i, node_vector
+        end do
+        interpolated_density = 0.0_real64
+
+        
+
+    end function interpolate_density_field
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
         implicit none
