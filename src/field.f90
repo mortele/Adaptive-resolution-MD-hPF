@@ -232,9 +232,9 @@ contains
                                                      point)                     &
                 result(interpolated_density)
         implicit none
-        real (real64), allocatable, intent(in), dimension(:,:,:)   :: density_field
-        real (real64), allocatable, intent(in), dimension(:,:,:,:) :: position_of_density_nodes
-        real (real64), allocatable, intent(in), dimension(:)       :: point
+        real (real64), intent(in), dimension(:,:,:)   :: density_field
+        real (real64), intent(in), dimension(:,:,:,:) :: position_of_density_nodes
+        real (real64), intent(in), dimension(:)       :: point
 
         integer :: j, i, k, x, y, z, x0, x1
         integer, allocatable, dimension(:,:) :: offset

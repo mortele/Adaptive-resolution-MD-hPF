@@ -7,7 +7,9 @@ print("\nField values:")
 for i in range(2) :
     for j in range(2) :
         for k in range(2) :
-            print(i+1, j+1, k+1, field[i,j,k])
+            print("density_field(", i+1, ",", j+1, ",", k+1, ") = ", end="")
+            print(field[i,j,k], end="")
+            print("_real64")
 
 # Scipy interpolator.
 x = np.array([0, 1])
@@ -21,11 +23,21 @@ for i in range(N) :
 
 print("\nEvaluation points:")
 for i in range(N) :
-    print(points[i,:])
+    print("points(:,", i+1, ") = [", end="")
+    for j in range(3) :
+        print(points[i,j], end="")
+        if j != 2 :
+            print("_real64, ", end="")
+        else :
+            print("_real64]")
+
 
 # Interpolated values.
 v = interpolator(points, method="linear")
 
 print("\nInterpolated values:")
 for i in range(N) :
-    print(v[i])
+    print("values(", i+1, ") = ", end="")
+    print(v[i], end="")
+    print("_real64")
+

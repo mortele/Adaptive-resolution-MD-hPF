@@ -436,7 +436,8 @@ contains
     subroutine test_interpolate_density_field()
         implicit none
         integer (int32) :: i, j, k
-        real (real64), allocatable, dimension(:) :: point
+        real (real64), allocatable, dimension(:,:) :: points
+        real (real64), allocatable, dimension(:)   :: point, values
         real (real64) :: interpolated_density
 
         ! We start with a single cube (8 density lattice points) with the 
@@ -495,6 +496,48 @@ contains
             end do
         end do
 
+        ! Next we test on some random data generated and interpolated using 
+        ! the scipy.interpolate package in python3 (script in /tools folder).
+        density_field( 1 , 1 , 1 ) = 0.47919988065709096_real64
+        density_field( 1 , 1 , 2 ) = 0.4432262866925848_real64
+        density_field( 1 , 2 , 1 ) = 0.14775650101900195_real64
+        density_field( 1 , 2 , 2 ) = 0.3311914156552239_real64
+        density_field( 2 , 1 , 1 ) = 0.544945955559647_real64
+        density_field( 2 , 1 , 2 ) = 0.33486182332430936_real64
+        density_field( 2 , 2 , 1 ) = 0.28336184861496694_real64
+        density_field( 2 , 2 , 2 ) = 0.7670556317983035_real64
+
+        allocate(points(number_of_dimensions, 10))
+        points(:, 1 ) = [0.3226243761072245_real64, 0.16000928172147622_real64, 0.07474857607741736_real64]
+        points(:, 2 ) = [0.5092014137865475_real64, 0.1184896077950004_real64, 0.25241336618190535_real64]
+        points(:, 3 ) = [0.35834120119087876_real64, 0.2809403053449454_real64, 0.0003234148574184914_real64]
+        points(:, 4 ) = [0.23480781215213598_real64, 0.7843375272202351_real64, 0.9271719737772645_real64]
+        points(:, 5 ) = [0.5604832314057514_real64, 0.5011060615131893_real64, 0.36617926974252146_real64]
+        points(:, 6 ) = [0.9363242421592629_real64, 0.7424379445058036_real64, 0.9412666162250206_real64]
+        points(:, 7 ) = [0.8282735698757658_real64, 0.9659206984116183_real64, 0.2605764978122821_real64]
+        points(:, 8 ) = [0.9899606876712709_real64, 0.7170472284509276_real64, 0.22977023945233688_real64]
+        points(:, 9 ) = [0.8239128542674138_real64, 0.7495958518805627_real64, 0.18555519519490316_real64]
+        points(:, 10 ) = [0.43629733663334413_real64, 0.85447599895436_real64, 0.4369060699031969_real64]
+
+        allocate(values(10))
+        values( 1 ) = 0.448550408370945_real64
+        values( 2 ) = 0.4599482323769342_real64
+        values( 3 ) = 0.41668007845152427_real64
+        values( 4 ) = 0.41683986940539497_real64
+        values( 5 ) = 0.40972231149742805_real64
+        values( 6 ) = 0.6196626661445901_real64
+        values( 7 ) = 0.37656402561364555_real64
+        values( 8 ) = 0.421864931428537_real64
+        values( 9 ) = 0.3796523928562688_real64
+        values( 10 ) = 0.3609886588271966_real64
+
+        do i = 1, 10
+            interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, points(:,i))
+            call assert_equals(values(i), interpolated_density, 1e-14_real64, "21 test_interpolate_density_field : interpolated density does not equal the scipy.interpolate values for the tested reference points / field values")
+        end do
+
+        deallocate(points)
+        deallocate(values)
         deallocate(positions)
         deallocate(masses)
     end subroutine test_interpolate_density_field
