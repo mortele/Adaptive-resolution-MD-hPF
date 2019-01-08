@@ -476,9 +476,13 @@ contains
         density_field = 0.0_real64
         density_field(1,1,1) = 1.0_real64
         point = [0.5, 0.5, 0.5]
-
         interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, point)
         
+        ! A single field vertex with value 1, and all others vanishing, should
+        ! result in an interpolated value of 1 / 8 evaluated in the middle of 
+        ! the cube.
+        call assert_equals(1.0_real64 / 8.0_real64, interpolated_density, "11 test_interpolate_density_field : interpolated density in the middle of the cube was not calculated correctly")
+
         deallocate(positions)
         deallocate(masses)
     end subroutine test_interpolate_density_field

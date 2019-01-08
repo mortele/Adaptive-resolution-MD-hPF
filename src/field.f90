@@ -236,7 +236,7 @@ contains
         real (real64), allocatable, intent(in), dimension(:,:,:,:) :: position_of_density_nodes
         real (real64), allocatable, intent(in), dimension(:)       :: point
 
-        integer :: j, i, k, x, y, z
+        integer :: j, i, k, x, y, z, x0, x1
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
         real (real64), allocatable, dimension(:)   :: partial_volume, cube
@@ -280,7 +280,6 @@ contains
                                                          node_vector(3) + offset(j, 3))
                 point_edge   = point(i)
                 cube(i) = abs(lattice_edge - point_edge)
-                print *, cube(i)
             end do
             
             partial_volume(j) = cube(1)
@@ -298,12 +297,17 @@ contains
         end do 
         denominator = 1.0_real64
         do i = 1, number_of_dimensions
-            denominator = denominator * (point(i) - position_of_density_nodes(i,                &
-                                                                              node_vector(1),   &
-                                                                              node_vector(2),   &
-                                                                              node_vector(3)))
+            x0 = position_of_density_nodes(i,                  &
+                                           node_vector(1),     &
+                                           node_vector(2),     &
+                                           node_vector(3))
+            x1 = position_of_density_nodes(i,                  &
+                                           node_vector(1)+1,   &
+                                           node_vector(2)+1,   &
+                                           node_vector(3)+1)
+            denominator = denominator * (x1 - x0)
         end do
-        interpolated_density = interpolated_density / denominator        
+        interpolated_density = interpolated_density / denominator   
     end function interpolate_density_field
 
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
