@@ -475,8 +475,7 @@ contains
         call compute_density_field(positions, masses)
         density_field = 0.0_real64
         density_field(1,1,1) = 1.0_real64
-        point = 0.0_real64
-        point(1) = 0.5_real64
+        point = [0.5, 0.5, 0.5]
 
         interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, point)
         
