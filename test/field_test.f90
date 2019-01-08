@@ -482,6 +482,18 @@ contains
         ! result in an interpolated value of 1 / 8 evaluated in the middle of 
         ! the cube.
         call assert_equals(1.0_real64 / 8.0_real64, interpolated_density, "11 test_interpolate_density_field : interpolated density in the middle of the cube was not calculated correctly")
+        
+        ! Repeat with all the other single vertices.
+        do i = 1, 2
+            do j = 1, 2
+                do k = 1, 2
+                    density_field = 0.0_real64
+                    density_field(i,j,k) = 1.0_real64
+                    interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, point)
+                    call assert_equals(1.0_real64 / 8.0_real64, interpolated_density, "12 test_interpolate_density_field : interpolated density in the middle of the cube was not calculated correctly")
+                end do
+            end do
+        end do
 
         deallocate(positions)
         deallocate(masses)
