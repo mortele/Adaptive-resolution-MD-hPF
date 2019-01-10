@@ -19,19 +19,21 @@ module field_test
                             density_gradient,                   &
                             number_of_field_nodes,              &
                             compute_density_gradient,           & ! Subroutine
-                            interpolate_density_field             ! Subroutine
+                            interpolate_density_field,          & ! Subroutine
+                            interpolate_density_gradient          ! Subroutine
     
     use particles,  only:   positions,                          &
                             masses
     implicit none
     private 
 
-    public  ::  setup,                          &
-                teardown,                       &
-                test_compute_density_field,     &
-                test_allocate_field_arrays,     &
-                test_compute_density_gradient,  &
-                test_interpolate_density_field
+    public  ::  setup,                              &
+                teardown,                           &
+                test_compute_density_field,         &
+                test_allocate_field_arrays,         &
+                test_compute_density_gradient,      &
+                test_interpolate_density_field,     &
+                test_interpolate_density_gradient   
 contains
 
     subroutine setup
@@ -508,16 +510,16 @@ contains
         density_field( 2 , 2 , 2 ) = 0.7670556317983035_real64
 
         allocate(points(number_of_dimensions, 10))
-        points(:, 1 ) = [0.3226243761072245_real64, 0.16000928172147622_real64, 0.07474857607741736_real64]
-        points(:, 2 ) = [0.5092014137865475_real64, 0.1184896077950004_real64, 0.25241336618190535_real64]
-        points(:, 3 ) = [0.35834120119087876_real64, 0.2809403053449454_real64, 0.0003234148574184914_real64]
-        points(:, 4 ) = [0.23480781215213598_real64, 0.7843375272202351_real64, 0.9271719737772645_real64]
-        points(:, 5 ) = [0.5604832314057514_real64, 0.5011060615131893_real64, 0.36617926974252146_real64]
-        points(:, 6 ) = [0.9363242421592629_real64, 0.7424379445058036_real64, 0.9412666162250206_real64]
-        points(:, 7 ) = [0.8282735698757658_real64, 0.9659206984116183_real64, 0.2605764978122821_real64]
-        points(:, 8 ) = [0.9899606876712709_real64, 0.7170472284509276_real64, 0.22977023945233688_real64]
-        points(:, 9 ) = [0.8239128542674138_real64, 0.7495958518805627_real64, 0.18555519519490316_real64]
-        points(:, 10 ) = [0.43629733663334413_real64, 0.85447599895436_real64, 0.4369060699031969_real64]
+        points(:, 1 )  = [ 0.3226243761072245_real64,  0.16000928172147622_real64, 0.07474857607741736_real64  ]
+        points(:, 2 )  = [ 0.5092014137865475_real64,  0.1184896077950004_real64,  0.25241336618190535_real64  ]
+        points(:, 3 )  = [ 0.35834120119087876_real64, 0.2809403053449454_real64,  0.0003234148574184914_real64]
+        points(:, 4 )  = [ 0.23480781215213598_real64, 0.7843375272202351_real64,  0.9271719737772645_real64   ]
+        points(:, 5 )  = [ 0.5604832314057514_real64,  0.5011060615131893_real64,  0.36617926974252146_real64  ]
+        points(:, 6 )  = [ 0.9363242421592629_real64,  0.7424379445058036_real64,  0.9412666162250206_real64   ]
+        points(:, 7 )  = [ 0.8282735698757658_real64,  0.9659206984116183_real64,  0.2605764978122821_real64   ]
+        points(:, 8 )  = [ 0.9899606876712709_real64,  0.7170472284509276_real64,  0.22977023945233688_real64  ]
+        points(:, 9 )  = [ 0.8239128542674138_real64,  0.7495958518805627_real64,  0.18555519519490316_real64  ]
+        points(:, 10 ) = [ 0.43629733663334413_real64, 0.85447599895436_real64,    0.4369060699031969_real64   ]
 
         allocate(values(10))
         values( 1 ) = 0.448550408370945_real64
@@ -540,6 +542,96 @@ contains
         deallocate(values)
         deallocate(positions)
         deallocate(masses)
+        deallocate(density_field)
+        deallocate(density_gradient)
+        deallocate(position_of_density_nodes)
     end subroutine test_interpolate_density_field
+
+    subroutine test_interpolate_density_gradient()
+        implicit none
+        integer (int32) :: i, j, k
+        real (real64), allocatable, dimension(:,:) :: points, values
+        real (real64), allocatable, dimension(:)   :: interpolated_gradient
+
+        number_of_field_nodes_x = 2
+        number_of_field_nodes_y = 2
+        number_of_field_nodes_z = 2
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+        number_of_particles   = 1
+        number_of_dimensions  = 3
+        system_size_x         = 2.0_real64
+        system_size_y         = 2.0_real64
+        system_size_z         = 2.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+
+        if (allocated(positions)) then
+            deallocate(positions)
+        end if
+        if (allocated(masses)) then
+            deallocate(masses) 
+        end if
+
+        call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
+        density_field = 0.0_real64
+        allocate(interpolated_gradient(number_of_dimensions))
+        allocate(points   (number_of_dimensions,10))
+        allocate(values   (number_of_dimensions, 10))
+        allocate(positions(number_of_dimensions, number_of_particles))
+        allocate(masses   (number_of_particles))
+        masses         = 1.0
+        positions(:,1) = [0.0, 0.0, 0.0]
+        
+        ! This call sets up position_of_density_nodes, so it is neccessary even
+        ! though we throw away the computed density values.
+        call compute_density_field   (positions, masses)
+        call compute_density_gradient(density_field)
+        density_field    = 0.0_real64
+        density_gradient = 0.0_real64
+        
+        density_gradient(:, 1 , 1 , 1 ) = [ 0.5540271911850455_real64,  0.3961947008639597_real64, 0.3709350754350955_real64  ]
+        density_gradient(:, 1 , 1 , 2 ) = [ 0.29989066985724067_real64, 0.5256264968923157_real64, 0.9835075358585761_real64  ]
+        density_gradient(:, 1 , 2 , 1 ) = [ 0.5977836288708848_real64,  0.5695607469442536_real64, 0.5911496386331424_real64  ]
+        density_gradient(:, 1 , 2 , 2 ) = [ 0.08186290845694477_real64, 0.6297744649628887_real64, 0.2847708818027924_real64  ]
+        density_gradient(:, 2 , 1 , 1 ) = [ 0.4147543677628468_real64,  0.7465105563078386_real64, 0.3990646219350965_real64  ]
+        density_gradient(:, 2 , 1 , 2 ) = [ 0.6606266575728618_real64,  0.53231087874991_real64,   0.08359344200872987_real64 ]
+        density_gradient(:, 2 , 2 , 1 ) = [ 0.6443874169895922_real64,  0.2935243867752405_real64, 0.2603839953354746_real64  ]
+        density_gradient(:, 2 , 2 , 2 ) = [ 0.42547562683826445_real64, 0.5521127426044589_real64, 0.8916053404339211_real64  ]
+
+        points(:, 1 )  = [ 0.5775948748056732_real64,   0.18410288727491742_real64, 0.011502436296286556_real64  ]
+        points(:, 2 )  = [ 0.16892202728673078_real64,  0.29878402069780086_real64, 0.1594028147281893_real64    ]
+        points(:, 3 )  = [ 0.6987832468901581_real64,   0.7371310391437007_real64,  0.0015824144694810416_real64 ]
+        points(:, 4 )  = [ 0.9530700783586349_real64,   0.808497523595109_real64,   0.03912110333739105_real64   ]
+        points(:, 5 )  = [ 0.924003466783018_real64,    0.7564474589497775_real64,  0.3056221180804195_real64    ]
+        points(:, 6 )  = [ 0.3445125008638579_real64,   0.10130670707437384_real64, 0.363201051304211_real64     ]
+        points(:, 7 )  = [ 0.5007985545190358_real64,   0.9880660518539662_real64,  0.06302118081541042_real64   ]
+        points(:, 8 )  = [ 0.5123913896979235_real64,   0.09895123684176588_real64, 0.847060755818077_real64     ]
+        points(:, 9 )  = [ 0.016671988827459905_real64, 0.567731274356605_real64,   0.068584064535122_real64     ]
+        points(:, 10 ) = [ 0.17486109033920194_real64,  0.9450808716033482_real64,  0.7137522199688752_real64    ]
+
+        values(:, 1 )  = [ 0.5010012334846653_real64,  0.5635703374727197_real64,  0.390777216015084_real64   ]
+        values(:, 2 )  = [ 0.5118083828970728_real64,  0.48799989474168715_real64, 0.46726883870339936_real64 ]
+        values(:, 3 )  = [ 0.5843839053101522_real64,  0.4463381487722325_real64,  0.36844537952444056_real64 ]
+        values(:, 4 )  = [ 0.5941968437894098_real64,  0.3939981659320265_real64,  0.3157752312771956_real64  ]
+        values(:, 5 )  = [ 0.5480036081000176_real64,  0.4555317324527523_real64,  0.42387899302020093_real64 ]
+        values(:, 6 )  = [ 0.47502269821515997_real64, 0.520921272713153_real64,   0.4866094799359585_real64  ]
+        values(:, 7 )  = [ 0.5966229450301203_real64,  0.44290013053647614_real64, 0.4352912067237929_real64  ]
+        values(:, 8 )  = [ 0.46750660652443143_real64, 0.539058626463431_real64,   0.5081330256110408_real64  ]
+        values(:, 9 )  = [ 0.5511235516756882_real64,  0.5006726571356255_real64,  0.499410890950402_real64   ]
+        values(:, 10 ) = [ 0.2822271319148202_real64,  0.5845211015987357_real64,  0.44623908382011673_real64 ]
+
+        do i = 1, 10
+            call interpolate_density_gradient(density_gradient,                &
+                                              position_of_density_nodes,       &
+                                              points(:,i),                     &
+                                              interpolated_gradient)
+            call assert_equals(values(:,i), interpolated_gradient, 3, 1e-14_real64, "11 test_interpolate_density_gradient : interpolated density gradient does not equal the scipy.interpolate values for the tested reference points / field values")
+        end do
+
+        deallocate(positions)
+        deallocate(masses)
+        deallocate(density_field)
+        deallocate(density_gradient)
+        deallocate(position_of_density_nodes)
+    end subroutine test_interpolate_density_gradient
 
 end module field_test

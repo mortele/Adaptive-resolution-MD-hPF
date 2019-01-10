@@ -21,7 +21,8 @@ module field
     public  ::  compute_density_field,                      &
                 allocate_field_arrays,                      &
                 compute_density_gradient,                   &
-                interpolate_density_field
+                interpolate_density_field,                  &
+                interpolate_density_gradient
 
     private ::  compute_density_gradient_2,                 &
                 compute_density_gradient_higher_order
@@ -310,15 +311,103 @@ contains
         interpolated_density = interpolated_density / denominator   
     end function interpolate_density_field
 
+    subroutine interpolate_density_gradient(density_gradient,          &
+                                            position_of_density_nodes, &
+                                            point,                     &
+                                            interpolated_gradient)
+        implicit none
+        real (real64), dimension(:,:,:,:), intent(in)     :: density_gradient
+        real (real64), dimension(:,:,:,:), intent(in)     :: position_of_density_nodes
+        real (real64), dimension(:),       intent(in)     :: point
+        real (real64), dimension(:),       intent(in out) :: interpolated_gradient
+
+        integer :: j, i, k, x, y, z, x0, x1
+        integer, allocatable, dimension(:,:) :: offset
+        integer, allocatable, dimension(:)   :: node_vector, opposite
+        real (real64), allocatable, dimension(:)   :: partial_volume, cube
+        real (real64) :: lattice_edge, point_edge, denominator, c
+
+        ! There are 2ⁿ nearest neighbor lattice points in a system of n 
+        ! dimensions, i.e. a hyper-cube in n dimensions has 2ⁿ corners.
+        allocate(partial_volume(2**number_of_dimensions))
+        allocate(node_vector(number_of_dimensions))
+        allocate(cube(number_of_dimensions))
+        allocate(offset(2**number_of_dimensions, number_of_dimensions))
+        allocate(opposite(2**number_of_dimensions))
+
+                              ! Opposite corners
+        offset(1,:) = [0,0,0] ! 8 
+        offset(2,:) = [1,0,0] ! 7
+        offset(3,:) = [0,1,0] ! 6
+        offset(4,:) = [0,0,1] ! 5 
+        offset(5,:) = [1,1,0] ! 4
+        offset(6,:) = [1,0,1] ! 3
+        offset(7,:) = [0,1,1] ! 2
+        offset(8,:) = [1,1,1] ! 1
+        opposite = [8,7,6,5,4,3,2,1]
+
+        ! Compute which field densities are closest, i.e. which (hyper-)cube we 
+        ! are in.
+        do j = 1, number_of_dimensions 
+            node_vector(j) = floor(point(j) / l(j)) + 1
+        end do
+        
+        ! Compute the partial volumes enclosed by the (hyper-)cubes with corners 
+        ! in the interpolation point, and the field density vertices.
+        do j = 1, 2**number_of_dimensions
+            
+            ! Compute the cube sides of the partial volume corresponding to 
+            ! lattice vertex j.
+            do i = 1, number_of_dimensions
+                lattice_edge = position_of_density_nodes(i,                             &
+                                                         node_vector(1) + offset(j, 1), & 
+                                                         node_vector(2) + offset(j, 2), &
+                                                         node_vector(3) + offset(j, 3))
+                point_edge   = point(i)
+                cube(i) = abs(lattice_edge - point_edge)
+            end do
+            
+            partial_volume(j) = cube(1)
+            do i = 2, number_of_dimensions
+                partial_volume(j) = partial_volume(j) * cube(i)
+            end do
+        end do
+        
+        interpolated_gradient = 0.0_real64
+        do j = 1, 2**number_of_dimensions
+            do i = 1, number_of_dimensions
+                c = partial_volume(opposite(j)) * density_gradient(i,                             &
+                                                                   node_vector(1) + offset(j, 1), & 
+                                                                   node_vector(2) + offset(j, 2), &
+                                                                   node_vector(3) + offset(j, 3))
+                interpolated_gradient(i) = interpolated_gradient(i) + c
+            end do
+        end do 
+        denominator = 1.0_real64
+        do i = 1, number_of_dimensions
+            x0 = position_of_density_nodes(i,                  &
+                                           node_vector(1),     &
+                                           node_vector(2),     &
+                                           node_vector(3))
+            x1 = position_of_density_nodes(i,                  &
+                                           node_vector(1)+1,   &
+                                           node_vector(2)+1,   &
+                                           node_vector(3)+1)
+            denominator = denominator * (x1 - x0)
+        end do
+        interpolated_gradient = interpolated_gradient / denominator   
+
+    end subroutine interpolate_density_gradient 
+
     subroutine allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
         implicit none
         real (real64), allocatable, dimension(:,:,:),   intent(in out) :: density_field
         real (real64), allocatable, dimension(:,:,:,:), intent(in out) :: position_of_density_nodes
         real (real64), allocatable, dimension(:,:,:,:), intent(in out) :: density_gradient
 
-        allocate(density_field            (number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
-        allocate(position_of_density_nodes(number_of_dimensions,  number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
-        allocate(density_gradient         (number_of_dimensions,  number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+        allocate(density_field                                  (number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+        allocate(position_of_density_nodes(number_of_dimensions, number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+        allocate(density_gradient         (number_of_dimensions, number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
     end subroutine allocate_field_arrays
 
 end module field
