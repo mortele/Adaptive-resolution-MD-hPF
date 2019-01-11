@@ -3,19 +3,29 @@ module potential
     use system,     only: compute_distance_minimum_image,   & ! Function 
                           system_size
     use particles,  only: masses, velocities
-    use parameters, only: number_of_particles,      &
-                          lennard_jones_epsilon,    &
-                          lennard_jones_sigma,      &
-                          lennard_jones_cutoff,     &
+    use parameters, only: number_of_particles,              &
+                          lennard_jones_epsilon,            &
+                          lennard_jones_sigma,              &
+                          lennard_jones_cutoff,             &
                           number_of_dimensions
+    use field,      only: density_field,                    &
+                          density_gradient,                 &
+                          position_of_density_nodes,        &
+                          interpolate_density_field,        & ! Function
+                          interpolate_density_gradient,     & ! Subroutine
+                          compute_density_field,            & ! Subroutine
+                          compute_density_gradient            ! Subroutine
     implicit none
     private 
 
     real (real64), public :: sigma6, sigma12, cutoff_squared, potential_at_cutoff
     real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
 
-    public :: lennard_jones_force, lennard_jones_potential
-    public :: compute_forces
+    private :: lennard_jones_force,         &
+               lennard_jones_potential,     &
+               hpf_force,                   &
+               hpf_potential
+    public  :: compute_forces
 
 contains
 
@@ -59,14 +69,6 @@ contains
                     forces(:,j)     = forces(:,j) - force * distance_vector
                     
                     V = V + lennard_jones_potential(dr_squared)
-                    
-                    !if ((i==2) .and. (j==11)) then
-                    !    print *, "ri:    ", positions(:2,i)
-                    !    print *, "rj:    ", positions(:2,j)
-                    !    print *, "delr:  ", distance_vector(1), distance_vector(2), distance_vector(3)
-                    !    print *, "r2:    ", dr_squared
-                    !    print *, "force: ", force(1)
-                    !end if
                 end if
             end do
         end do
@@ -105,5 +107,26 @@ contains
         r6  = r2 * r2 * r2
         potential = 4.0_real64 * eps * sigma6 * r6 * (sigma6 * r6 - 1.0_real64) - potential_at_cutoff
     end function lennard_jones_potential
+
+    function hpf_force(position) result(force)
+        implicit none
+        real (real64), intent(in), dimension(:) :: position
+        real (real64), dimension(number_of_dimensions) :: force
+        
+        call interpolate_density_gradient(density_gradient,          &
+                                          position_of_density_nodes, &
+                                          position,                  &
+                                          force)
+    end function hpf_force
+
+    function hpf_potential(position) result(potential)
+        implicit none
+        real (real64), intent(in), dimension(:) :: position
+        real (real64) :: potential
+
+        potential = interpolate_density_field(density_field,                &
+                                              position_of_density_nodes,    &
+                                              position)
+    end function hpf_potential
 
 end module potential

@@ -59,7 +59,7 @@ parameters.o parameters.mod: src/parameters.f90
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 particles.o particles.mod: src/particles.f90 
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
-potential.o potential.mod: src/potential.f90 parameters.o particles.o system.o 
+potential.o potential.mod: src/potential.f90 parameters.o particles.o system.o field.o
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
 sampler.o sampler.mod: src/sampler.f90 potential.o particles.o parameters.o 
 	$(FORTRAN_COMPILER) -c $< -o build/$(notdir $@)
