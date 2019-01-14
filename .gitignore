@@ -27,3 +27,4 @@ lammps.energy
 *.pyc
 .pytest_cache/
 *.dump
+*.mpg
