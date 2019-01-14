@@ -10,7 +10,7 @@ program md2dlj
                                   read_state_lammps           ! subroutine
     use integrator,         only: integrate_one_step          ! subroutine
     use potential,          only: Ek, V, E,                 &
-                                  compute_forces              ! subroutine           
+                                  compute_forces_md           ! subroutine           
     use system,             only: system_size
     use sampler,            only: kinetic_energy,           &
                                   potential_energy,         &
@@ -42,7 +42,7 @@ program md2dlj
     ! energies.
     call read_state_lammps(lammps_file, 3, positions, velocities, forces, types, masses)
     forces = 0.0_real64
-    call compute_forces(positions, forces)
+    call compute_forces_md(positions, forces)
     call write_array_to_file("positions.dump",   positions)
     call write_array_to_file("velocities.dump",  velocities)
     call write_array_to_file("forces.dump",      forces)
@@ -55,7 +55,7 @@ program md2dlj
     
     ! Reload on initial LAMMPS step and integrate.
     call read_state_lammps(lammps_file, 1, positions, velocities, forces, types, masses)
-    call compute_forces(positions, forces)
+    call compute_forces_md(positions, forces)
 
     do i = 1, 10
         call write_state(positions, i, types)

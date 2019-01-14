@@ -110,9 +110,9 @@ contains
 
         call setup
         print *, " "
-        print *, " ..running test: test_compute_forces"
-        call set_unit_name ('test_compute_forces')    
-        call run_test_case(test_compute_forces, "test_compute_forces")
+        print *, " ..running test: test_compute_forces_md"
+        call set_unit_name ('test_compute_forces_md')    
+        call run_test_case(test_compute_forces_md, "test_compute_forces_md")
         call teardown     
     end subroutine potential_all_tests
 

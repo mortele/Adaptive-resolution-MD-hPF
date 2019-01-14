@@ -2,11 +2,11 @@ module potential_test
     use, intrinsic :: iso_fortran_env, only: real64, int32
     use potential,  only:   lennard_jones_force,        &
                             lennard_jones_potential,    &
-                            compute_forces,             &
+                            compute_forces_md,          &
                             sigma6,                     &   
                             sigma12,                    &
                             Ek,                         &
-                            V,                          &
+                            V_md,                       &
                             E
     use fruit,      only:   assert_equals,              & ! Subroutine
                             assert_false                  ! Subroutine
@@ -27,7 +27,7 @@ module potential_test
                 teardown,                       &
                 test_lennard_jones_force,       &
                 test_lennard_jones_potential,   &
-                test_compute_forces
+                test_compute_forces_md
 
 
 contains
@@ -87,7 +87,7 @@ contains
 
     end subroutine test_lennard_jones_potential
 
-    subroutine test_compute_forces()
+    subroutine test_compute_forces_md()
         implicit none
         real (real64), dimension(number_of_dimensions) :: unit_vector
         real (real64)   :: tollerance
@@ -107,11 +107,11 @@ contains
 
         positions (:,1) = [3.0, 3.0, 3.0]
         velocities(:,1) = [1.0, 2.0, 3.0]
-        call compute_forces(positions, forces)
-        call assert_equals([0.0_real64, 0.0_real64, 0.0_real64], forces(:,1), 3, tollerance, "1  test_compute_forces : Computed net force on a system of a single particle is not zero")
-        call assert_equals(0.0_real64, V, tollerance, "2  test_compute_forces : Compute net potential on a system of a single particle is not zero")
-        call assert_equals(0.5_real64*((1.0)**2 + (2.0)**2 + (3.0)**2), Ek, tollerance, "3  test_compute_forces : Computed kinetic energy of a single particle is not correct")
-        call assert_equals(E, Ek, tollerance, "4  test_compute_forces : Computed total energy is not equal to the kinetic energy for a system of a single particle.")
+        call compute_forces_md(positions, forces)
+        call assert_equals([0.0_real64, 0.0_real64, 0.0_real64], forces(:,1), 3, tollerance, "1  test_compute_forces_md : Computed net force on a system of a single particle is not zero")
+        call assert_equals(0.0_real64, V_md, tollerance, "2  test_compute_forces_md : Compute net potential on a system of a single particle is not zero")
+        call assert_equals(0.5_real64*((1.0)**2 + (2.0)**2 + (3.0)**2), Ek, tollerance, "3  test_compute_forces_md : Computed kinetic energy of a single particle is not correct")
+        call assert_equals(E, Ek, tollerance, "4  test_compute_forces_md : Computed total energy is not equal to the kinetic energy for a system of a single particle.")
         deallocate(positions)
         deallocate(velocities)
         deallocate(forces)
@@ -130,8 +130,8 @@ contains
         positions(:,2) = [4.0, 0.0, 0.0]
         positions(:,3) = [6.0, 0.0, 0.0]
         call random_number(velocities)
-        call compute_forces(positions, forces)
-        call assert_equals(0.0_real64, forces(1,2), tollerance, "1  test_compute_forces : Computed net force should be zero when affected by only two particles on opposite sides at identical distance")
+        call compute_forces_md(positions, forces)
+        call assert_equals(0.0_real64, forces(1,2), tollerance, "1  test_compute_forces_md : Computed net force should be zero when affected by only two particles on opposite sides at identical distance")
 
 
         ! Three particles placed in a triangle, the middle particle should feel
@@ -139,10 +139,10 @@ contains
         positions(:,1) = [2.0, 2.0, 2.0]
         positions(:,2) = [4.0, 2.0, 2.0]
         positions(:,3) = [2.0, 4.0, 2.0]
-        call compute_forces(positions, forces)
-        call assert_equals(0.0_real64, forces(3,1), tollerance, "2  test_compute_forces : Computed net force in the z direction should be zero when all particles have the same z coordinate")
-        call assert_equals(lennard_jones_force((2.0_real64)**2)*2.0_real64, forces(1,1), tollerance, "3  test_compute_forces : Computed net force in the x direction should only be the force from the second particle, since the third has the same x coordinate as the first")
-        call assert_equals(lennard_jones_force((2.0_real64)**2)*2.0_real64, forces(2,1), tollerance, "4  test_compute_forces : Computed net force in the y direction should only be the force from the third particle, since the second has the same y coordinate as the first")
+        call compute_forces_md(positions, forces)
+        call assert_equals(0.0_real64, forces(3,1), tollerance, "2  test_compute_forces_md : Computed net force in the z direction should be zero when all particles have the same z coordinate")
+        call assert_equals(lennard_jones_force((2.0_real64)**2)*2.0_real64, forces(1,1), tollerance, "3  test_compute_forces_md : Computed net force in the x direction should only be the force from the second particle, since the third has the same x coordinate as the first")
+        call assert_equals(lennard_jones_force((2.0_real64)**2)*2.0_real64, forces(2,1), tollerance, "4  test_compute_forces_md : Computed net force in the y direction should only be the force from the third particle, since the second has the same y coordinate as the first")
         unit_vector = [-1.0, -1.0, 0.0]
         unit_vector = unit_vector / norm2(unit_vector)
         call assert_equals(unit_vector, forces(:,1)/norm2(forces(:,1)), 3, tollerance, "5  test_compute_forces : The computed net force does not have the correct overall direction")
@@ -151,5 +151,5 @@ contains
         deallocate(forces)
         deallocate(masses)
 
-    end subroutine test_compute_forces
+    end subroutine test_compute_forces_md
 end module potential_test

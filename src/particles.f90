@@ -7,7 +7,8 @@ module particles
     real   (real64), public, dimension(:), allocatable   :: masses 
     real   (real64), public, dimension(:,:), allocatable :: positions,  &
                                                             velocities, &
-                                                            forces
+                                                            forces,     &
+                                                            forces_hpf
 
 
 

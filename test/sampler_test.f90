@@ -14,7 +14,7 @@ module sampler_test
                                 potential_energy,                   &
                                 total_energy,                       &
                                 store_energy                          ! Subroutine
-    use potential,      only:   Ek, V, E
+    use potential,      only:   Ek, V_md, E
     implicit none
     
     private 
@@ -51,9 +51,9 @@ contains
         allocate(total_energy    (number_of_time_steps + 1))
         call store_energy(kinetic_energy, potential_energy, total_energy)
 
-        call assert_equals(Ek, kinetic_energy(1),   "1  test_store_energy : Stored kinetic energy does not equal computed kinetic energy in the potential module")
-        call assert_equals(V,  potential_energy(1), "2  test_store_energy : Stored potential energy does not equal computed potential energy in the potential module")
-        call assert_equals(E,  total_energy(1),     "3  test_store_energy : Stored total energy does not equal computed total energy in the potential module")
+        call assert_equals(Ek,   kinetic_energy(1),   "1  test_store_energy : Stored kinetic energy does not equal computed kinetic energy in the potential module")
+        call assert_equals(V_md, potential_energy(1), "2  test_store_energy : Stored potential energy does not equal computed potential energy in the potential module")
+        call assert_equals(E,    total_energy(1),     "3  test_store_energy : Stored total energy does not equal computed total energy in the potential module")
 
         deallocate(positions)
         deallocate(velocities)

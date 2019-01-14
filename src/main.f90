@@ -5,7 +5,7 @@ program main
     use file_writer,        only: write_state,          &   ! subroutine
                                   write_info                ! subroutine
     use integrator,         only: integrate_one_step        ! subroutine
-    use potential,          only: Ek, V, E
+    use potential,          only: Ek, V_md, E
     use sampler,            only: kinetic_energy,       &
                                   potential_energy,     &
                                   total_energy,         &
@@ -40,9 +40,9 @@ program main
         ! Write the state to file.
         call write_state(positions, time_step, types)
 
-        print *, E  / number_of_particles,  &
-                 Ek / number_of_particles,  &
-                 V  / number_of_particles
+        print *, E    / number_of_particles,  &
+                 Ek   / number_of_particles,  &
+                 V_md / number_of_particles
     end do
 
     call write_info

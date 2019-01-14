@@ -5,7 +5,7 @@ module integrator_test
     use integrator,         only:   integrate_one_step,         &   ! Subroutine
                                     half_move,                  &   ! Subroutine
                                     move                            ! Subroutine
-    use potential,          only:   compute_forces                  ! Subroutine
+    use potential,          only:   compute_forces_md               ! Subroutine
     use particles,          only:   masses,                     &
                                     positions,                  &
                                     velocities,                 &
@@ -192,7 +192,7 @@ contains
         call assert_equals(0.0_real64, velocities(1,1), "2  test_integrate_one_step : The one step integration shouldnt change the velocity of a particle when the forces are set to zero")
 
         ! Lets make sure that also the default force calculation produce the 
-        ! same result if we arrange for compute_forces to give no forces.
+        ! same result if we arrange for compute_forces_md to give no forces.
         lennard_jones_sigma     = 3.405
         lennard_jones_epsilon   = 1.0
         call integrate_one_step(positions, velocities, forces) ! Default call

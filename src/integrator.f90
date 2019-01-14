@@ -1,6 +1,6 @@
 module integrator
     use, intrinsic :: iso_fortran_env, only: real64, int32
-    use potential,      only: compute_forces                      ! Subroutine
+    use potential,      only: compute_forces_md                   ! Subroutine
     use particles,      only: masses
     use system,         only: apply_periodic_boundary_conditions  ! Subroutine
     use parameters,     only: time_step,                          &
@@ -40,7 +40,7 @@ contains
 
         if (first_step) then
             forces = 0.0_real64
-            call compute_forces(positions, forces)
+            call compute_forces_md(positions, forces)
             first_step = .false.
         end if
         
@@ -49,8 +49,8 @@ contains
 
         call apply_periodic_boundary_conditions(positions)
         
-        call compute_forces(positions,  forces)
-        call half_move     (velocities, forces)
+        call compute_forces_md(positions,  forces)
+        call half_move        (velocities, forces)
     end subroutine integrate_one_step_default_force
 
 

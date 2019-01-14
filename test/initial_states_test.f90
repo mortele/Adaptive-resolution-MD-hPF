@@ -25,8 +25,8 @@ module initial_states_test
                                 initial_configuration,              &
                                 lennard_jones_epsilon,              &
                                 lennard_jones_sigma
-    use potential,      only:   compute_forces,                     & ! Subroutine
-                                V
+    use potential,      only:   compute_forces_md,                  & ! Subroutine
+                                V_md
 
 
     implicit none
@@ -137,15 +137,15 @@ contains
         ! Test that the FCC lattice is the minium of the potential energy. We 
         ! move all particles in every direction and check if the potential 
         ! energy ever decreases in any other configuration.
-        call compute_forces(positions, forces)
-        FCC_potential_energy = V
+        call compute_forces_md(positions, forces)
+        FCC_potential_energy = V_md
         do i = 1, number_of_particles
             do j = 1, number_of_dimensions
                 
                 positions(j,i) = positions(j,i) + dx
                 call apply_periodic_boundary_conditions(positions)
-                call compute_forces(positions, forces)
-                potential_energy = V
+                call compute_forces_md(positions, forces)
+                potential_energy = V_md
                 positions(j,i) = positions(j,i) - dx
                 call apply_periodic_boundary_conditions(positions)
                 call assert_true(FCC_potential_energy < potential_energy, char(i)//" test_fcc_initial_state : The FCC state is not the minimum of the potential energy")
@@ -154,7 +154,7 @@ contains
 
         ! If the FCC lattice is the minimum energy configuration, then all 
         ! forces on every atom should vanish in this configuration.
-        call compute_forces(positions, forces)
+        call compute_forces_md(positions, forces)
         do i = 1, number_of_particles
             call assert_equals([0.0_real64, 0.0_real64, 0.0_real64], forces(:,i), 3, 1e-14_real64, char(i)//" test_fcc_initial_state : Particle net force should be zero in the FCC lattice")
         end do

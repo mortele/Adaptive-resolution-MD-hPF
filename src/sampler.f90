@@ -1,12 +1,12 @@
 module sampler
     use, intrinsic :: iso_fortran_env, only: real64, int32
     use parameters, only:   number_of_time_steps
-    use particles,  only:   positions,      &
+    use particles,  only:   positions,             &
                             forces
-    use potential,  only:   compute_forces, &
-                            Ek,             & ! Current total kinetic energy.
-                            V,              & ! Current total potential energy. 
-                            E                 ! Current total energy.
+    use potential,  only:   compute_forces_md,     &
+                            Ek,                    & ! Current total kinetic energy.
+                            V_md,                  & ! Current total potential energy. 
+                            E                        ! Current total energy.
     implicit none
     private
 
@@ -31,11 +31,11 @@ contains
         ! potential module, so we just fetch it from there and avoid re-
         ! computing it.
         if (first_call) then
-            call compute_forces(positions, forces)
+            call compute_forces_md(positions, forces)
         end if
 
         kinetic_energy  (array_index) = Ek
-        potential_energy(array_index) = V 
+        potential_energy(array_index) = V_md
         total_energy    (array_index) = E
 
         array_index = array_index + 1

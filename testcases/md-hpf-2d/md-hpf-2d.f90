@@ -55,7 +55,7 @@ program mdhpf2d
     ! energies.
     !call read_state_lammps(lammps_file, 3, positions, velocities, forces, types, masses)
     !forces = 0.0_real64
-    !call compute_forces(positions, forces)
+    !call compute_forces_md(positions, forces)
     !call write_array_to_file("positions.dump",   positions)
     !call write_array_to_file("velocities.dump",  velocities)
     !call write_array_to_file("forces.dump",      forces)
@@ -68,7 +68,7 @@ program mdhpf2d
     
     ! Reload on initial LAMMPS step and integrate.
     call read_state_lammps(lammps_file, 1, positions, velocities, forces, types, masses)
-    call compute_forces(positions, forces)
+    call compute_forces_md(positions, forces)
     call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
     call compute_density_field(positions, masses)
 

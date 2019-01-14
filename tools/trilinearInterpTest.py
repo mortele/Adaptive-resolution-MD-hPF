@@ -76,7 +76,7 @@ def test_example_gradient() :
                 print("_real64]")
 
 
-    # Interpolated values.
+    # Interpolated values.  
     interpolated_grad = np.zeros(shape=(10,3))
     for i in range(3) :
         # Scipy interpolator.

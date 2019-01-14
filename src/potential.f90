@@ -7,7 +7,9 @@ module potential
                           lennard_jones_epsilon,            &
                           lennard_jones_sigma,              &
                           lennard_jones_cutoff,             &
-                          number_of_dimensions
+                          number_of_dimensions,             &
+                          chi,                              &
+                          kappa
     use field,      only: density_field,                    &
                           density_gradient,                 &
                           position_of_density_nodes,        &
@@ -19,17 +21,18 @@ module potential
     private 
 
     real (real64), public :: sigma6, sigma12, cutoff_squared, potential_at_cutoff
-    real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
+    real (real64), public  :: Ek, V_md, V_hpf, E  ! Kinetic, potential, and total energies.
 
     public  :: lennard_jones_force,         &
                lennard_jones_potential,     &
                hpf_force,                   &
                hpf_potential,               &
-               compute_forces
+               compute_forces_md,           &
+               compute_forces_hpf
 
 contains
 
-    subroutine compute_forces(positions, forces)
+    subroutine compute_forces_md(positions, forces)
         implicit none
         real (real64), dimension(:,:), intent(in)      :: positions
         real (real64), dimension(:,:), intent(in out)  :: forces
@@ -50,7 +53,7 @@ contains
 
         forces  = 0.0_real64 ! All elements of dimension(3,:) array is set to zero. 
         force   = 0.0_real64
-        V       = 0.0_real64
+        V_md    = 0.0_real64
         Ek      = 0.0_real64
 
         do i = 1, number_of_particles
@@ -68,7 +71,7 @@ contains
                     forces(:,i)     = forces(:,i) + force * distance_vector
                     forces(:,j)     = forces(:,j) - force * distance_vector
                     
-                    V = V + lennard_jones_potential(dr_squared)
+                    V_md = V_md + lennard_jones_potential(dr_squared)
                 end if
             end do
         end do
@@ -83,8 +86,25 @@ contains
         Vtail = (8.0_real64 / 3.0_real64) * pi * lennard_jones_epsilon * lennard_jones_sigma**3 * number_of_particles / volume * ((1.0_real64 / 3.0_real64) * (lennard_jones_sigma/lennard_jones_cutoff)**9 - (lennard_jones_sigma/lennard_jones_cutoff)**3)
         !print *, Vtail
         !V = V + Vtail
-        E = V + Ek
-    end subroutine compute_forces
+        E = V_md + Ek
+    end subroutine compute_forces_md
+
+    subroutine compute_forces_hpf(positions, forces_hpf)
+        implicit none
+        real (real64), dimension(:,:), intent(in)      :: positions
+        real (real64), dimension(:,:), intent(in out)  :: forces_hpf
+
+        integer (int32) :: i
+
+        do i = 1, number_of_particles
+            forces_hpf(:,i) = hpf_force(positions(:,i))
+        end do
+
+        do i = 1, number_of_particles
+            Ek = Ek + 0.5 * masses(i) * dot_product(velocities(:,i), velocities(:, i))
+        end do
+
+    end subroutine compute_forces_hpf
 
     pure function lennard_jones_force(dr_squared) result(F_divided_by_r)
         implicit none
@@ -117,6 +137,7 @@ contains
                                           position_of_density_nodes, &
                                           position,                  &
                                           force)
+        force = -(1.0_real64 / kappa) * force
     end function hpf_force
 
     function hpf_potential(position) result(potential)

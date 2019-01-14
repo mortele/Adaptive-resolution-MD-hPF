@@ -33,6 +33,9 @@ module parameters
     integer (int32), public :: number_of_field_nodes_z = 25
     real (real64),   public :: temperature = 1.0
 
+    real (real64),   public :: chi   = 1.0
+    real (real64),   public :: kappa = 0.05
+
     character (13),  public :: out_file_name      = "positions.xyz"
     character (14),  public :: info_file_name     = "systeminfo.out"
     character (16),  public :: silent_output_file = "silentoutput.out"

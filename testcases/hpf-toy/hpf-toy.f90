@@ -10,7 +10,7 @@ program hpftoy
                                   read_state_lammps           ! subroutine
     use integrator,         only: integrate_one_step          ! subroutine
     use potential,          only: Ek, V, E,                 &
-                                  compute_forces              ! subroutine           
+                                  compute_forces_md,          ! subroutine           
     use system,             only: system_size
     use sampler,            only: kinetic_energy,           &
                                   potential_energy,         &
