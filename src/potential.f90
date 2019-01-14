@@ -21,11 +21,11 @@ module potential
     real (real64), public :: sigma6, sigma12, cutoff_squared, potential_at_cutoff
     real (real64), public  :: Ek, V, E  ! Kinetic, potential, and total energies.
 
-    private :: lennard_jones_force,         &
+    public  :: lennard_jones_force,         &
                lennard_jones_potential,     &
                hpf_force,                   &
-               hpf_potential
-    public  :: compute_forces
+               hpf_potential,               &
+               compute_forces
 
 contains
 
