@@ -9,8 +9,8 @@ program hpftoy
                                   write_info,               & ! subroutine
                                   read_state_lammps           ! subroutine
     use integrator,         only: integrate_one_step          ! subroutine
-    use potential,          only: Ek, V, E,                 &
-                                  compute_forces_md,          ! subroutine           
+    use potential,          only: Ek, V_md, E,              &
+                                  compute_forces_md           ! subroutine           
     use system,             only: system_size
     use sampler,            only: kinetic_energy,           &
                                   potential_energy,         &
@@ -37,9 +37,13 @@ program hpftoy
                                   position_of_density_nodes,&
                                   density_field,            &
                                   density_gradient,         &
-                                  interpolate_density_gradient ! Subroutine
+                                  interpolate_density_gradient! Subroutine
+    use initial_states,     only: allocate_arrays             ! Subroutine
 
     implicit none
+    number_of_dimensions = 3
+    number_of_particles  = 10
+    
     
     
 end program
