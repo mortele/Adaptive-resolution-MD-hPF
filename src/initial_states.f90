@@ -13,7 +13,8 @@ module initial_states
                                 system_size_y,              &
                                 system_size_z,              &
                                 silent_output_ID
-    use particles,        only: forces
+    use particles,        only: forces,                     &
+                                forces_hpf
     implicit none
     private 
 
@@ -246,6 +247,7 @@ contains
         allocate(positions (number_of_dimensions, number_of_particles))
         allocate(velocities(number_of_dimensions, number_of_particles))
         allocate(forces    (number_of_dimensions, number_of_particles))
+        allocate(forces_hpf(number_of_dimensions, number_of_particles))
         allocate(masses    (number_of_particles))
         allocate(types     (number_of_particles))
     end subroutine allocate_arrays

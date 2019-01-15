@@ -185,7 +185,8 @@ contains
         integer (int32), dimension(:),   intent(in out), allocatable :: types
         character (len=*), intent(in) :: file_name
 
-        integer (int32) :: i, j, file_ID
+        integer (int32) :: i, j
+        integer (int32), save :: file_ID
         character (len=200) :: line
         integer (int32) :: int
         logical :: file_exists, file_opened

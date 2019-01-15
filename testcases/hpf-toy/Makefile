@@ -15,9 +15,9 @@ AGRESSIVE_OPTIMIZE  = -Ofast -faggressive-function-elimination -frepack-arrays -
 
 DEBUG_FLAGS 				= -fbacktrace -ffpe-trap=zero,overflow,underflow -fcheck=all -g
 TEST_FLAGS 					= -fprofile-arcs #-ftest-coverage
-FORTRAN_COMPILER_DEBUG 		= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS) $(TEST_FLAGS)
+FORTRAN_COMPILER 	 		= $(GFORTRAN) $(COMPILER_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUG_FLAGS) $(TEST_FLAGS)
 #FORTRAN_COMPILER 			= $(GFORTRAN) -J../../build -ffree-line-length-0
-FORTRAN_COMPILER        	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
+FORTRAN_COMPILER_OPT       	= $(GFORTRAN) $(COMPILER_FLAGS) $(AGRESSIVE_OPTIMIZE) 
 PROGRAM 					= hpf-toy.app
 
 VPATH = ../../src:../../test:../../build:../../bin
