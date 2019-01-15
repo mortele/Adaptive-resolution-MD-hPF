@@ -13,10 +13,10 @@ module field
     real (real64), private :: lx, ly, lz
     real (real64), private, dimension(:), allocatable :: l
 
-    real (real64), public, dimension(:,:,:),   allocatable :: density_field
-    real (real64), public, dimension(:,:,:,:), allocatable :: position_of_density_nodes
-    real (real64), public, dimension(:,:,:,:), allocatable :: density_gradient
-    real (real64), public, dimension(:),       allocatable :: number_of_field_nodes
+    real (real64),   public, dimension(:,:,:),   allocatable :: density_field
+    real (real64),   public, dimension(:,:,:,:), allocatable :: position_of_density_nodes
+    real (real64),   public, dimension(:,:,:,:), allocatable :: density_gradient
+    integer (int32), public, dimension(:),       allocatable :: number_of_field_nodes
 
     public  ::  compute_density_field,                      &
                 allocate_field_arrays,                      &
@@ -206,6 +206,7 @@ contains
     subroutine compute_density_gradient_higher_order(density_field, order)
         real (real64), dimension(:,:,:), intent(in) :: density_field
         integer, intent(in) :: order
+        real (real64) :: dummy
 
         !integer (int32) :: i, j, k
         !integer (int32) :: i_next,     j_next,     k_next
@@ -226,6 +227,9 @@ contains
 
         density_gradient = 0
 
+        ! Supress compiler warnings about unused arguments: order, density_field
+        dummy = order * density_field(1,1,1)
+
     end subroutine compute_density_gradient_higher_order
 
     real (real64) function interpolate_density_field(density_field,             &
@@ -237,11 +241,11 @@ contains
         real (real64), intent(in), dimension(:,:,:,:) :: position_of_density_nodes
         real (real64), intent(in), dimension(:)       :: point
 
-        integer :: j, i, k, x, y, z, x0, x1
+        integer :: j, i
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
         real (real64), allocatable, dimension(:)   :: partial_volume, cube
-        real (real64) :: lattice_edge, point_edge, denominator, c
+        real (real64) :: lattice_edge, point_edge, denominator, c, x0, x1
 
         ! There are 2ⁿ nearest neighbor lattice points in a system of n 
         ! dimensions, i.e. a hyper-cube in n dimensions has 2ⁿ corners.
@@ -321,11 +325,11 @@ contains
         real (real64), dimension(:),       intent(in)     :: point
         real (real64), dimension(:),       intent(in out) :: interpolated_gradient
 
-        integer :: j, i, k, x, y, z, x0, x1
+        integer :: j, i
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
         real (real64), allocatable, dimension(:)   :: partial_volume, cube
-        real (real64) :: lattice_edge, point_edge, denominator, c
+        real (real64) :: lattice_edge, point_edge, denominator, c, x0, x1
 
         ! There are 2ⁿ nearest neighbor lattice points in a system of n 
         ! dimensions, i.e. a hyper-cube in n dimensions has 2ⁿ corners.

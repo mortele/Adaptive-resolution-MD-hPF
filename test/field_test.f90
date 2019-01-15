@@ -203,7 +203,7 @@ contains
     end subroutine test_compute_density_field
 
     subroutine test_compute_density_gradient()
-        integer (int32) :: i, j, k, N
+        integer (int32) :: i, j, N
         real (real64)   :: pi, x, real_i, real_number_of_field_nodes
         real (real64)   :: tollerance, h
         real (real64), allocatable, dimension(:) :: convergence_rate,       &
@@ -228,7 +228,7 @@ contains
         ! should vanish everywhere.
         density_field = 3.5
         call compute_density_gradient(density_field)
-        any_nonzero = any(density_gradient /= 0.0)
+        any_nonzero = any(abs(density_gradient) > 1.0e-14)
         call assert_false(any_nonzero, "1  test_compute_density_gradient : At least one element of density_gradient was computed to be non-zero for a constant density field configuration")
 
         ! Secondly, we see if a 1D linear density is differentiated correctly.
@@ -549,7 +549,7 @@ contains
 
     subroutine test_interpolate_density_gradient()
         implicit none
-        integer (int32) :: i, j, k
+        integer (int32) :: i
         real (real64), allocatable, dimension(:,:) :: points, values
         real (real64), allocatable, dimension(:)   :: interpolated_gradient
 

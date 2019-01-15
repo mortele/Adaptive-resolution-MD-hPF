@@ -111,7 +111,6 @@ contains
         integer    (int32),  dimension(:),   intent(in out) :: types
         
         integer (int32) ::  number_of_particles_in_file,        &
-                            time_step_in_file,                  &
                             file_ID,                            &
                             i
         real (real64), dimension(:), allocatable :: type_position_line
@@ -186,13 +185,8 @@ contains
         integer (int32), dimension(:),   intent(in out), allocatable :: types
         character (len=*), intent(in) :: file_name
 
-        integer (int32) ::  time_step_in_file,                  &
-                            i, j,                               &
-                            atom
-        integer (int32) :: file_ID
-        real (real64), dimension(:), allocatable :: type_position_line
+        integer (int32) :: i, j, file_ID
         character (len=200) :: line
-        real (real64)   :: double
         integer (int32) :: int
         logical :: file_exists, file_opened
 

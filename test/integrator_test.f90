@@ -237,13 +237,15 @@ contains
         number_of_dimensions = 3
         time_step            = 0.01
         system_size          = [10.0, 10.0, 10.0]
-        allocate(constant_force   (number_of_dimensions))
-        allocate(expected_velocity(number_of_dimensions))
-        allocate(initial_velocity (number_of_dimensions))
-        allocate(initial_position (number_of_dimensions))
-        allocate(positions        (number_of_dimensions, number_of_particles))
-        allocate(velocities       (number_of_dimensions, number_of_particles))
-        allocate(forces           (number_of_dimensions, number_of_particles))
+        allocate(constant_force    (number_of_dimensions))
+        allocate(expected_velocity (number_of_dimensions))
+        allocate(initial_velocity  (number_of_dimensions))
+        allocate(initial_position  (number_of_dimensions))
+        allocate(expected_positions(number_of_particles))
+        allocate(positions         (number_of_dimensions, number_of_particles))
+        allocate(velocities        (number_of_dimensions, number_of_particles))
+        allocate(forces            (number_of_dimensions, number_of_particles))
+        positions = 0.0_real64
         constant_force  = [ 0.85_real64,  2.0_real64,  -1.98_real64]
         velocities(:,1) = [-3.3_real64,   0.0_real64,   1.5_real64]
         positions (:,1) = [ 5.0_real64,   5.0_real64,   5.0_real64]

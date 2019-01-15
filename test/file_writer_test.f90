@@ -41,8 +41,7 @@ contains
 
     subroutine test_write_state()
         logical :: file_exists
-        integer :: out_file_ID, info_file_ID
-
+        integer :: out_file_ID
 
         number_of_dimensions = 3
         number_of_particles  = 10
