@@ -8,6 +8,7 @@ module initial_states_test
     use particles,      only:   positions,                          &
                                 velocities,                         &
                                 forces,                             &
+                                forces_hpf,                         &
                                 masses,                             &
                                 types
     use initial_states, only:   random_initial_state,               & ! Subroutine
@@ -79,6 +80,9 @@ contains
         if (allocated(types)) then
             deallocate(types)
         end if
+        if (allocated(forces_hpf)) then
+            deallocate(forces_hpf)
+        end if
     end subroutine test_allocate_arrays
 
 
@@ -96,6 +100,7 @@ contains
         deallocate(positions)
         deallocate(velocities)
         deallocate(forces)
+        deallocate(forces_hpf)
         deallocate(masses)
         deallocate(types)
 
@@ -113,6 +118,7 @@ contains
         deallocate(positions)
         deallocate(velocities)
         deallocate(forces)
+        deallocate(forces_hpf)
         deallocate(masses)
         deallocate(types)
     end subroutine test_random_initial_state
@@ -162,6 +168,7 @@ contains
         deallocate(positions)
         deallocate(velocities)
         deallocate(forces)
+        deallocate(forces_hpf)
         deallocate(types)
         deallocate(masses)
     end subroutine test_fcc_initial_state

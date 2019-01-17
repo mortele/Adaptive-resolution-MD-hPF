@@ -50,9 +50,9 @@ program hpftoy
     system_size_x           = 10.0
     system_size_y           = 10.0
     system_size_z           = 10.0
-    number_of_field_nodes_x = 5
-    number_of_field_nodes_y = 5
-    number_of_field_nodes_z = 5
+    number_of_field_nodes_x = 2
+    number_of_field_nodes_y = 2
+    number_of_field_nodes_z = 2
     time_step               = 0.03_real64
     number_of_time_steps    = 100
     kappa                   = 0.05
@@ -71,17 +71,16 @@ program hpftoy
     forces_hpf = 0.0_real64
     masses     = 1.0_real64
     
-    positions(:, 1 )  = [ 9.861513516680217_real64,  5.854609220329756_real64,  4.090152684461406_real64   ]
-    positions(:, 2 )  = [ 2.9071826059146924_real64, 8.743543693640504_real64,  9.004829883778097_real64   ]
-    positions(:, 3 )  = [ 2.461251549282577_real64,  6.473427427545419_real64,  0.40419124737701484_real64 ]
-    positions(:, 4 )  = [ 2.873699847732466_real64,  4.562054499100865_real64,  0.8750826555311375_real64  ]
-    positions(:, 5 )  = [ 8.61517700020657_real64,   7.5947341584529235_real64, 7.817588697757908_real64   ]
-    positions(:, 6 )  = [ 8.329323455469527_real64,  6.48491076670158_real64,   1.0595951799017522_real64  ]
-    positions(:, 7 )  = [ 7.539162628881729_real64,  6.8390933240322624_real64, 7.783573997831711_real64   ]
-    positions(:, 8 )  = [ 5.502628575319229_real64,  5.086691204907025_real64,  9.508740311058814_real64   ]
-    positions(:, 9 )  = [ 4.68875984367639_real64,   0.7111235962240725_real64, 7.499310540550107_real64   ]
-    positions(:, 10 ) = [ 5.628789714994156_real64,  0.5249494827666557_real64, 6.096779978340795_real64   ]
-
+    positions(:, 1 ) = [0.05815856656600038_real64,0.025342305369190687_real64,0.19873935016981903_real64 ]
+    positions(:, 2 ) = [0.07215982897620887_real64,0.2504571863305104_real64,0.38362945814487526_real64 ]
+    positions(:, 3 ) = [0.49720339870241104_real64,0.8872456338742205_real64,0.9632329182983882_real64 ]
+    positions(:, 4 ) = [0.5905505257877675_real64,0.33492055184731184_real64,0.8214094476851357_real64 ]
+    positions(:, 5 ) = [0.5156196908805613_real64,0.7799713140086558_real64,0.007959114457485872_real64 ]
+    positions(:, 6 ) = [0.8737540746260515_real64,0.12371839911797189_real64,0.6094189843776412_real64 ]
+    positions(:, 7 ) = [0.7794755801413096_real64,0.44018012706879395_real64,0.10548340557947777_real64 ]
+    positions(:, 8 ) = [0.9931810993676221_real64,0.26069746565869656_real64,0.7264137166754773_real64 ]
+    positions(:, 9 ) = [0.2898648348703551_real64,0.5064354936235451_real64,0.8455429407939724_real64 ]
+    positions(:, 10 ) = [0.38696815531713213_real64,0.898330488912219_real64,0.3928309115958717_real64 ]
     call compute_density_field(positions, masses)
 
     do i = 1, number_of_field_nodes_x
