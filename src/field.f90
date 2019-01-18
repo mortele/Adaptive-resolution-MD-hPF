@@ -126,9 +126,10 @@ contains
                 end if
             end do
             
-            ! Scale the total contribution to the overall density field by the 
-            ! mass of the particle in question.
-            vertex_contributions = vertex_contributions * masses(i)
+            ! Scale the total contribution to the overall (number density) 
+            ! field by the contributions from this particle. Note: Not mass 
+            ! density.
+            vertex_contributions = vertex_contributions ! * masses(i)
             
             ! The tensor vertex_contributions holds the contribution to the 
             ! density field at the 8 nodes closest to the particle in question.

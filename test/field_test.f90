@@ -44,6 +44,7 @@ contains
 
     subroutine test_compute_density_field()
         integer (int32) :: i, j, k
+        real (real64), allocatable, dimension(:,:,:) :: occam_density
 
         ! We start off with a 1D test of the density field computation, with a 
         ! single particle.
@@ -200,6 +201,66 @@ contains
         deallocate(density_field)
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)
+
+        ! Check that the density field values correspond exactly to those found
+        ! by OCCAM in a simple system of 10 particles and 2 vertices in each
+        ! dimension. 
+        number_of_dimensions = 3
+        number_of_particles  = 10
+        number_of_field_nodes_x = 2
+        number_of_field_nodes_y = 2
+        number_of_field_nodes_z = 2
+        system_size_x         = 10.0_real64
+        system_size_y         = 10.0_real64
+        system_size_z         = 10.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+
+        allocate(positions(number_of_dimensions, number_of_particles))
+        allocate(masses   (number_of_particles))
+        allocate(occam_density(number_of_field_nodes_x,         &
+                               number_of_field_nodes_y,         &
+                               number_of_field_nodes_z))
+        masses     = 1.0_real64
+        
+        positions(:,  1 ) = [0.05815856656600038_real64, 0.025342305369190687_real64, 0.19873935016981903_real64   ]
+        positions(:,  2 ) = [0.07215982897620887_real64, 0.2504571863305104_real64,   0.38362945814487526_real64   ]
+        positions(:,  3 ) = [0.49720339870241104_real64, 0.8872456338742205_real64,   0.9632329182983882_real64    ]
+        positions(:,  4 ) = [0.5905505257877675_real64,  0.33492055184731184_real64,  0.8214094476851357_real64    ]
+        positions(:,  5 ) = [0.5156196908805613_real64,  0.7799713140086558_real64,   0.007959114457485872_real64  ]
+        positions(:,  6 ) = [0.8737540746260515_real64,  0.12371839911797189_real64,  0.6094189843776412_real64    ]
+        positions(:,  7 ) = [0.7794755801413096_real64,  0.44018012706879395_real64,  0.10548340557947777_real64   ]
+        positions(:,  8 ) = [0.9931810993676221_real64,  0.26069746565869656_real64,  0.7264137166754773_real64    ]
+        positions(:,  9 ) = [0.2898648348703551_real64,  0.5064354936235451_real64,   0.8455429407939724_real64    ]
+        positions(:, 10 ) = [0.38696815531713213_real64, 0.898330488912219_real64,    0.3928309115958717_real64    ]
+        
+        call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
+        call compute_density_field(positions, masses)
+
+        occam_density(1,1,1) = 7.360439175029531_real64
+        occam_density(2,1,1) = 0.820343600335064_real64
+        occam_density(1,2,1) = 0.726866505217675_real64
+        occam_density(2,2,1) = 0.081418669862102_real64
+        occam_density(1,1,2) = 0.817321740122457_real64
+        occam_density(2,1,2) = 0.100435691350726_real64
+        occam_density(1,2,2) = 0.083985428583254_real64
+        occam_density(2,2,2) = 0.009189189499192_real64
+
+        do i = 1, 2
+            do j = 1, 2
+                do k = 1, 2
+                    call assert_equals(occam_density(i,j,k), density_field(i,j,k), 1.0e-15_real64, "80 test_compute_density_field : Calculated density field values are not equal to the corresponding values calculated in OCCAM")
+                end do
+            end do
+        end do
+        
+        deallocate(positions)
+        deallocate(masses)
+        deallocate(occam_density)
+        deallocate(density_field)
+        deallocate(density_gradient)
+        deallocate(position_of_density_nodes)
+
+
     end subroutine test_compute_density_field
 
     subroutine test_compute_density_gradient()
