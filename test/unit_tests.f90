@@ -250,6 +250,13 @@ contains
         call set_unit_name ('test_write_info')    
         call run_test_case(test_write_info, "test_write_info")
         call teardown     
+
+        call setup
+        print *, " "
+        print *, " ..running test: read_state_lammps"
+        call set_unit_name ('read_state_lammps')    
+        call run_test_case(read_state_lammps, "read_state_lammps")
+        call teardown     
         
     end subroutine file_writer_all_tests
 

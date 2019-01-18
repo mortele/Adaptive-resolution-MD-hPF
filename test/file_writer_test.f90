@@ -29,7 +29,8 @@ module file_writer_test
                 teardown,                   &
                 test_write_state,           &
                 test_read_state,            &
-                test_write_info
+                test_write_info,            &
+                test_read_state_lammps
 
 contains
 
@@ -139,6 +140,9 @@ contains
 
     subroutine test_write_info()
     end subroutine
+
+    subroutine read_state_lammps()
+    end subroutine read_state_lammps
 
 
 end module file_writer_test
