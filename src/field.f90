@@ -403,9 +403,9 @@ contains
         ! are in.
         do j = 1, number_of_dimensions 
             node_vector(j) = int(floor(point(j) / l(j))) + 1
-            print *, "l(j) : ", l(j) 
-            print *, "point(j)  /  l(j) ", point(j)/l(j)
-            print *, "node_vector: ", node_vector
+            !print *, "l(j) : ", l(j) 
+            !print *, "point(j)  /  l(j) ", point(j)/l(j)
+            !print *, "node_vector: ", node_vector
         end do
         
         ! Compute the partial volumes enclosed by the (hyper-)cubes with corners 

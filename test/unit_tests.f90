@@ -157,6 +157,13 @@ contains
         call set_unit_name ('test_compute_density_field')    
         call run_test_case(test_compute_density_field, "test_compute_density_field")
         call teardown        
+
+        call setup
+        print *, " "
+        print *, " ..running test: test_compute_density_field_periodic_boundaries"
+        call set_unit_name ('test_compute_density_field_periodic_boundaries')    
+        call run_test_case(test_compute_density_field_periodic_boundaries, "test_compute_density_field_periodic_boundaries")
+        call teardown        
         
         call setup
         print *, " "
