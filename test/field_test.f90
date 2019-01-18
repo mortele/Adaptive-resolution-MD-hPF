@@ -761,6 +761,8 @@ contains
     subroutine test_compute_density_field_periodic_boundaries() 
         implicit none
         integer (int32) :: i, j, k
+        real (real64)   :: test_density
+        integer (int32), allocatable, dimension(:) :: indices
 
         number_of_field_nodes_x = 3
         number_of_field_nodes_y = 3
@@ -790,13 +792,45 @@ contains
                           0.83333333333333333333_real64]
         call compute_density_field(positions, masses)
         call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,1), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,3), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,1), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,3), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,3), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,3), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), 1.0e-15_real64, "12 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), 1.0e-15_real64, "13 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,3), 1.0e-15_real64, "14 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,1), 1.0e-15_real64, "15 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,3), 1.0e-15_real64, "16 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,3), 1.0e-15_real64, "17 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,3), 1.0e-15_real64, "18 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+        
+        ! Test particle placed in the center of the first cell (1,1,1), except 
+        ! for once index, which is placed in the center of the last cell. This 
+        ! particle should distribute its number density in 
+        number_of_field_nodes_x = 4
+        number_of_field_nodes_y = 4
+        number_of_field_nodes_z = 4
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+        deallocate(density_field)
+        deallocate(density_gradient)
+        deallocate(position_of_density_nodes)
+
+        call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
+        
+        allocate(indices(number_of_dimensions))
+        do i = 1, 3
+            positions      = 0.5_real64
+            positions(i,1) = 0.9_real64
+            indices = 1
+            indices(i) = 3
+            call compute_density_field(positions, masses)
+            test_density = density_field(indices(1), indices(2), indices(3))
+            !call assert_equals(1.0_real64 / 8.0_real64, test_density, 1.0e-15_real64, "20 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
+            if (i == 3) then 
+                print *, " "
+                do j = 1, 4
+                    do k = 1, 4
+                        print *,":",j,k,density_field(:,j,k)
+                    end do
+                end do
+            end if
+        end do
         deallocate(density_field)
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)
