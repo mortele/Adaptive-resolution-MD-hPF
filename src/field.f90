@@ -242,7 +242,7 @@ contains
         real (real64), intent(in), dimension(:,:,:,:) :: position_of_density_nodes
         real (real64), intent(in), dimension(:)       :: point
 
-        integer :: j, i
+        integer :: j, i, x_index, y_index, z_index
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
         real (real64), allocatable, dimension(:)   :: partial_volume, cube
@@ -280,10 +280,26 @@ contains
             ! Compute the cube sides of the partial volume corresponding to 
             ! lattice vertex j.
             do i = 1, number_of_dimensions
-                lattice_edge = position_of_density_nodes(i,                             &
-                                                         node_vector(1) + offset(j, 1), & 
-                                                         node_vector(2) + offset(j, 2), &
-                                                         node_vector(3) + offset(j, 3))
+                x_index = node_vector(1) + offset(j, 1)
+                y_index = node_vector(2) + offset(j, 2)
+                z_index = node_vector(3) + offset(j, 3)
+                if (      (node_vector(1) == number_of_field_nodes_x)     &
+                    .and. (offset(j,1)    == 1)) then
+                    x_index = 1
+                end if
+                if (      (node_vector(2) == number_of_field_nodes_y)     &
+                    .and. (offset(j,2)    == 1)) then
+                    y_index = 1
+                end if
+                if (      (node_vector(3) == number_of_field_nodes_z)     &
+                    .and. (offset(j,3)    == 1)) then
+                    z_index = 1
+                end if
+
+                lattice_edge = position_of_density_nodes(i,               &
+                                                         x_index,         & 
+                                                         y_index,         &
+                                                         z_index)
                 point_edge   = point(i)
                 cube(i) = abs(lattice_edge - point_edge)
             end do
@@ -296,21 +312,53 @@ contains
         
         interpolated_density = 0.0_real64
         do j = 1, 2**number_of_dimensions
-            c = partial_volume(opposite(j)) * density_field(node_vector(1) + offset(j, 1), & 
-                                                            node_vector(2) + offset(j, 2), &
-                                                            node_vector(3) + offset(j, 3))
+            x_index = node_vector(1) + offset(j, 1)
+            y_index = node_vector(2) + offset(j, 2)
+            z_index = node_vector(3) + offset(j, 3)
+            if (      (node_vector(1) == number_of_field_nodes_x)     &
+                .and. (offset(j,1)    == 1)) then
+                x_index = 1
+            end if
+            if (      (node_vector(2) == number_of_field_nodes_y)     &
+                .and. (offset(j,2)    == 1)) then
+                y_index = 1
+            end if
+            if (      (node_vector(3) == number_of_field_nodes_z)     &
+                .and. (offset(j,3)    == 1)) then
+                z_index = 1
+            end if
+            c = partial_volume(opposite(j)) * density_field(x_index,  & 
+                                                            y_index,  &
+                                                            z_index)
             interpolated_density = interpolated_density + c
         end do 
         denominator = 1.0_real64
         do i = 1, number_of_dimensions
+            ! The offset(8,:) subarray contains [1,1,1].
+            x_index = node_vector(1) + offset(8, 1)
+            y_index = node_vector(2) + offset(8, 2)
+            z_index = node_vector(3) + offset(8, 3)
+            !print *, "node_vector, number_of_field_nodes_x : ", node_vector(3), number_of_field_nodes_x
+            if (      (node_vector(1) == number_of_field_nodes_x)     &
+                .and. (offset(8,1)    == 1)) then
+                x_index = 1
+            end if
+            if (      (node_vector(2) == number_of_field_nodes_y)     &
+                .and. (offset(8,2)    == 1)) then
+                y_index = 1
+            end if
+            if (      (node_vector(3) == number_of_field_nodes_z)     &
+                .and. (offset(8,3)    == 1)) then
+                z_index = 1
+            end if
             x0 = position_of_density_nodes(i,                  &
                                            node_vector(1),     &
                                            node_vector(2),     &
                                            node_vector(3))
             x1 = position_of_density_nodes(i,                  &
-                                           node_vector(1)+1,   &
-                                           node_vector(2)+1,   &
-                                           node_vector(3)+1)
+                                           x_index,            &
+                                           y_index,            &
+                                           z_index)
             denominator = denominator * (x1 - x0)
         end do
         interpolated_density = interpolated_density / denominator   
@@ -326,7 +374,7 @@ contains
         real (real64), dimension(:),       intent(in)     :: point
         real (real64), dimension(:),       intent(in out) :: interpolated_gradient
 
-        integer :: j, i
+        integer :: j, i, x_index, y_index, z_index
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
         real (real64), allocatable, dimension(:)   :: partial_volume, cube
@@ -354,7 +402,10 @@ contains
         ! Compute which field densities are closest, i.e. which (hyper-)cube we 
         ! are in.
         do j = 1, number_of_dimensions 
-            node_vector(j) = floor(point(j) / l(j)) + 1
+            node_vector(j) = int(floor(point(j) / l(j))) + 1
+            print *, "l(j) : ", l(j) 
+            print *, "point(j)  /  l(j) ", point(j)/l(j)
+            print *, "node_vector: ", node_vector
         end do
         
         ! Compute the partial volumes enclosed by the (hyper-)cubes with corners 
@@ -364,10 +415,25 @@ contains
             ! Compute the cube sides of the partial volume corresponding to 
             ! lattice vertex j.
             do i = 1, number_of_dimensions
+                x_index = node_vector(1) + offset(j, 1)
+                y_index = node_vector(2) + offset(j, 2)
+                z_index = node_vector(3) + offset(j, 3)
+                if (      (node_vector(1) == number_of_field_nodes_x)     &
+                    .and. (offset(j,1)    == 1)) then
+                    x_index = 1
+                end if
+                if (      (node_vector(2) == number_of_field_nodes_y)     &
+                    .and. (offset(j,2)    == 1)) then
+                    y_index = 1
+                end if
+                if (      (node_vector(3) == number_of_field_nodes_z)     &
+                    .and. (offset(j,3)    == 1)) then
+                    z_index = 1
+                end if
                 lattice_edge = position_of_density_nodes(i,                             &
-                                                         node_vector(1) + offset(j, 1), & 
-                                                         node_vector(2) + offset(j, 2), &
-                                                         node_vector(3) + offset(j, 3))
+                                                         x_index, & 
+                                                         y_index, &
+                                                         z_index)
                 point_edge   = point(i)
                 cube(i) = abs(lattice_edge - point_edge)
             end do
@@ -381,23 +447,57 @@ contains
         interpolated_gradient = 0.0_real64
         do j = 1, 2**number_of_dimensions
             do i = 1, number_of_dimensions
-                c = partial_volume(opposite(j)) * density_gradient(i,                             &
-                                                                   node_vector(1) + offset(j, 1), & 
-                                                                   node_vector(2) + offset(j, 2), &
-                                                                   node_vector(3) + offset(j, 3))
+                x_index = node_vector(1) + offset(j, 1)
+                y_index = node_vector(2) + offset(j, 2)
+                z_index = node_vector(3) + offset(j, 3)
+                if (      (node_vector(1) == number_of_field_nodes_x)     &
+                    .and. (offset(j,1)    == 1)) then
+                    x_index = 1
+                end if
+                if (      (node_vector(2) == number_of_field_nodes_y)     &
+                    .and. (offset(j,2)    == 1)) then
+                    y_index = 1
+                end if
+                if (      (node_vector(3) == number_of_field_nodes_z)     &
+                    .and. (offset(j,3)    == 1)) then
+                    z_index = 1
+                end if
+
+                c = partial_volume(opposite(j)) * density_gradient(i,       &
+                                                                   x_index, & 
+                                                                   y_index, &
+                                                                   z_index)
                 interpolated_gradient(i) = interpolated_gradient(i) + c
             end do
         end do 
         denominator = 1.0_real64
         do i = 1, number_of_dimensions
+            ! The offset(8,:) subarray contains [1,1,1].
+            x_index = node_vector(1) + offset(8, 1)
+            y_index = node_vector(2) + offset(8, 2)
+            z_index = node_vector(3) + offset(8, 3)
+            !print *, "node_vector, number_of_field_nodes_x : ", node_vector(3), number_of_field_nodes_x
+            if (      (node_vector(1) == number_of_field_nodes_x)     &
+                .and. (offset(8,1)    == 1)) then
+                x_index = 1
+            end if
+            if (      (node_vector(2) == number_of_field_nodes_y)     &
+                .and. (offset(8,2)    == 1)) then
+                y_index = 1
+            end if
+            if (      (node_vector(3) == number_of_field_nodes_z)     &
+                .and. (offset(8,3)    == 1)) then
+                z_index = 1
+            end if
+
             x0 = position_of_density_nodes(i,                  &
                                            node_vector(1),     &
                                            node_vector(2),     &
                                            node_vector(3))
             x1 = position_of_density_nodes(i,                  &
-                                           node_vector(1)+1,   &
-                                           node_vector(2)+1,   &
-                                           node_vector(3)+1)
+                                           x_index,            &
+                                           y_index,            &
+                                           z_index)
             denominator = denominator * (x1 - x0)
         end do
         interpolated_gradient = interpolated_gradient / denominator   

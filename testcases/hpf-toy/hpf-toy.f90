@@ -41,20 +41,21 @@ program hpftoy
     use initial_states,     only: allocate_arrays             ! Subroutine
 
     implicit none
-    real (real64)   :: interpolated_density
     integer (int32) :: i, j, k
+    real (real64)   :: interpolated_density
+    real (real64), allocatable, dimension(:) :: interpolated_gradient 
 
 
     ! Setup parameters to mimic the OCCAM run
     number_of_dimensions    = 3
     number_of_particles     = 10
-    system_size             = [10.0, 10.0, 10.0]
-    system_size_x           = 10.0
-    system_size_y           = 10.0
-    system_size_z           = 10.0
-    number_of_field_nodes_x = 2
-    number_of_field_nodes_y = 2
-    number_of_field_nodes_z = 2
+    system_size             = [1.0, 1.0, 1.0]
+    system_size_x           = 1.0
+    system_size_y           = 1.0
+    system_size_z           = 1.0
+    number_of_field_nodes_x = 3
+    number_of_field_nodes_y = 3
+    number_of_field_nodes_z = 3
     time_step               = 0.03_real64
     number_of_time_steps    = 100
     kappa                   = 0.05
@@ -100,6 +101,24 @@ program hpftoy
                                                          positions(:,i))
         print *, i, interpolated_density
     end do
+    
+    call compute_density_gradient(density_field)
+
+    print *, " "
+    print *, "Positions: "
+    do i = 1, number_of_particles
+        print "(F20.15,F20.15,F20.15)", positions(:,i)
+    end do
+
+    allocate(interpolated_gradient(number_of_dimensions))
+    do i = 1, number_of_particles
+        call interpolate_density_gradient(density_gradient,          &
+                                          position_of_density_nodes, &
+                                          positions(:,i),            &
+                                          interpolated_gradient)
+        print "(I5,F20.15)", i, interpolated_gradient(1)
+    end do
+
     
     
 end program

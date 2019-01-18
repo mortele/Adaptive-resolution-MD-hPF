@@ -456,6 +456,7 @@ contains
         end do
         call assert_equals(2.0_real64, convergence_rate(N), 0.001_real64, "6  test_compute_density_gradient : The computed convergence rate of the central finite difference scheme used in compute_density_gradient is not sufficiently close to 2.0")
     
+        
         deallocate(density_field)
         deallocate(density_gradient)
 
@@ -623,7 +624,7 @@ contains
         positions = 0.0_real64
         masses = 0.0_real64
         call compute_density_field(positions, masses)
-        
+
         density_field(1,1,1) = 7.360439175029531_real64
         density_field(2,1,1) = 0.820343600335064_real64
         density_field(1,2,1) = 0.726866505217675_real64
