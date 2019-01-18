@@ -36,10 +36,12 @@ program hpftoy
                                   position_of_density_nodes,&
                                   density_field,            &
                                   density_gradient,         &
-                                  interpolate_density_gradient! Subroutine
+                                  interpolate_density_gradient, &! Subroutine
+                                  interpolate_density_field   ! Subroutine
     use initial_states,     only: allocate_arrays             ! Subroutine
 
     implicit none
+    real (real64)   :: interpolated_density
     integer (int32) :: i, j, k
 
 
@@ -90,6 +92,14 @@ program hpftoy
             end do
         end do
     end do
+    print *, " "
 
+    do i = 1, number_of_particles
+        interpolated_density = interpolate_density_field(density_field,              &
+                                                         position_of_density_nodes,  &
+                                                         positions(:,i))
+        print *, i, interpolated_density
+    end do
+    
     
 end program

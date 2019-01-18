@@ -252,7 +252,7 @@ contains
                 end do
             end do
         end do
-        
+
         deallocate(positions)
         deallocate(masses)
         deallocate(occam_density)
@@ -597,6 +597,67 @@ contains
         do i = 1, 10
             interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, points(:,i))
             call assert_equals(values(i), interpolated_density, 1e-14_real64, "21 test_interpolate_density_field : interpolated density does not equal the scipy.interpolate values for the tested reference points / field values")
+        end do
+
+        ! Check that the interpolated density field values correspond exactly to
+        ! those found by OCCAM in a simple system of 10 particles and 2 
+        ! vertices in each dimension. 
+        number_of_field_nodes_x = 2
+        number_of_field_nodes_y = 2
+        number_of_field_nodes_z = 2
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+        number_of_particles   = 10
+        number_of_dimensions  = 3
+        system_size_x         = 10.0_real64
+        system_size_y         = 10.0_real64
+        system_size_z         = 10.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+
+        ! Reallocate positions and masses to enable calling 
+        ! compute_density_field. This is only done as a lazy way to compute 
+        ! position_of_density_nodes--the density values are disregarded.
+        deallocate(positions)
+        deallocate(masses)
+        allocate(positions(number_of_dimensions, number_of_particles))
+        allocate(masses(number_of_particles))
+        positions = 0.0_real64
+        masses = 0.0_real64
+        call compute_density_field(positions, masses)
+        
+        density_field(1,1,1) = 7.360439175029531_real64
+        density_field(2,1,1) = 0.820343600335064_real64
+        density_field(1,2,1) = 0.726866505217675_real64
+        density_field(2,2,1) = 0.081418669862102_real64
+        density_field(1,1,2) = 0.817321740122457_real64
+        density_field(2,1,2) = 0.100435691350726_real64
+        density_field(1,2,2) = 0.083985428583254_real64
+        density_field(2,2,2) = 0.009189189499192_real64
+
+        points(:,  1 ) = [0.05815856656600038_real64, 0.025342305369190687_real64, 0.19873935016981903_real64   ]
+        points(:,  2 ) = [0.07215982897620887_real64, 0.2504571863305104_real64,   0.38362945814487526_real64   ]
+        points(:,  3 ) = [0.49720339870241104_real64, 0.8872456338742205_real64,   0.9632329182983882_real64    ]
+        points(:,  4 ) = [0.5905505257877675_real64,  0.33492055184731184_real64,  0.8214094476851357_real64    ]
+        points(:,  5 ) = [0.5156196908805613_real64,  0.7799713140086558_real64,   0.007959114457485872_real64  ]
+        points(:,  6 ) = [0.8737540746260515_real64,  0.12371839911797189_real64,  0.6094189843776412_real64    ]
+        points(:,  7 ) = [0.7794755801413096_real64,  0.44018012706879395_real64,  0.10548340557947777_real64   ]
+        points(:,  8 ) = [0.9931810993676221_real64,  0.26069746565869656_real64,  0.7264137166754773_real64    ]
+        points(:,  9 ) = [0.2898648348703551_real64,  0.5064354936235451_real64,   0.8455429407939724_real64    ]
+        points(:, 10 ) = [0.38696815531713213_real64, 0.898330488912219_real64,    0.3928309115958717_real64    ]
+    
+        values(1 ) = 6.9948858249501731_real64
+        values(2 ) = 6.4648355463455784_real64
+        values(3 ) = 4.6718703421534755_real64
+        values(4 ) = 5.2864544226407126_real64
+        values(5 ) = 5.7378962066850665_real64
+        values(6 ) = 5.4204577534819203_real64
+        values(7 ) = 5.7283284816729338_real64
+        values(8 ) = 5.0307551561218400_real64
+        values(9 ) = 5.3904463286467665_real64
+        values(10) = 5.3433024738229600_real64
+
+        do i = 1, 10
+            interpolated_density = interpolate_density_field(density_field, position_of_density_nodes, points(:,i))
+            call assert_equals(values(i), interpolated_density, 1e-15_real64, "30 test_interpolate_density_field : Interpolated density values are not equal to the corresponding interpolated density values calculated in OCCAM")
         end do
 
         deallocate(points)
