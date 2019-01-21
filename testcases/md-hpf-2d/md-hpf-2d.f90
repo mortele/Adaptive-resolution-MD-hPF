@@ -70,7 +70,7 @@ program mdhpf2d
     call read_state_lammps(lammps_file, 1, positions, velocities, forces, types, masses)
     call compute_forces_md(positions, forces)
     call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
-    call compute_density_field(positions, masses)
+    call compute_density_field(positions)
 
     number_of_field_nodes_total =   number_of_field_nodes_x *       &
                                     number_of_field_nodes_y *       &
@@ -86,7 +86,7 @@ program mdhpf2d
         !call write_state_density_visualization(positions, field_visualization_positions, i, types)
         !call write_energy_to_file(Ek, V)
         call integrate_one_step(positions, velocities, forces)
-        !call compute_density_field(positions, masses)
+        !call compute_density_field(positions)
     end do
     print *, "thermalization done"
 
@@ -100,7 +100,7 @@ program mdhpf2d
         call write_state_density_visualization(positions, field_visualization_positions, i, types)
         !call write_energy_to_file(Ek, V)
         call integrate_one_step(positions, velocities, forces)
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
     end do
 
     print *, "md-2d-lj.f90 exited with exit code 0"

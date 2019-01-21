@@ -72,7 +72,7 @@ contains
         allocate(masses   (number_of_particles))
         masses         = 1.0
         positions(:,1) = [0.5,0.0,0.0]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         
         ! Placing the particle in the middle of two field nodes must allocate 
         ! half of the mass of the particle to each node.
@@ -83,7 +83,7 @@ contains
         ! system box, making sure the periodic boundary conditions are working
         ! correctly.
         positions(:,1) = [2.5,0.0,0.0]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         call assert_equals(0.5_real64, density_field(1,1,1), "3  test_compute_density_field : A particle placed in the middle between field node 3 and the right hand side edge of the system box should distribute its mass evenly between node 3 and node 1")
         call assert_equals(0.5_real64, density_field(3,1,1), "4  test_compute_density_field : A particle placed in the middle between field node 3 and the right hand side edge of the system box should distribute its mass evenly between node 3 and node 1")
         
@@ -93,7 +93,7 @@ contains
             call random_number(positions)
             positions(2:,1) = [0.0, 0.0]
             positions = positions * system_size_x
-            call compute_density_field(positions, masses)
+            call compute_density_field(positions)
             call assert_equals(1.0_real64, sum(density_field), char(4+i)//" test_compute_density_field : The contribution of a single particle of mass 1.0 should be exactly 1.0 to the overall density field")
         end do
 
@@ -102,7 +102,7 @@ contains
         ! no contribution to any other vertices.
         do i = 1, 3
             positions(:,1) = [real(i-1), 0.0, 0.0]
-            call compute_density_field(positions, masses)
+            call compute_density_field(positions)
             call assert_equals(1.0_real64, density_field(i,1,1), char(i)//"  test_compute_density_field : A particle placed on top of a density field vertex should contribute all its mass to that vertex, and nothing to any other vertex in the field")
         end do
 
@@ -128,7 +128,7 @@ contains
         ! the mass of our single particle should be distributed evenly across 
         ! all of them.
         positions(:,1) = [0.5, 0.5, 0.0]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         do i = 1, 2
             do j = 1,2
                 call assert_equals(0.25_real64, density_field(i,j,1), "30 test_compute_density_field : A particle in 2D placed in the middle of four density vertices should evenly distribute 25% of its mass onto each of these vertices, and contribute nothing to any others")
@@ -139,7 +139,7 @@ contains
         ! simulation box, i.e. that the periodic boundary conditions also work
         ! correctly in 2D.
         positions(:,1) = [2.5, 2.5, 0.0]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         call assert_equals(0.25_real64, density_field(1,1,1), "40 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
         call assert_equals(0.25_real64, density_field(3,1,1), "41 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
         call assert_equals(0.25_real64, density_field(1,3,1), "42 test_compute_density_field : A particle in 2D placed in the middle of four density vertices on the right hand side of the simulation box should evenly distribute 25% of its mass onto each of these vertices, two of which should be the vertices with index 1 because of periodic boundary conditions")
@@ -161,7 +161,7 @@ contains
         ! of the 8 closest density field vertices distribute its mass evenly
         ! onto all 8.
         positions(:,1) = [0.5, 0.5, 0.5]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         do i = 1, 2
             do j = 1,2
                 do k = 1,2
@@ -174,7 +174,7 @@ contains
         ! simulation box. In this way we check that the periodic boundary 
         ! conditions on the density field works in the full 3D configuration.
         positions(:,1) = [2.5, 2.5, 2.5]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,1), "60 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
         call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), "61 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
         call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), "62 test_compute_density_field : A particle in 3D placed in the center of a cube of 8 density vertices should evenly distribute 12.5% of its mass onto each of these vertices, periodic boundary version (particle on the right hand side edge of the simulation box")
@@ -190,7 +190,7 @@ contains
             do j = 1, number_of_field_nodes_y
                 do k = 1, number_of_field_nodes_z
                     positions(:,1) = [real(i-1), real(j-1), real(k-1)]
-                    call compute_density_field(positions, masses)
+                    call compute_density_field(positions)
                     call assert_equals(1.0_real64, density_field(i,j,k), "70 test_compute_density_field : A particle placed on top of a density field vertex should contribute its mass to that single vertex and not to any other vertices")
                     call assert_equals(0.0_real64, sum(density_field(i+1:,j+1:,k+1:))+sum(density_field(:i-1,:j-1,:k-1)), "70 test_compute_density_field : A particle placed on top of a density field vertex should contribute its mass to that single vertex and not to any other vertices")
                 end do
@@ -235,7 +235,7 @@ contains
         positions(:, 10 ) = [0.38696815531713213_real64, 0.898330488912219_real64,    0.3928309115958717_real64    ]
         
         call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
 
         occam_density(1,1,1) = 7.360439175029531_real64
         occam_density(2,1,1) = 0.820343600335064_real64
@@ -538,7 +538,7 @@ contains
         
         ! This call sets up position_of_density_nodes, so it is neccessary even
         ! though we throw away the computed density values.
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         density_field = 0.0_real64
         density_field(1,1,1) = 1.0_real64
         point = [0.5, 0.5, 0.5]
@@ -624,7 +624,7 @@ contains
         allocate(masses(number_of_particles))
         positions = 0.0_real64
         masses = 0.0_real64
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
 
         density_field(1,1,1) = 7.360439175029531_real64
         density_field(2,1,1) = 0.820343600335064_real64
@@ -707,7 +707,7 @@ contains
         
         ! This call sets up position_of_density_nodes, so it is neccessary even
         ! though we throw away the computed density values.
-        call compute_density_field   (positions, masses)
+        call compute_density_field   (positions)
         call compute_density_gradient(density_field)
         density_field    = 0.0_real64
         density_gradient = 0.0_real64
@@ -761,8 +761,7 @@ contains
     subroutine test_compute_density_field_periodic_boundaries() 
         implicit none
         integer (int32) :: i, j, k
-        real (real64)   :: test_density
-        integer (int32), allocatable, dimension(:) :: indices
+        real (real64),   allocatable, dimension(:,:,:) :: expected_density
 
         number_of_field_nodes_x = 3
         number_of_field_nodes_y = 3
@@ -790,7 +789,7 @@ contains
         positions(:,1) = [0.83333333333333333333_real64,    &
                           0.83333333333333333333_real64,    &
                           0.83333333333333333333_real64]
-        call compute_density_field(positions, masses)
+        call compute_density_field(positions)
         call assert_equals(1.0_real64 / 8.0_real64, density_field(1,1,1), 1.0e-15_real64, "11 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
         call assert_equals(1.0_real64 / 8.0_real64, density_field(3,1,1), 1.0e-15_real64, "12 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
         call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,1), 1.0e-15_real64, "13 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
@@ -800,37 +799,88 @@ contains
         call assert_equals(1.0_real64 / 8.0_real64, density_field(1,3,3), 1.0e-15_real64, "17 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
         call assert_equals(1.0_real64 / 8.0_real64, density_field(3,3,3), 1.0e-15_real64, "18 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
         
-        ! Test particle placed in the center of the first cell (1,1,1), except 
-        ! for once index, which is placed in the center of the last cell. This 
-        ! particle should distribute its number density in 
-        number_of_field_nodes_x = 4
-        number_of_field_nodes_y = 4
-        number_of_field_nodes_z = 4
+        ! Test computed density field against the OCCAM results when particles
+        ! are placed randomly inside the integration box (also close to the 
+        ! boundaries).
+        number_of_particles   = 20
+        number_of_dimensions  = 3
+        system_size_x         = 5.0_real64
+        system_size_y         = 5.0_real64
+        system_size_z         = 5.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+        number_of_field_nodes_x = 3
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
         number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+        deallocate(positions)
+        deallocate(masses)
         deallocate(density_field)
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)
 
+        allocate(positions(number_of_dimensions, number_of_particles))
+        allocate(masses   (number_of_particles))
         call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
-        
-        allocate(indices(number_of_dimensions))
-        do i = 1, 3
-            positions      = 0.5_real64
-            positions(i,1) = 0.9_real64
-            indices = 1
-            indices(i) = 3
-            call compute_density_field(positions, masses)
-            test_density = density_field(indices(1), indices(2), indices(3))
-            !call assert_equals(1.0_real64 / 8.0_real64, test_density, 1.0e-15_real64, "20 test_compute_density_field_periodic_boundaries : computed number density is not distributed correctly w.r.t. the periodic boundaries")
-            if (i == 3) then 
-                print *, " "
-                do j = 1, 4
-                    do k = 1, 4
-                        print *,":",j,k,density_field(:,j,k)
-                    end do
+        masses    = 0.0_real64
+        positions(:, 1 )  = [2.067625980522865_real64   ,0.4185744390348428_real64  ,2.83524693305736_real64    ]
+        positions(:, 2 )  = [0.9123154513864479_real64  ,4.352858323936657_real64   ,4.195594571925238_real64   ]
+        positions(:, 3 )  = [2.6132571470761916_real64  ,2.6030249274122967_real64  ,1.7757540856852345_real64  ]
+        positions(:, 4 )  = [3.5968793100436165_real64  ,2.070247412706989_real64   ,1.1473397562051675_real64  ]
+        positions(:, 5 )  = [0.18617714100533922_real64 ,1.506857907482213_real64   ,2.9906668039066266_real64  ]
+        positions(:, 6 )  = [3.8285863823953585_real64  ,3.5168644555424877_real64  ,0.37217354991752327_real64 ]
+        positions(:, 7 )  = [2.9192747077524634_real64  ,1.9200935457662665_real64  ,4.379566746668979_real64   ]
+        positions(:, 8 )  = [2.0887982783403904_real64  ,4.793608358818268_real64   ,0.7016011293648883_real64  ]
+        positions(:, 9 )  = [0.7569551038444566_real64  ,4.462595357219107_real64   ,1.6567181825660109_real64  ]
+        positions(:, 10 ) = [3.262790047645259_real64   ,1.1384817180311368_real64  ,4.754299188727044_real64   ]
+        positions(:, 11 ) = [0.24342988473868066_real64 ,1.114369636796459_real64   ,3.509095178222462_real64   ]
+        positions(:, 12 ) = [4.901507462115794_real64   ,1.408117250007901_real64   ,0.18200860719317924_real64 ]
+        positions(:, 13 ) = [2.4135903846435287_real64  ,2.039157659449395_real64   ,2.957395079233789_real64   ]
+        positions(:, 14 ) = [1.684126205635299_real64   ,0.6214695284238703_real64  ,1.6008989052568445_real64  ]
+        positions(:, 15 ) = [1.3825219177912285_real64  ,1.6298893810289088_real64  ,4.693271071569928_real64   ]
+        positions(:, 16 ) = [2.3863235534682254_real64  ,3.5465391437517395_real64  ,4.279316435437916_real64   ]
+        positions(:, 17 ) = [4.046486567311006_real64   ,3.550388978219383_real64   ,1.848968274144731_real64   ]
+        positions(:, 18 ) = [3.590608121078941_real64   ,0.5888638276544195_real64  ,2.0210665815488564_real64  ]
+        positions(:, 19 ) = [0.4970724081482475_real64  ,4.859426900669118_real64   ,4.549507011070417_real64   ]
+        positions(:, 20 ) = [1.415397222080486_real64   ,3.1463110358773227_real64  ,1.1572954897788035_real64  ]
+        call compute_density_field(positions)
+
+        allocate(expected_density(number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z))
+        expected_density(1, 1, 1) = 0.802680886824402_real64
+        expected_density(1, 1, 2) = 0.536608675691542_real64
+        expected_density(1, 1, 3) = 0.656124885277429_real64
+        expected_density(1, 2, 1) = 0.946895144204601_real64
+        expected_density(1, 2, 2) = 0.389119187565895_real64
+        expected_density(1, 2, 3) = 1.191031146423121_real64
+        expected_density(1, 3, 1) = 0.393380725589749_real64
+        expected_density(1, 3, 2) = 0.684751516630930_real64
+        expected_density(1, 3, 3) = 0.141527060162227_real64
+        expected_density(2, 1, 1) = 0.850402116471090_real64
+        expected_density(2, 1, 2) = 1.349525687235042_real64
+        expected_density(2, 1, 3) = 0.722749919462960_real64
+        expected_density(2, 2, 1) = 0.872788637018358_real64
+        expected_density(2, 2, 2) = 0.771931095780656_real64
+        expected_density(2, 2, 3) = 0.877537370321526_real64
+        expected_density(2, 3, 1) = 0.718121354126469_real64
+        expected_density(2, 3, 2) = 0.962679693247174_real64
+        expected_density(2, 3, 3) = 0.449113820683124_real64
+        expected_density(3, 1, 1) = 0.487143714231343_real64
+        expected_density(3, 1, 2) = 0.668782635154007_real64
+        expected_density(3, 1, 3) = 0.319376177470390_real64
+        expected_density(3, 2, 1) = 1.201219368070684_real64
+        expected_density(3, 2, 2) = 1.012793116671838_real64
+        expected_density(3, 2, 3) = 0.725358398291809_real64
+        expected_density(3, 3, 1) = 0.852936803467041_real64
+        expected_density(3, 3, 2) = 1.057171109646409_real64
+        expected_density(3, 3, 3) = 0.358249754280182_real64
+
+        do i = 1, number_of_field_nodes_x
+            do j = 1, number_of_field_nodes_y
+                do k = 1, number_of_field_nodes_z
+                    call assert_equals(expected_density(i,j,k), density_field(i,j,k), 1e-15_real64, "20 test_compute_density_field_periodic_boundaries : computed number density is not distributed identically to densities computed in OCCAM w.r.t. the periodic boundaries")
                 end do
-            end if
+            end do
         end do
+
         deallocate(density_field)
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)

@@ -84,7 +84,7 @@ program hpftoy
     positions(:,  8 ) = [0.9931810993676221_real64,  0.26069746565869656_real64,  0.7264137166754773_real64    ]
     positions(:,  9 ) = [0.2898648348703551_real64,  0.5064354936235451_real64,   0.8455429407939724_real64    ]
     positions(:, 10 ) = [0.38696815531713213_real64, 0.898330488912219_real64,    0.3928309115958717_real64    ]
-    call compute_density_field(positions, masses)
+    call compute_density_field(positions)
 
     do i = 1, number_of_field_nodes_x
         do j = 1, number_of_field_nodes_y

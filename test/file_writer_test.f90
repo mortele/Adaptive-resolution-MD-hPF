@@ -141,8 +141,8 @@ contains
     subroutine test_write_info()
     end subroutine
 
-    subroutine read_state_lammps()
-    end subroutine read_state_lammps
+    subroutine test_read_state_lammps()
+    end subroutine test_read_state_lammps
 
 
 end module file_writer_test

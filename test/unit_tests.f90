@@ -253,9 +253,9 @@ contains
 
         call setup
         print *, " "
-        print *, " ..running test: read_state_lammps"
-        call set_unit_name ('read_state_lammps')    
-        call run_test_case(read_state_lammps, "read_state_lammps")
+        print *, " ..running test: test_read_state_lammps"
+        call set_unit_name ('test_read_state_lammps')    
+        call run_test_case(test_read_state_lammps, "test_read_state_lammps")
         call teardown     
         
     end subroutine file_writer_all_tests

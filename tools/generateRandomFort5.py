@@ -50,3 +50,4 @@ for i in range(n_molecules) :
     for j in range(2) :
         print(coordinates[j,i], end="_real64,")
     print(coordinates[-1,i], end="_real64 ]\n")
+

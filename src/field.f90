@@ -34,10 +34,9 @@ module field
 
 contains
 
-    subroutine compute_density_field(positions, masses)
+    subroutine compute_density_field(positions)
         implicit none
         real (real64), dimension(:,:), intent(in) :: positions
-        real (real64), dimension(:),   intent(in) :: masses
         
         ! Tensor for holding the contribution to each of the density nodes 
         ! closest to the particle in question. There are 8 such points, 
