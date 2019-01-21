@@ -34,6 +34,7 @@ module field_test
                 test_allocate_field_arrays,                             &
                 test_compute_density_gradient,                          &
                 test_interpolate_density_field,                         &
+                test_interpolate_density_field_periodic_boundaries,     &
                 test_interpolate_density_gradient   
 contains
 
@@ -819,9 +820,7 @@ contains
         deallocate(position_of_density_nodes)
 
         allocate(positions(number_of_dimensions, number_of_particles))
-        allocate(masses   (number_of_particles))
         call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
-        masses    = 0.0_real64
         positions(:, 1 )  = [2.067625980522865_real64   ,0.4185744390348428_real64  ,2.83524693305736_real64    ]
         positions(:, 2 )  = [0.9123154513864479_real64  ,4.352858323936657_real64   ,4.195594571925238_real64   ]
         positions(:, 3 )  = [2.6132571470761916_real64  ,2.6030249274122967_real64  ,1.7757540856852345_real64  ]
@@ -885,8 +884,113 @@ contains
         deallocate(density_gradient)
         deallocate(position_of_density_nodes)
         deallocate(positions)
-        deallocate(masses)
-
     end subroutine test_compute_density_field_periodic_boundaries
+
+    subroutine test_interpolate_density_field_periodic_boundaries()
+        implicit none
+        real (real64), allocatable, dimension(:) :: expected_interpolated_densities
+        real (real64)   :: interpolated_density
+        integer (int32) :: i
+
+        ! Test interpolated densities against OCCAM values.
+        number_of_particles   = 20
+        number_of_dimensions  = 3
+        system_size_x         = 5.0_real64
+        system_size_y         = 5.0_real64
+        system_size_z         = 5.0_real64
+        system_size           = [system_size_x, system_size_y, system_size_z]
+        number_of_field_nodes_x = 3
+        number_of_field_nodes_y = 3
+        number_of_field_nodes_z = 3
+        number_of_field_nodes = [number_of_field_nodes_x, number_of_field_nodes_y, number_of_field_nodes_z]
+
+        allocate(positions(number_of_dimensions, number_of_particles))
+        call allocate_field_arrays(density_field, density_gradient, position_of_density_nodes)
+
+        positions(:, 1 )  = [2.067625980522865_real64   ,0.4185744390348428_real64  ,2.83524693305736_real64    ]
+        positions(:, 2 )  = [0.9123154513864479_real64  ,4.352858323936657_real64   ,4.195594571925238_real64   ]
+        positions(:, 3 )  = [2.6132571470761916_real64  ,2.6030249274122967_real64  ,1.7757540856852345_real64  ]
+        positions(:, 4 )  = [3.5968793100436165_real64  ,2.070247412706989_real64   ,1.1473397562051675_real64  ]
+        positions(:, 5 )  = [0.18617714100533922_real64 ,1.506857907482213_real64   ,2.9906668039066266_real64  ]
+        positions(:, 6 )  = [3.8285863823953585_real64  ,3.5168644555424877_real64  ,0.37217354991752327_real64 ]
+        positions(:, 7 )  = [2.9192747077524634_real64  ,1.9200935457662665_real64  ,4.379566746668979_real64   ]
+        positions(:, 8 )  = [2.0887982783403904_real64  ,4.793608358818268_real64   ,0.7016011293648883_real64  ]
+        positions(:, 9 )  = [0.7569551038444566_real64  ,4.462595357219107_real64   ,1.6567181825660109_real64  ]
+        positions(:, 10 ) = [3.262790047645259_real64   ,1.1384817180311368_real64  ,4.754299188727044_real64   ]
+        positions(:, 11 ) = [0.24342988473868066_real64 ,1.114369636796459_real64   ,3.509095178222462_real64   ]
+        positions(:, 12 ) = [4.901507462115794_real64   ,1.408117250007901_real64   ,0.18200860719317924_real64 ]
+        positions(:, 13 ) = [2.4135903846435287_real64  ,2.039157659449395_real64   ,2.957395079233789_real64   ]
+        positions(:, 14 ) = [1.684126205635299_real64   ,0.6214695284238703_real64  ,1.6008989052568445_real64  ]
+        positions(:, 15 ) = [1.3825219177912285_real64  ,1.6298893810289088_real64  ,4.693271071569928_real64   ]
+        positions(:, 16 ) = [2.3863235534682254_real64  ,3.5465391437517395_real64  ,4.279316435437916_real64   ]
+        positions(:, 17 ) = [4.046486567311006_real64   ,3.550388978219383_real64   ,1.848968274144731_real64   ]
+        positions(:, 18 ) = [3.590608121078941_real64   ,0.5888638276544195_real64  ,2.0210665815488564_real64  ]
+        positions(:, 19 ) = [0.4970724081482475_real64  ,4.859426900669118_real64   ,4.549507011070417_real64   ]
+        positions(:, 20 ) = [1.415397222080486_real64   ,3.1463110358773227_real64  ,1.1572954897788035_real64  ]
+        call compute_density_field(positions)
+
+        density_field(1, 1, 1) = 0.802680886824402_real64
+        density_field(1, 1, 2) = 0.536608675691542_real64
+        density_field(1, 1, 3) = 0.656124885277429_real64
+        density_field(1, 2, 1) = 0.946895144204601_real64
+        density_field(1, 2, 2) = 0.389119187565895_real64
+        density_field(1, 2, 3) = 1.191031146423121_real64
+        density_field(1, 3, 1) = 0.393380725589749_real64
+        density_field(1, 3, 2) = 0.684751516630930_real64
+        density_field(1, 3, 3) = 0.141527060162227_real64
+        density_field(2, 1, 1) = 0.850402116471090_real64
+        density_field(2, 1, 2) = 1.349525687235042_real64
+        density_field(2, 1, 3) = 0.722749919462960_real64
+        density_field(2, 2, 1) = 0.872788637018358_real64
+        density_field(2, 2, 2) = 0.771931095780656_real64
+        density_field(2, 2, 3) = 0.877537370321526_real64
+        density_field(2, 3, 1) = 0.718121354126469_real64
+        density_field(2, 3, 2) = 0.962679693247174_real64
+        density_field(2, 3, 3) = 0.449113820683124_real64
+        density_field(3, 1, 1) = 0.487143714231343_real64
+        density_field(3, 1, 2) = 0.668782635154007_real64
+        density_field(3, 1, 3) = 0.319376177470390_real64
+        density_field(3, 2, 1) = 1.201219368070684_real64
+        density_field(3, 2, 2) = 1.012793116671838_real64
+        density_field(3, 2, 3) = 0.725358398291809_real64
+        density_field(3, 3, 1) = 0.852936803467041_real64
+        density_field(3, 3, 2) = 1.057171109646409_real64
+        density_field(3, 3, 3) = 0.358249754280182_real64
+
+        allocate(expected_interpolated_densities(number_of_particles))
+        expected_interpolated_densities(1)  =  0.80426655050569396_real64
+        expected_interpolated_densities(2)  =  0.63958441046039438_real64
+        expected_interpolated_densities(3)  =  0.94306090829713929_real64
+        expected_interpolated_densities(4)  =  0.97637759117945389_real64
+        expected_interpolated_densities(5)  =  0.97347545669520941_real64
+        expected_interpolated_densities(6)  =  0.74838540022110056_real64
+        expected_interpolated_densities(7)  =  0.93663453982167466_real64
+        expected_interpolated_densities(8)  =  0.92428748053800303_real64
+        expected_interpolated_densities(9)  =  0.87438559599697074_real64
+        expected_interpolated_densities(10) =  0.91666786026142044_real64
+        expected_interpolated_densities(11) =  0.97666072365162104_real64
+        expected_interpolated_densities(12) =  0.88082026215194131_real64
+        expected_interpolated_densities(13) =  0.76216079988603314_real64
+        expected_interpolated_densities(14) =  1.11984820182069790_real64
+        expected_interpolated_densities(15) =  0.89213894692106777_real64
+        expected_interpolated_densities(16) =  0.61953638911275122_real64
+        expected_interpolated_densities(17) =  0.79834900838492973_real64
+        expected_interpolated_densities(18) =  0.69606384861385584_real64
+        expected_interpolated_densities(19) =  0.74862461820578785_real64
+        expected_interpolated_densities(20) =  0.83515083965475556_real64
+
+        do i = 1, number_of_particles
+            interpolated_density = interpolate_density_field(density_field,               &
+                                                             position_of_density_nodes,   &
+                                                             positions(:,i))
+            call assert_equals(expected_interpolated_densities(i), interpolated_density, 1e-14_real64, "10 test_interpolate_density_field_periodic_boundaries : Interpolated density is not equal to the interpolated density in OCCAM")
+        end do
+
+        deallocate(expected_interpolated_densities)
+        deallocate(positions)
+        deallocate(density_field)
+        deallocate(density_gradient)
+        deallocate(position_of_density_nodes)
+    end subroutine test_interpolate_density_field_periodic_boundaries
 
 end module field_test

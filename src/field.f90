@@ -1,6 +1,7 @@
 module field
     use, intrinsic :: iso_fortran_env, only: real64, int32
-    use system,          only:  system_size
+    use system,          only:  system_size,                        &
+                                compute_distance_minimum_image        ! Subroutine
     use parameters,      only:  number_of_field_nodes_x,            &
                                 number_of_field_nodes_y,            &
                                 number_of_field_nodes_z,            &
@@ -10,7 +11,7 @@ module field
     private 
 
     ! The distance between density vertices.
-    real (real64), private :: lx, ly, lz
+    real (real64), private :: lx, ly, lz, cell_volume
     real (real64), private, dimension(:), allocatable :: l
 
     real (real64),   public, dimension(:,:,:),   allocatable :: density_field
@@ -246,16 +247,17 @@ contains
         integer :: j, i, x_index, y_index, z_index
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
-        real (real64), allocatable, dimension(:)   :: partial_volume, cube
-        real (real64) :: lattice_edge, point_edge, denominator, c, x0, x1
+        real (real64), allocatable, dimension(:) :: partial_volume, cube, lattice_edge
+        real (real64) :: c
 
         ! There are 2ⁿ nearest neighbor lattice points in a system of n 
         ! dimensions, i.e. a hyper-cube in n dimensions has 2ⁿ corners.
-        allocate(partial_volume(2**number_of_dimensions))
-        allocate(node_vector(number_of_dimensions))
-        allocate(cube(number_of_dimensions))
-        allocate(offset(2**number_of_dimensions, number_of_dimensions))
-        allocate(opposite(2**number_of_dimensions))
+        allocate(node_vector    (number_of_dimensions))
+        allocate(cube           (number_of_dimensions))
+        allocate(lattice_edge   (number_of_dimensions))
+        allocate(offset         (2**number_of_dimensions, number_of_dimensions))
+        allocate(partial_volume (2**number_of_dimensions))
+        allocate(opposite       (2**number_of_dimensions))
 
                               ! Opposite corners
         offset(1,:) = [0,0,0] ! 8 
@@ -297,13 +299,12 @@ contains
                     z_index = 1
                 end if
 
-                lattice_edge = position_of_density_nodes(i,               &
-                                                         x_index,         & 
-                                                         y_index,         &
-                                                         z_index)
-                point_edge   = point(i)
-                cube(i) = abs(lattice_edge - point_edge)
+                lattice_edge(i) = position_of_density_nodes(i,               &
+                                                            x_index,         & 
+                                                            y_index,         &
+                                                            z_index)
             end do
+            cube = abs(compute_distance_minimum_image(point - lattice_edge))
             
             partial_volume(j) = cube(1)
             do i = 2, number_of_dimensions
@@ -333,36 +334,11 @@ contains
                                                             z_index)
             interpolated_density = interpolated_density + c
         end do 
-        denominator = 1.0_real64
+        cell_volume = 1.0_real64
         do i = 1, number_of_dimensions
-            ! The offset(8,:) subarray contains [1,1,1].
-            x_index = node_vector(1) + offset(8, 1)
-            y_index = node_vector(2) + offset(8, 2)
-            z_index = node_vector(3) + offset(8, 3)
-            !print *, "node_vector, number_of_field_nodes_x : ", node_vector(3), number_of_field_nodes_x
-            if (      (node_vector(1) == number_of_field_nodes_x)     &
-                .and. (offset(8,1)    == 1)) then
-                x_index = 1
-            end if
-            if (      (node_vector(2) == number_of_field_nodes_y)     &
-                .and. (offset(8,2)    == 1)) then
-                y_index = 1
-            end if
-            if (      (node_vector(3) == number_of_field_nodes_z)     &
-                .and. (offset(8,3)    == 1)) then
-                z_index = 1
-            end if
-            x0 = position_of_density_nodes(i,                  &
-                                           node_vector(1),     &
-                                           node_vector(2),     &
-                                           node_vector(3))
-            x1 = position_of_density_nodes(i,                  &
-                                           x_index,            &
-                                           y_index,            &
-                                           z_index)
-            denominator = denominator * (x1 - x0)
+            cell_volume = cell_volume * (system_size(i) / number_of_field_nodes(i))
         end do
-        interpolated_density = interpolated_density / denominator   
+        interpolated_density = interpolated_density / cell_volume
     end function interpolate_density_field
 
     subroutine interpolate_density_gradient(density_gradient,          &
@@ -378,16 +354,17 @@ contains
         integer :: j, i, x_index, y_index, z_index
         integer, allocatable, dimension(:,:) :: offset
         integer, allocatable, dimension(:)   :: node_vector, opposite
-        real (real64), allocatable, dimension(:)   :: partial_volume, cube
-        real (real64) :: lattice_edge, point_edge, denominator, c, x0, x1
+        real (real64), allocatable, dimension(:) :: partial_volume, cube, lattice_edge
+        real (real64) :: c
 
         ! There are 2ⁿ nearest neighbor lattice points in a system of n 
         ! dimensions, i.e. a hyper-cube in n dimensions has 2ⁿ corners.
-        allocate(partial_volume(2**number_of_dimensions))
-        allocate(node_vector(number_of_dimensions))
-        allocate(cube(number_of_dimensions))
-        allocate(offset(2**number_of_dimensions, number_of_dimensions))
-        allocate(opposite(2**number_of_dimensions))
+        allocate(node_vector    (number_of_dimensions))
+        allocate(cube           (number_of_dimensions))
+        allocate(lattice_edge   (number_of_dimensions))
+        allocate(offset         (2**number_of_dimensions, number_of_dimensions))
+        allocate(partial_volume (2**number_of_dimensions))
+        allocate(opposite       (2**number_of_dimensions))
 
                               ! Opposite corners
         offset(1,:) = [0,0,0] ! 8 
@@ -431,13 +408,13 @@ contains
                     .and. (offset(j,3)    == 1)) then
                     z_index = 1
                 end if
-                lattice_edge = position_of_density_nodes(i,                             &
-                                                         x_index, & 
-                                                         y_index, &
-                                                         z_index)
-                point_edge   = point(i)
-                cube(i) = abs(lattice_edge - point_edge)
+
+                lattice_edge(i) = position_of_density_nodes(i,               &
+                                                            x_index,         & 
+                                                            y_index,         &
+                                                            z_index)
             end do
+            cube = abs(compute_distance_minimum_image(point - lattice_edge))
             
             partial_volume(j) = cube(1)
             do i = 2, number_of_dimensions
@@ -471,37 +448,12 @@ contains
                 interpolated_gradient(i) = interpolated_gradient(i) + c
             end do
         end do 
-        denominator = 1.0_real64
-        do i = 1, number_of_dimensions
-            ! The offset(8,:) subarray contains [1,1,1].
-            x_index = node_vector(1) + offset(8, 1)
-            y_index = node_vector(2) + offset(8, 2)
-            z_index = node_vector(3) + offset(8, 3)
-            !print *, "node_vector, number_of_field_nodes_x : ", node_vector(3), number_of_field_nodes_x
-            if (      (node_vector(1) == number_of_field_nodes_x)     &
-                .and. (offset(8,1)    == 1)) then
-                x_index = 1
-            end if
-            if (      (node_vector(2) == number_of_field_nodes_y)     &
-                .and. (offset(8,2)    == 1)) then
-                y_index = 1
-            end if
-            if (      (node_vector(3) == number_of_field_nodes_z)     &
-                .and. (offset(8,3)    == 1)) then
-                z_index = 1
-            end if
 
-            x0 = position_of_density_nodes(i,                  &
-                                           node_vector(1),     &
-                                           node_vector(2),     &
-                                           node_vector(3))
-            x1 = position_of_density_nodes(i,                  &
-                                           x_index,            &
-                                           y_index,            &
-                                           z_index)
-            denominator = denominator * (x1 - x0)
+        cell_volume = 1.0_real64
+        do i = 1, number_of_dimensions
+            cell_volume = cell_volume * (system_size(i) / number_of_field_nodes(i))
         end do
-        interpolated_gradient = interpolated_gradient / denominator   
+        interpolated_gradient = interpolated_gradient / cell_volume
 
     end subroutine interpolate_density_gradient 
 

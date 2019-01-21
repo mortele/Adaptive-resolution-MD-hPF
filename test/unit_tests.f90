@@ -178,6 +178,13 @@ contains
         call set_unit_name ('test_interpolate_density_field')    
         call run_test_case(test_interpolate_density_field, "test_interpolate_density_field")
         call teardown  
+        
+        call setup
+        print *, " "
+        print *, " ..running test: test_interpolate_density_field_periodic_boundaries"
+        call set_unit_name ('test_interpolate_density_field_periodic_boundaries')    
+        call run_test_case(test_interpolate_density_field_periodic_boundaries, "test_interpolate_density_field_periodic_boundaries")
+        call teardown  
 
         call setup
         print *, " "
@@ -185,7 +192,6 @@ contains
         call set_unit_name ('test_interpolate_density_gradient')    
         call run_test_case(test_interpolate_density_gradient, "test_interptest_interpolate_density_gradientolate_density_field")
         call teardown  
-
         
     end subroutine field_all_tests
 
