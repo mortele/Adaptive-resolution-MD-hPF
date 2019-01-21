@@ -63,6 +63,7 @@ contains
         real (real64),   dimension(:), allocatable :: p 
 
         integer (int32) :: i, j, k
+        real (real64)   :: cell_volume
 
         density_field = 0
 
@@ -75,6 +76,7 @@ contains
         lx = system_size(1) / number_of_field_nodes_x
         ly = system_size(2) / number_of_field_nodes_y
         lz = system_size(3) / number_of_field_nodes_z
+        cell_volume = lx * ly * lz
 
         if (.not. allocated(l)) then
             allocate(l(number_of_dimensions))
@@ -103,14 +105,14 @@ contains
 
             ! Computing the contribution to each nearest neighbor density vertex
             ! from this particle.
-            vertex_contributions(0,0,0) = (lx - p(1)) * (ly - p(2)) * (lz - p(3)) / (lx * ly * lz)
-            vertex_contributions(1,0,0) =    p(1)     * (ly - p(2)) * (lz - p(3)) / (lx * ly * lz)
-            vertex_contributions(0,1,0) = (lx - p(1)) *    p(2)     * (lz - p(3)) / (lx * ly * lz)
-            vertex_contributions(0,0,1) = (lx - p(1)) * (ly - p(2)) *    p(3)     / (lx * ly * lz)
-            vertex_contributions(1,1,0) =    p(1)     *    p(2)     * (lz - p(3)) / (lx * ly * lz)
-            vertex_contributions(1,0,1) =    p(1)     * (ly - p(2)) *    p(3)     / (lx * ly * lz)
-            vertex_contributions(0,1,1) = (lx - p(1)) *    p(2)     *    p(3)     / (lx * ly * lz)
-            vertex_contributions(1,1,1) =    p(1)     *    p(2)     *    p(3)     / (lx * ly * lz)
+            vertex_contributions(0,0,0) = (lx - p(1)) * (ly - p(2)) * (lz - p(3)) / cell_volume
+            vertex_contributions(1,0,0) =    p(1)     * (ly - p(2)) * (lz - p(3)) / cell_volume
+            vertex_contributions(0,1,0) = (lx - p(1)) *    p(2)     * (lz - p(3)) / cell_volume
+            vertex_contributions(0,0,1) = (lx - p(1)) * (ly - p(2)) *    p(3)     / cell_volume
+            vertex_contributions(1,1,0) =    p(1)     *    p(2)     * (lz - p(3)) / cell_volume
+            vertex_contributions(1,0,1) =    p(1)     * (ly - p(2)) *    p(3)     / cell_volume
+            vertex_contributions(0,1,1) = (lx - p(1)) *    p(2)     *    p(3)     / cell_volume
+            vertex_contributions(1,1,1) =    p(1)     *    p(2)     *    p(3)     / cell_volume
 
             ! Since node_vector indices start at 1, we need to add 1 here
             ! because of the floor function used. It is convenient to use the 
